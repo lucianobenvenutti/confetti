@@ -32,6 +32,7 @@ if ($pedidos) {
 
 $mensaje = $_GET['msg'] ?? null;
 $tipoMensaje = $_GET['tipo'] ?? 'error';
+$linkWhatsapp = $_GET['whatsapp'] ?? null;
 
 $etiquetasEstado = [
     'pendiente'      => 'Pendiente',
@@ -170,6 +171,16 @@ function etiquetaCantidad($item) {
 
 <?php if ($mensaje): ?>
   <div class="aviso <?= $tipoMensaje === 'ok' ? 'ok' : 'error' ?>"><?= htmlspecialchars($mensaje) ?></div>
+<?php endif; ?>
+
+<?php if ($linkWhatsapp): ?>
+  <div class="aviso ok" style="display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;">
+    <span>Avisale al cliente que ya puede pasar a retirarlo.</span>
+    <a href="<?= htmlspecialchars($linkWhatsapp) ?>" target="_blank"
+       style="background:#1E9C7C; color:#fff; font-weight:700; padding:9px 16px; border-radius:9px; text-decoration:none; white-space:nowrap;">
+      📲 Avisar por WhatsApp
+    </a>
+  </div>
 <?php endif; ?>
 
 <?php if (!$pedidos): ?>

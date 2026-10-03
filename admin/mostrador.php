@@ -155,7 +155,7 @@
     <h1>Mostrador rápido</h1>
     <p class="sub">Tocá un producto para sumarlo a la venta actual, o buscalo por nombre.</p>
     <div class="buscador-row">
-      <input type="text" id="input-buscar" placeholder="Buscar producto por nombre… (código de barras próximamente)" autocomplete="off">
+      <input type="text" id="input-buscar" placeholder="Buscar por nombre o escanear código de barras…" autocomplete="off">
     </div>
     <div class="chip-row" id="chip-row"></div>
     <div class="grid" id="grid-productos"></div>
@@ -244,7 +244,9 @@
     const busqueda = document.getElementById('input-buscar').value.trim().toLowerCase();
     return productosCache.filter(p => {
       const pasaCategoria = !categoriaActiva || p.categoria_id === categoriaActiva;
-      const pasaBusqueda = !busqueda || p.nombre.toLowerCase().includes(busqueda);
+      const pasaBusqueda = !busqueda
+        || p.nombre.toLowerCase().includes(busqueda)
+        || (p.codigo_barras && p.codigo_barras.toLowerCase().includes(busqueda));
       return pasaCategoria && pasaBusqueda;
     });
   }
@@ -280,11 +282,25 @@
 
   inputBuscar.addEventListener('input', renderGrid);
 
-  // Pensado para cuando sumemos código de barras: si escribís (o "escanea" un
-  // lector, que tipea rápido y manda Enter) y el resultado es un único
-  // producto disponible, lo agrega directo sin tener que tocarlo con el mouse.
+  // Un lector de código de barras "tipea" el código rapidísimo y manda Enter solo.
+  // Por eso, ante un Enter, primero probamos si el texto matchea EXACTO un código
+  // de barras (sin importar la categoría elegida) antes de caer al buscador por nombre.
   inputBuscar.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter') return;
+    const texto = inputBuscar.value.trim();
+
+    const porCodigo = productosCache.find(p => p.codigo_barras && p.codigo_barras === texto);
+    if (porCodigo) {
+      if (porCodigo.disponible) {
+        agregarProducto(porCodigo);
+        inputBuscar.value = '';
+        renderGrid();
+      } else {
+        alert(`"${porCodigo.nombre}" está sin stock.`);
+      }
+      return;
+    }
+
     const resultados = productosFiltrados();
     if (resultados.length === 1 && resultados[0].disponible) {
       agregarProducto(resultados[0]);

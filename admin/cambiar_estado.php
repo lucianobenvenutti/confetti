@@ -13,9 +13,23 @@
 
 require 'conexion.php';
 
-function volver($mensaje, $tipo = 'error') {
-    header('Location: pedidos.php?msg=' . urlencode($mensaje) . '&tipo=' . $tipo);
+function volver($mensaje, $tipo = 'error', $whatsapp = null) {
+    $url = 'pedidos.php?msg=' . urlencode($mensaje) . '&tipo=' . $tipo;
+    if ($whatsapp) {
+        $url .= '&whatsapp=' . urlencode($whatsapp);
+    }
+    header('Location: ' . $url);
     exit;
+}
+
+// Mismo criterio que usa index.html para armar el link de wa.me: si el
+// teléfono no viene con código de país, se lo agregamos (Argentina, celular).
+function linkWhatsapp($telefono, $mensaje) {
+    $soloNumeros = preg_replace('/\D/', '', $telefono);
+    if (substr($soloNumeros, 0, 2) !== '54') {
+        $soloNumeros = '549' . $soloNumeros;
+    }
+    return 'https://wa.me/' . $soloNumeros . '?text=' . urlencode($mensaje);
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -29,7 +43,7 @@ if (!$pedido_id || !in_array($accion, ['avanzar', 'cancelar'], true)) {
     volver('Solicitud inválida.');
 }
 
-$stmt = $pdo->prepare('SELECT id, estado, codigo FROM pedidos WHERE id = ?');
+$stmt = $pdo->prepare('SELECT id, estado, codigo, origen, nombre_cliente, telefono_cliente FROM pedidos WHERE id = ?');
 $stmt->execute([$pedido_id]);
 $pedido = $stmt->fetch();
 
@@ -47,8 +61,20 @@ if ($accion === 'avanzar') {
     if (!isset($siguienteEstado[$pedido['estado']])) {
         volver('Ese pedido ya no se puede avanzar.');
     }
+    $nuevoEstado = $siguienteEstado[$pedido['estado']];
+
     $pdo->prepare('UPDATE pedidos SET estado = ? WHERE id = ?')
-        ->execute([$siguienteEstado[$pedido['estado']], $pedido_id]);
+        ->execute([$nuevoEstado, $pedido_id]);
+
+    // Al pasar a "listo" (solo pedidos web, que tienen un teléfono real para avisar)
+    // dejamos armado el link de WhatsApp para que el dueño solo tenga que tocar "Enviar".
+    if ($nuevoEstado === 'listo' && $pedido['origen'] === 'web') {
+        $primerNombre = explode(' ', trim($pedido['nombre_cliente']))[0];
+        $mensaje = "¡Hola {$primerNombre}! 🎉 Tu pedido {$pedido['codigo']} ya está listo para retirar en Confetti. ¡Te esperamos!";
+        $link = linkWhatsapp($pedido['telefono_cliente'], $mensaje);
+
+        volver('Pedido ' . $pedido['codigo'] . ' marcado como listo.', 'ok', $link);
+    }
 
     volver('Pedido ' . $pedido['codigo'] . ' actualizado.', 'ok');
 }

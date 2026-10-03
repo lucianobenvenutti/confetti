@@ -102,8 +102,14 @@ $pedidosWebActivos = $stmt->fetch()['cantidad'];
 
   <a class="tile" href="productos.php" style="--acento:var(--verde);">
     <div class="icono">🖼️</div>
-    <h2>Cargar productos</h2>
-    <p>Subir o cambiar la foto de cada producto.</p>
+    <h2>Productos y categorías</h2>
+    <p>Crear, editar, dar de baja y subir fotos.</p>
+  </a>
+
+  <a class="tile" href="proveedores.php" style="--acento:var(--azul);">
+    <div class="icono">🚚</div>
+    <h2>Proveedores</h2>
+    <p>A quién pedirle cuando algo se queda sin stock.</p>
   </a>
 
   <div class="tile stat" style="--acento:var(--violeta);">

@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --paper:#62d0ff;
+    --paper:#FFFBF3;
     --paper-dim:#FFF4DE;
     --ink:#1F2A44;
     --ink-soft:#5B6478;
@@ -267,6 +267,69 @@
     object-fit:cover;
     border-radius:10px;
   }
+  .cantidad-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:2px;
+  }
+  .qty-btn{
+    width:30px; height:30px;
+    border-radius:8px;
+    border:1px solid var(--linea);
+    background:#fff;
+    font-weight:700;
+    font-size:1rem;
+    cursor:pointer;
+    flex:none;
+  }
+  .qty-btn:hover{ border-color:var(--acento, var(--rojo)); }
+  .qty-input{
+    width:56px;
+    text-align:center;
+    padding:6px 4px;
+    border-radius:8px;
+    border:1px solid var(--linea);
+    font-family:inherit;
+    font-size:0.88rem;
+  }
+  .unidad-qty{ font-size:0.8rem; color:var(--ink-soft); }
+  .btn-agregar-card{
+    margin-top:10px;
+    width:100%;
+    padding:10px;
+    border-radius:10px;
+    border:none;
+    background:var(--acento, var(--rojo));
+    color:#fff;
+    font-weight:600;
+    font-size:0.85rem;
+    font-family:inherit;
+    cursor:pointer;
+  }
+  .btn-agregar-card:hover{ filter:brightness(0.93); }
+
+  .toast{
+    position:fixed;
+    bottom:26px;
+    left:50%;
+    transform:translateX(-50%) translateY(16px);
+    background:var(--ink);
+    color:#fff;
+    padding:12px 22px;
+    border-radius:999px;
+    font-size:0.9rem;
+    font-weight:600;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s ease, transform .2s ease;
+    z-index:80;
+    white-space:nowrap;
+  }
+  .toast.visible{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+  }
   .card-producto .etiqueta{
     font-size:0.75rem;
     font-weight:600;
@@ -496,15 +559,30 @@
     padding:16px 22px;
   }
   .carrito-item{
+    padding:14px 0;
+    border-bottom:1px solid var(--linea);
+  }
+  .carrito-item-fila{
     display:flex;
     justify-content:space-between;
     align-items:center;
     gap:10px;
-    padding:14px 0;
-    border-bottom:1px solid var(--linea);
   }
   .carrito-item .nombre{ font-weight:600; font-size:0.95rem; }
   .carrito-item .detalle{ color:var(--ink-soft); font-size:0.82rem; margin-top:2px; }
+  .btn-quitar-item{
+    display:block;
+    margin-left:auto;
+    margin-top:6px;
+    background:none;
+    border:none;
+    color:var(--rojo);
+    font-size:0.78rem;
+    font-weight:600;
+    cursor:pointer;
+    padding:0;
+  }
+  .btn-quitar-item:hover{ text-decoration:underline; }
   .qty-control{
     display:flex; align-items:center; gap:8px;
   }
@@ -690,18 +768,12 @@
 </section>
 
 <section class="combo wrap" id="combos">
-  <div class="combo-panel">
-    <div>
-      <span class="combo-tag">Armá tu picada</span>
-      <h2>Elegís lo que te gusta, nosotros armamos el combo</h2>
-      <p>Sumá fiambres, quesos, pan y algo dulce para el final. El precio se calcula solo a medida que vas agregando.</p>
-      <div class="hero-ctas" style="margin-top:24px;">
-        <a class="btn btn-primary" href="#" id="btn-agregar-combo">Agregar picada al pedido</a>
-      </div>
-    </div>
-    <div class="combo-visual" id="combo-visual">
-      <div class="combo-item"><span>Cargando combo…</span><span></span></div>
-    </div>
+  <div class="section-head">
+    <h2>Combos y picadas</h2>
+    <p>Armados por nosotros, con precio especial.</p>
+  </div>
+  <div class="grid-productos" id="grid-combos">
+    <div class="card-producto"><p>Cargando combos…</p></div>
   </div>
 </section>
 
@@ -736,6 +808,7 @@
 </footer>
 
 <div class="overlay" id="overlay"></div>
+<div class="toast" id="toast"></div>
 
 <!-- Carrito -->
 <aside class="drawer" id="drawer-carrito">
@@ -764,7 +837,7 @@
     </div>
     <div class="campo">
       <label for="input-telefono">Teléfono</label>
-      <input type="tel" id="input-telefono" placeholder="Tu WhatsApp">
+      <input type="tel" id="input-telefono" placeholder="Tu numero con codigo de area y sin 15 (Ej: 3482000000)">
     </div>
     <button class="btn btn-primary" id="btn-confirmar-pedido" style="width:100%;">Confirmar pedido</button>
     <button class="btn btn-ghost" id="btn-cancelar-checkout" style="width:100%; margin-top:10px;">Volver</button>
@@ -888,6 +961,10 @@
       ? `${formatoPrecio.format(p.precio)}/kg`
       : formatoPrecio.format(p.precio);
 
+    const esPeso = p.tipo_venta === 'peso';
+    const pasoQty = esPeso ? 50 : 1;     // gramos por paso, o unidades
+    const valorInicial = esPeso ? 250 : 1;
+
     const div = document.createElement('div');
     div.className = 'card-producto';
     div.style.setProperty('--acento', p.color_acento || 'var(--rojo)');
@@ -900,12 +977,31 @@
       <p>${p.descripcion || ''}${p.disponible ? '' : ' — sin stock por ahora'}</p>
       <div class="precio-row">
         <span class="precio">${precio}</span>
-        <button class="add-btn" aria-label="Agregar" ${p.disponible ? '' : 'disabled'}>+</button>
       </div>
+      ${p.disponible ? `
+        <div class="cantidad-row">
+          <button type="button" class="qty-btn menos" aria-label="Menos">−</button>
+          <input type="number" class="qty-input" value="${valorInicial}" min="${pasoQty}" step="${pasoQty}">
+          <button type="button" class="qty-btn mas" aria-label="Más">+</button>
+          ${esPeso ? '<span class="unidad-qty">g</span>' : ''}
+        </div>
+        <button type="button" class="btn-agregar-card">Agregar al carrito</button>
+      ` : ''}
     `;
 
     if (p.disponible) {
-      div.querySelector('.add-btn').addEventListener('click', () => agregarProducto(p));
+      const input = div.querySelector('.qty-input');
+      div.querySelector('.menos').addEventListener('click', () => {
+        input.value = Math.max(pasoQty, (parseInt(input.value, 10) || pasoQty) - pasoQty);
+      });
+      div.querySelector('.mas').addEventListener('click', () => {
+        input.value = (parseInt(input.value, 10) || pasoQty) + pasoQty;
+      });
+      div.querySelector('.btn-agregar-card').addEventListener('click', () => {
+        const valor = Math.max(pasoQty, parseInt(input.value, 10) || pasoQty);
+        const cantidadFinal = esPeso ? valor / 1000 : valor;
+        agregarProductoCantidad(p, cantidadFinal);
+      });
     }
 
     return div;
@@ -937,40 +1033,67 @@
     return `x${parseInt(item.cantidad, 10)}`;
   }
 
-  let comboActual = null;
+  function bloqueVisualCombo(c) {
+    if (c.imagen) {
+      return `<img class="foto-producto" src="assets/combos/${c.imagen}" alt="${c.nombre}"
+                onerror="this.outerHTML='<div class=&quot;icono&quot;>🎉</div>'">`;
+    }
+    return '<div class="icono">🎉</div>';
+  }
 
-  async function cargarCombo() {
-    const cont = document.getElementById('combo-visual');
+  function tarjetaCombo(c) {
+    const detalleItems = c.items.map(item => `${item.nombre} (${etiquetaCantidad(item)})`).join(', ');
+
+    const div = document.createElement('div');
+    div.className = 'card-producto';
+    div.style.setProperty('--acento', 'var(--magenta)');
+
+    div.innerHTML = `
+      ${bloqueVisualCombo(c)}
+      <span class="etiqueta" style="color:var(--magenta);">Combo</span>
+      <h3>${c.nombre}</h3>
+      <p>${c.descripcion || detalleItems}</p>
+      <div class="precio-row">
+        <span class="precio">${formatoPrecio.format(c.precio)}</span>
+      </div>
+      <div class="cantidad-row">
+        <button type="button" class="qty-btn menos" aria-label="Menos">−</button>
+        <input type="number" class="qty-input" value="1" min="1" step="1">
+        <button type="button" class="qty-btn mas" aria-label="Más">+</button>
+      </div>
+      <button type="button" class="btn-agregar-card">Agregar al carrito</button>
+    `;
+
+    const input = div.querySelector('.qty-input');
+    div.querySelector('.menos').addEventListener('click', () => {
+      input.value = Math.max(1, (parseInt(input.value, 10) || 1) - 1);
+    });
+    div.querySelector('.mas').addEventListener('click', () => {
+      input.value = (parseInt(input.value, 10) || 1) + 1;
+    });
+    div.querySelector('.btn-agregar-card').addEventListener('click', () => {
+      const valor = Math.max(1, parseInt(input.value, 10) || 1);
+      agregarComboCantidad(c, valor);
+    });
+
+    return div;
+  }
+
+  async function cargarCombos() {
+    const cont = document.getElementById('grid-combos');
     try {
       const combos = await pedirJSON(API + 'combos.php');
+      cont.innerHTML = '';
       if (!combos.length) {
-        cont.innerHTML = '<div class="combo-item"><span>Todavía no hay combos cargados.</span><span></span></div>';
+        cont.innerHTML = '<div class="card-producto"><p>Todavía no hay combos armados.</p></div>';
         return;
       }
-      const combo = combos[0]; // mostramos el primer combo fijo activo
-      comboActual = combo;
-      cont.innerHTML = '';
-      combo.items.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'combo-item';
-        div.innerHTML = `<span>${item.nombre} (${etiquetaCantidad(item)})</span><span></span>`;
-        cont.appendChild(div);
-      });
-      const total = document.createElement('div');
-      total.className = 'combo-total';
-      total.innerHTML = `<span>${combo.nombre}</span><span>${formatoPrecio.format(combo.precio)}</span>`;
-      cont.appendChild(total);
+      combos.forEach(c => cont.appendChild(tarjetaCombo(c)));
     } catch (err) {
-      cont.innerHTML = '<div class="combo-item"><span>No se pudo cargar el combo.</span><span></span></div>';
+      cont.innerHTML = '<div class="card-producto"><p>No se pudieron cargar los combos.</p></div>';
       console.error(err);
     }
   }
-
-  document.getElementById('btn-agregar-combo').addEventListener('click', (e) => {
-    e.preventDefault();
-    if (!comboActual) return;
-    agregarCombo(comboActual);
-  });
 
   // =========================================================
   // Carrito
@@ -993,33 +1116,45 @@
     renderCarrito();
   }
 
-  function agregarProducto(p) {
-    const incremento = p.tipo_venta === 'peso' ? PESO_STEP : 1;
+  // Estas dos son las que usan las cards del catálogo: suman la cantidad que
+  // el cliente haya elegido con el selector, avisan con un toast, y a
+  // propósito NO abren el carrito — abrirlo en cada click es lo molesto que
+  // queríamos evitar.
+  function agregarProductoCantidad(p, cantidad) {
     const existente = carrito.find(i => i.tipo === 'producto' && i.id === p.id);
     if (existente) {
-      existente.cantidad += incremento;
+      existente.cantidad += cantidad;
     } else {
       carrito.push({
         tipo: 'producto', id: p.id, nombre: p.nombre,
-        precio: parseFloat(p.precio), tipo_venta: p.tipo_venta, cantidad: incremento,
+        precio: parseFloat(p.precio), tipo_venta: p.tipo_venta, cantidad,
       });
     }
     guardarCarrito();
-    abrirCarrito();
+    mostrarToast('Agregado al carrito ✓');
   }
 
-  function agregarCombo(combo) {
+  function agregarComboCantidad(combo, cantidad) {
     const existente = carrito.find(i => i.tipo === 'combo' && i.id === combo.id);
     if (existente) {
-      existente.cantidad += 1;
+      existente.cantidad += cantidad;
     } else {
       carrito.push({
         tipo: 'combo', id: combo.id, nombre: combo.nombre,
-        precio: parseFloat(combo.precio), tipo_venta: 'unidad', cantidad: 1,
+        precio: parseFloat(combo.precio), tipo_venta: 'unidad', cantidad,
       });
     }
     guardarCarrito();
-    abrirCarrito();
+    mostrarToast('Agregado al carrito ✓');
+  }
+
+  let toastTimeout;
+  function mostrarToast(texto) {
+    const el = document.getElementById('toast');
+    el.textContent = texto;
+    el.classList.add('visible');
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => el.classList.remove('visible'), 2000);
   }
 
   function cambiarCantidad(index, delta) {
@@ -1029,6 +1164,11 @@
     if (item.cantidad <= 0) {
       carrito.splice(index, 1);
     }
+    guardarCarrito();
+  }
+
+  function quitarDelCarrito(index) {
+    carrito.splice(index, 1);
     guardarCarrito();
   }
 
@@ -1060,19 +1200,23 @@
         const div = document.createElement('div');
         div.className = 'carrito-item';
         div.innerHTML = `
-          <div>
-            <div class="nombre">${item.nombre}</div>
-            <div class="detalle">${formatoPrecio.format(item.precio)}${item.tipo_venta === 'peso' ? '/kg' : ''}</div>
+          <div class="carrito-item-fila">
+            <div>
+              <div class="nombre">${item.nombre}</div>
+              <div class="detalle">${formatoPrecio.format(item.precio)}${item.tipo_venta === 'peso' ? '/kg' : ''}</div>
+            </div>
+            <div class="qty-control">
+              <button aria-label="Restar">−</button>
+              <span>${etiquetaCantidadCarrito(item)}</span>
+              <button aria-label="Sumar">+</button>
+            </div>
           </div>
-          <div class="qty-control">
-            <button aria-label="Restar">−</button>
-            <span>${etiquetaCantidadCarrito(item)}</span>
-            <button aria-label="Sumar">+</button>
-          </div>
+          <button class="btn-quitar-item" aria-label="Eliminar producto">Eliminar</button>
         `;
-        const [btnMenos, btnMas] = div.querySelectorAll('button');
+        const [btnMenos, btnMas] = div.querySelectorAll('.qty-control button');
         btnMenos.addEventListener('click', () => cambiarCantidad(index, -1));
         btnMas.addEventListener('click', () => cambiarCantidad(index, 1));
+        div.querySelector('.btn-quitar-item').addEventListener('click', () => quitarDelCarrito(index));
         cont.appendChild(div);
       });
     }
@@ -1305,7 +1449,7 @@
 
   cargarCategorias();
   cargarProductos();
-  cargarCombo();
+  cargarCombos();
 </script>
 
 </body>

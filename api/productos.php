@@ -13,7 +13,7 @@ require 'db.php';
 
 $sql = 'SELECT
             p.id, p.nombre, p.descripcion, p.tipo_venta, p.precio,
-            p.stock_actual, p.stock_minimo, p.imagen, p.sin_tacc, p.destacado,
+            p.stock_actual, p.stock_minimo, p.imagen, p.sin_tacc, p.destacado, p.codigo_barras,
             c.id AS categoria_id, c.nombre AS categoria_nombre, c.color_acento
         FROM productos p
         JOIN categorias c ON c.id = p.categoria_id
