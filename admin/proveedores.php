@@ -48,7 +48,7 @@ $tipoMensaje = $_GET['tipo'] ?? 'error';
 </head>
 <body>
 
-<div class="nav-admin"><a href="index.php">← Panel</a> · <a href="productos.php">Productos</a> · <a href="categorias.php">Categorías</a> · <a href="combos.php">Combos</a> · Proveedores</div>
+<div class="nav-admin"><a href="index.php">← Panel</a> · <a href="productos.php">Productos</a> · <a href="categorias.php">Categorías</a> · <a href="combos.php">Combos</a> · Proveedores · <a href="ventas.php">Ventas</a></div>
 
 <div class="cabecera">
   <div>

@@ -119,6 +119,12 @@ $pedidosWebActivos = $stmt->fetch()['cantidad'];
     <p><?= $resumenHoy['cantidad_hoy'] ?> pedido(s) hoy (web + mostrador)</p>
   </div>
 
+  <a class="tile" href="ventas.php" style="--acento:var(--azul);">
+    <div class="icono">📊</div>
+    <h2>Ventas</h2>
+    <p>Por día, por mes, o eligiendo un rango de fechas.</p>
+  </a>
+
 </div>
 
 </body>

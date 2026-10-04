@@ -166,6 +166,13 @@ function etiquetaCantidad($item) {
 </head>
 <body>
 
+<div class="nav-admin" style="font-size:0.85rem; color:#5B6478; margin-bottom:18px;">
+  <a href="index.php" style="color:#5B6478; text-decoration:none;">← Panel</a> ·
+  Pedidos web ·
+  <a href="mostrador.php" style="color:#5B6478; text-decoration:none;">Mostrador</a> ·
+  <a href="ventas.php" style="color:#5B6478; text-decoration:none;">Ventas</a>
+</div>
+
 <h1>Pedidos de hoy</h1>
 <p class="sub">Se ordenan solos: primero lo pendiente, después en preparación, y al final lo ya resuelto.</p>
 
