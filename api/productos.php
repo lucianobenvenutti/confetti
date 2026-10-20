@@ -10,6 +10,10 @@
  */
 
 require 'db.php';
+require __DIR__ . '/vencimientos.php';
+
+// El catálogo siempre muestra stock al día: antes de leerlo, libero lo que ya venció.
+liberarPedidosVencidos($pdo);
 
 $sql = 'SELECT
             p.id, p.nombre, p.descripcion, p.tipo_venta, p.precio,
@@ -28,6 +32,11 @@ if (!empty($_GET['categoria_id'])) {
 
 if (!empty($_GET['destacado'])) {
     $sql .= ' AND p.destacado = 1';
+}
+
+if (!empty($_GET['buscar'])) {
+    $sql .= ' AND p.nombre LIKE :buscar';
+    $params['buscar'] = '%' . $_GET['buscar'] . '%';
 }
 
 $sql .= ' ORDER BY c.orden ASC, p.nombre ASC';

@@ -6,6 +6,10 @@
  */
 
 require 'db.php';
+require __DIR__ . '/vencimientos.php';
+
+// Si el plazo de este pedido ya pasó, que se vea como cancelado en el momento.
+liberarPedidosVencidos($pdo);
 
 $codigo = strtoupper(trim($_GET['codigo'] ?? ''));
 
@@ -16,7 +20,9 @@ if ($codigo === '') {
 }
 
 $stmt = $pdo->prepare(
-    'SELECT codigo, nombre_cliente, origen, estado, total, creado_en, vence_en
+    'SELECT codigo, nombre_cliente, origen, estado, total, creado_en, vence_en,
+            UNIX_TIMESTAMP() - UNIX_TIMESTAMP(creado_en) AS seg_transcurridos,
+            UNIX_TIMESTAMP(vence_en) - UNIX_TIMESTAMP() AS seg_restantes
      FROM pedidos WHERE codigo = ?'
 );
 $stmt->execute([$codigo]);

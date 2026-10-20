@@ -20,6 +20,7 @@
  */
 
 require 'db.php';
+require __DIR__ . '/vencimientos.php';
 
 $body = json_decode(file_get_contents('php://input'), true);
 
@@ -82,17 +83,24 @@ function reservarStock(PDO $pdo, int $productoId, float $cantidad, int $pedidoId
     return $producto;
 }
 
+// Antes de reservar, devuelvo el stock de pedidos que ya vencieron, para no
+// decirle "no hay" a alguien por culpa de una reserva vieja.
+liberarPedidosVencidos($pdo);
+
 try {
     $pdo->beginTransaction();
 
     // 1. Creo el pedido "en blanco" para tener un id al que atar los movimientos de stock
     $codigo = generarCodigo($pdo);
+    // El plazo de 24hs lo calcula MySQL con su propio reloj (el mismo que usa para
+    // creado_en y para compararlo después), no PHP. Es una constante del código,
+    // no viene del cliente, por eso puede ir directo en el SQL.
+    $venceSql = $origen === 'web' ? 'DATE_ADD(NOW(), INTERVAL 24 HOUR)' : 'NULL';
     $stmt = $pdo->prepare(
         "INSERT INTO pedidos (codigo, nombre_cliente, telefono_cliente, origen, estado, total, vence_en)
-         VALUES (?, ?, ?, ?, 'pendiente', 0, ?)"
+         VALUES (?, ?, ?, ?, 'pendiente', 0, $venceSql)"
     );
-    $vence_en = $origen === 'web' ? date('Y-m-d H:i:s', strtotime('+24 hours')) : null;
-    $stmt->execute([$codigo, $nombre, $telefono, $origen, $vence_en]);
+    $stmt->execute([$codigo, $nombre, $telefono, $origen]);
     $pedidoId = (int) $pdo->lastInsertId();
 
     $total = 0;

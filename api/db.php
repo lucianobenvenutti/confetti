@@ -22,6 +22,10 @@ $opciones = [
 
 try {
     $pdo = new PDO($dsn, $usuario, $clave, $opciones);
+    // Fijamos la hora de MySQL en Argentina (UTC-3, sin horario de verano) para esta
+    // conexión. Así NOW(), CURDATE() y las fechas de los pedidos son siempre las
+    // mismas, sin importar cómo venga configurado el servidor (XAMPP, Hostinger...).
+    $pdo->exec("SET time_zone = '-03:00'");
 } catch (PDOException $e) {
     http_response_code(500);
     header('Content-Type: application/json; charset=utf8');
