@@ -3,12 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="only light">
 <title>Confetti — Seguí tu pedido</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
+    color-scheme: only light;
     --paper:#FFFBF3;
     --paper-dim:#FFF4DE;
     --ink:#1F2A44;
@@ -220,6 +222,17 @@
     return `x${parseInt(item.cantidad, 10)}`;
   }
 
+  // Convierte segundos en un texto corto: 3725 -> "1 h 2 min"
+  function formatoDuracion(seg) {
+    const min = Math.floor(Math.max(0, Number(seg)) / 60);
+    if (min < 1) return 'menos de 1 minuto';
+    const h = Math.floor(min / 60);
+    const m = min % 60;
+    if (h >= 24) return `${Math.floor(h / 24)} d ${h % 24} h`;
+    if (h > 0) return m ? `${h} h ${m} min` : `${h} h`;
+    return `${m} min`;
+  }
+
   function formatoFecha(iso) {
     const d = new Date(iso.replace(' ', 'T'));
     return d.toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
@@ -254,7 +267,7 @@
     let html = `
       <div class="cabecera-pedido">
         <span class="codigo"><strong>${pedido.codigo}</strong></span>
-        <span class="fecha">Pedido a las ${formatoFecha(pedido.creado_en)}</span>
+        <span class="fecha">Pedido hecho hace ${formatoDuracion(pedido.seg_transcurridos)}</span>
       </div>
     `;
 
@@ -280,8 +293,9 @@
       });
       html += '</div>';
 
-      if (pedido.vence_en && ['pendiente', 'en_preparacion', 'listo'].includes(pedido.estado)) {
-        html += `<div class="aviso-vencimiento">Tenés hasta las ${formatoFecha(pedido.vence_en)} para retirarlo.</div>`;
+      if (pedido.seg_restantes !== null && Number(pedido.seg_restantes) > 0
+          && ['pendiente', 'en_preparacion', 'listo'].includes(pedido.estado)) {
+        html += `<div class="aviso-vencimiento">Te quedan ${formatoDuracion(pedido.seg_restantes)} para retirarlo.</div>`;
       }
     }
 
