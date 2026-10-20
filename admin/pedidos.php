@@ -1,10 +1,21 @@
 <?php
 require 'conexion.php';
+require __DIR__ . '/../api/vencimientos.php';
 
+// Lo primero: cancelar (y devolver el stock de) lo que ya pasó las 24hs.
+$vencidosAhora = liberarPedidosVencidos($pdo);
+
+// Un pedido activo vive hasta 24hs, así que puede ser de ayer y seguir en juego:
+// se muestran todos los activos (sin importar el día) más lo resuelto hoy.
+// Cuánto pasó y cuánto queda lo calcula MySQL, en segundos reales: no depende
+// de la zona horaria de nadie.
 $pedidos = $pdo->query(
-    "SELECT id, codigo, nombre_cliente, telefono_cliente, origen, estado, total, creado_en
+    "SELECT id, codigo, nombre_cliente, telefono_cliente, origen, estado, total, creado_en,
+            UNIX_TIMESTAMP() - UNIX_TIMESTAMP(creado_en) AS seg_transcurridos,
+            UNIX_TIMESTAMP(vence_en) - UNIX_TIMESTAMP() AS seg_restantes
      FROM pedidos
-     WHERE DATE(creado_en) = CURDATE()
+     WHERE estado IN ('pendiente','en_preparacion','listo')
+        OR DATE(creado_en) = CURDATE()
      ORDER BY FIELD(estado, 'pendiente','en_preparacion','listo','entregado','cancelado'),
               creado_en ASC"
 )->fetchAll();
@@ -41,6 +52,17 @@ $etiquetasEstado = [
     'entregado'      => 'Entregado',
     'cancelado'      => 'Cancelado',
 ];
+
+// 3725 segundos -> "1 h 2 min"
+function duracion($segundos) {
+    $min = intdiv(max(0, (int) $segundos), 60);
+    if ($min < 1) return 'menos de 1 min';
+    $h = intdiv($min, 60);
+    $m = $min % 60;
+    if ($h >= 24) return intdiv($h, 24) . ' d ' . ($h % 24) . ' h';
+    if ($h > 0) return $h . ' h' . ($m ? " $m min" : '');
+    return $m . ' min';
+}
 
 function etiquetaCantidad($item) {
     if ($item['tipo_venta'] === 'peso') {
@@ -162,6 +184,24 @@ function etiquetaCantidad($item) {
   .btn-cancelar{ background:transparent; color:#E8483C; border:1px solid #E8483C; }
   .btn-cancelar:hover{ background:#FBEAE8; }
   .sin-pedidos{ color:#5B6478; }
+
+  .cuenta-atras{
+    margin-top:12px;
+    display:inline-block;
+    background:#F2F4F8;
+    color:#5B6478;
+    font-size:0.82rem;
+    padding:6px 12px;
+    border-radius:9px;
+  }
+  .cuenta-atras .cuenta-valor{
+    font-weight:700;
+    color:#1F2A44;
+    font-variant-numeric:tabular-nums;
+  }
+  .cuenta-atras.urgente{ background:#FFF1DC; }
+  .cuenta-atras.urgente .cuenta-valor{ color:#C26A00; }
+  .cuenta-atras.vencido{ background:#FBEAE8; color:#E8483C; font-weight:600; }
 </style>
 </head>
 <body>
@@ -170,14 +210,22 @@ function etiquetaCantidad($item) {
   <a href="index.php" style="color:#5B6478; text-decoration:none;">← Panel</a> ·
   Pedidos web ·
   <a href="mostrador.php" style="color:#5B6478; text-decoration:none;">Mostrador</a> ·
-  <a href="ventas.php" style="color:#5B6478; text-decoration:none;">Ventas</a>
+  <a href="ventas.php" style="color:#5B6478; text-decoration:none;">Ventas</a> ·
+  <a href="horarios.php" style="color:#5B6478; text-decoration:none;">Horario</a>
 </div>
 
-<h1>Pedidos de hoy</h1>
-<p class="sub">Se ordenan solos: primero lo pendiente, después en preparación, y al final lo ya resuelto.</p>
+<h1>Pedidos</h1>
+<p class="sub">Los pedidos activos (de cualquier día) y lo resuelto hoy. Cada pedido web se cancela solo a las 24hs de hecho y su stock vuelve al catálogo.</p>
 
 <?php if ($mensaje): ?>
   <div class="aviso <?= $tipoMensaje === 'ok' ? 'ok' : 'error' ?>"><?= htmlspecialchars($mensaje) ?></div>
+<?php endif; ?>
+
+<?php if ($vencidosAhora): ?>
+  <div class="aviso error">
+    Se cancelaron automáticamente <?= count($vencidosAhora) ?> pedido(s) por vencer las 24hs y su stock volvió al catálogo:
+    <?= htmlspecialchars(implode(', ', $vencidosAhora)) ?>
+  </div>
 <?php endif; ?>
 
 <?php if ($linkWhatsapp): ?>
@@ -210,9 +258,15 @@ function etiquetaCantidad($item) {
         <div class="badges">
           <span class="badge origen"><?= $p['origen'] === 'web' ? 'Pedido web' : 'Mostrador' ?></span>
           <span class="badge"><?= $etiquetasEstado[$p['estado']] ?></span>
-          <span class="badge"><?= date('H:i', strtotime($p['creado_en'])) ?></span>
+          <span class="badge">Hace <?= duracion($p['seg_transcurridos']) ?></span>
         </div>
       </div>
+
+      <?php if ($p['seg_restantes'] !== null && in_array($p['estado'], ['pendiente', 'en_preparacion', 'listo'], true)): ?>
+        <div class="cuenta-atras" data-seg="<?= (int) $p['seg_restantes'] ?>">
+          Se cancela solo en <span class="cuenta-valor"><?= duracion($p['seg_restantes']) ?></span>
+        </div>
+      <?php endif; ?>
 
       <div class="items">
         <?php foreach ($itemsPorPedido[$p['id']] ?? [] as $item): ?>
@@ -255,6 +309,36 @@ function etiquetaCantidad($item) {
     </div>
   <?php endforeach; ?>
 </div>
+
+<script>
+  // Cuenta atrás de cada pedido. El servidor manda cuántos segundos faltaban al
+  // cargar la página (calculados por MySQL); acá solo se restan los segundos que
+  // pasaron desde entonces. No se usa ninguna hora ni zona horaria del navegador.
+  const cargadoEn = Date.now();
+  const dos = n => String(n).padStart(2, '0');
+
+  function actualizarCuentas() {
+    const pasados = Math.floor((Date.now() - cargadoEn) / 1000);
+    document.querySelectorAll('.cuenta-atras').forEach(el => {
+      const restante = parseInt(el.dataset.seg, 10) - pasados;
+
+      if (restante <= 0) {
+        el.classList.add('vencido');
+        el.textContent = 'Plazo vencido: se cancela al recargar la página';
+        return;
+      }
+
+      const h = Math.floor(restante / 3600);
+      const m = Math.floor((restante % 3600) / 60);
+      const s = restante % 60;
+      el.querySelector('.cuenta-valor').textContent = `${dos(h)}:${dos(m)}:${dos(s)}`;
+      el.classList.toggle('urgente', restante < 3 * 3600);
+    });
+  }
+
+  actualizarCuentas();
+  setInterval(actualizarCuentas, 1000);
+</script>
 
 </body>
 </html>

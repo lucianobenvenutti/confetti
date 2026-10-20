@@ -1,11 +1,12 @@
 <?php
 require 'conexion.php';
 
-$hoy = date('Y-m-d');
+// "Hoy" lo decide MySQL (el mismo reloj que le puso la fecha a cada pedido), no PHP.
+$hoy = $pdo->query('SELECT CURDATE()')->fetchColumn();
 $periodo = $_GET['periodo'] ?? 'hoy';
 
 if ($periodo === 'mes') {
-    $desde = date('Y-m-01');
+    $desde = substr($hoy, 0, 8) . '01';
     $hasta = $hoy;
 } elseif ($periodo === 'rango' && !empty($_GET['desde']) && !empty($_GET['hasta'])) {
     $desde = $_GET['desde'];
@@ -115,7 +116,7 @@ $etiquetasOrigen = ['web' => 'Pedidos web', 'mostrador' => 'Mostrador'];
 </head>
 <body>
 
-<div class="nav-admin"><a href="index.php">← Panel</a> · <a href="pedidos.php">Pedidos web</a> · <a href="mostrador.php">Mostrador</a> · Ventas</div>
+<div class="nav-admin"><a href="index.php">← Panel</a> · <a href="pedidos.php">Pedidos web</a> · <a href="mostrador.php">Mostrador</a> · Ventas · <a href="horarios.php">Horario</a></div>
 
 <h1>Ventas</h1>
 <p class="sub">No incluye pedidos cancelados.</p>

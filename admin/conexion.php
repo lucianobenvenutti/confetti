@@ -22,6 +22,8 @@ $opciones = [
 
 try {
     $pdo = new PDO($dsn, $usuario, $clave, $opciones);
+    // Misma hora de MySQL que en api/db.php (Argentina, UTC-3).
+    $pdo->exec("SET time_zone = '-03:00'");
 } catch (PDOException $e) {
     die('No se pudo conectar a la base de datos: ' . $e->getMessage());
 }

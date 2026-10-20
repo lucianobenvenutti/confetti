@@ -125,6 +125,12 @@ $pedidosWebActivos = $stmt->fetch()['cantidad'];
     <p>Por día, por mes, o eligiendo un rango de fechas.</p>
   </a>
 
+  <a class="tile" href="horarios.php" style="--acento:var(--naranja);">
+    <div class="icono">🕒</div>
+    <h2>Horario de atención</h2>
+    <p>Define el cartel de "abierto ahora" en la página.</p>
+  </a>
+
 </div>
 
 </body>
