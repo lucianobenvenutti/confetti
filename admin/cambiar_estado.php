@@ -13,6 +13,33 @@
 
 require 'conexion.php';
 
+// ---------------------------------------------------------------------------
+// Datos del local para el mensaje de "tu pedido está listo".
+//
+// LOCAL_DIRECCION: calle, número y ciudad, tal como la escribirías en Google
+//   Maps (ej: 'Av. San Martín 123, Reconquista, Santa Fe'). Mientras esté vacía,
+//   el mensaje sale sin la parte de la ubicación.
+// LOCAL_MAPS_LINK: opcional. Si ya tenés el link de tu local en Google Maps
+//   (Compartir → Copiar vínculo), pegalo acá y se usa ese. Si lo dejás vacío,
+//   se arma solo un link de "cómo llegar" a partir de la dirección.
+// ---------------------------------------------------------------------------
+const LOCAL_DIRECCION = 'Calle 117 Numero 644 - Avellaneda';
+const LOCAL_MAPS_LINK = 'https://maps.app.goo.gl/PD7g51CrznPWzKgP7';
+
+// Bloque de texto con la dirección y el link para llegar. Vacío si no hay dirección cargada.
+function textoUbicacion() {
+    if (LOCAL_DIRECCION === '') {
+        return '';
+    }
+
+    // destination= abre Google Maps con la ruta desde donde esté la persona hasta el local
+    $link = LOCAL_MAPS_LINK !== ''
+        ? LOCAL_MAPS_LINK
+        : 'https://www.google.com/maps/dir/?api=1&destination=' . urlencode(LOCAL_DIRECCION);
+
+    return "\n\n📍 Estamos en " . LOCAL_DIRECCION . "\nCómo llegar: " . $link;
+}
+
 function volver($mensaje, $tipo = 'error', $whatsapp = null) {
     $url = 'pedidos.php?msg=' . urlencode($mensaje) . '&tipo=' . $tipo;
     if ($whatsapp) {
@@ -70,7 +97,9 @@ if ($accion === 'avanzar') {
     // dejamos armado el link de WhatsApp para que el dueño solo tenga que tocar "Enviar".
     if ($nuevoEstado === 'listo' && $pedido['origen'] === 'web') {
         $primerNombre = explode(' ', trim($pedido['nombre_cliente']))[0];
-        $mensaje = "¡Hola {$primerNombre}! 🎉 Tu pedido {$pedido['codigo']} ya está listo para retirar en Confetti. ¡Te esperamos!";
+        $mensaje = "¡Hola {$primerNombre}! 🎉 Tu pedido {$pedido['codigo']} ya está listo para retirar en Confetti."
+                 . textoUbicacion()
+                 . "\n\n¡Te esperamos!";
         $link = linkWhatsapp($pedido['telefono_cliente'], $mensaje);
 
         volver('Pedido ' . $pedido['codigo'] . ' marcado como listo.', 'ok', $link);

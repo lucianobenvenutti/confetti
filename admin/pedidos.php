@@ -211,7 +211,8 @@ function etiquetaCantidad($item) {
   Pedidos web ·
   <a href="mostrador.php" style="color:#5B6478; text-decoration:none;">Mostrador</a> ·
   <a href="ventas.php" style="color:#5B6478; text-decoration:none;">Ventas</a> ·
-  <a href="horarios.php" style="color:#5B6478; text-decoration:none;">Horario</a>
+  <a href="horarios.php" style="color:#5B6478; text-decoration:none;">Horario</a> ·
+  <a href="cuentas.php" style="color:#5B6478; text-decoration:none;">Cuentas</a>
 </div>
 
 <h1>Pedidos</h1>

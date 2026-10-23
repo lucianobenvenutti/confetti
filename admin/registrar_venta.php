@@ -1,7 +1,12 @@
 <?php
 /**
  * POST /admin/registrar_venta.php
- * Body JSON: { "items": [{ "tipo": "producto"|"combo", "id": 3, "cantidad": 2 }, ...] }
+ * Body JSON: { "items": [{ "tipo": "producto"|"combo", "id": 3, "cantidad": 2 }, ...],
+ *               "descuento": {...}, "monto_pagado": 5000, "cuenta_id": 7 }
+ *
+ * Si viene "cuenta_id", la venta se carga a esa cuenta corriente (fiado): se
+ * registra igual que cualquier venta, y el total final queda como cargo en la
+ * cuenta, dentro de la MISMA transacción (o se guarda todo, o no se guarda nada).
  *
  * A diferencia de api/crear_pedido.php, esto NO reserva stock para
  * retirar después — es una venta ya resuelta en el momento. Por eso:
@@ -19,6 +24,10 @@ $body = json_decode(file_get_contents('php://input'), true);
 $items = is_array($body['items'] ?? null) ? $body['items'] : [];
 $descuento = is_array($body['descuento'] ?? null) ? $body['descuento'] : null;
 $montoPagado = isset($body['monto_pagado']) ? (float) $body['monto_pagado'] : null;
+$cuentaId = !empty($body['cuenta_id']) ? (int) $body['cuenta_id'] : null;
+if ($cuentaId) {
+    $montoPagado = null; // fiado: no hay pago ni vuelto que calcular
+}
 
 function responder($codigo, $payload) {
     http_response_code($codigo);
@@ -69,12 +78,28 @@ function descontarStock(PDO $pdo, int $productoId, float $cantidad, int $pedidoI
 try {
     $pdo->beginTransaction();
 
+    $nombreCliente = 'Venta mostrador';
+    $telefonoCliente = '-';
+    $cuenta = null;
+
+    if ($cuentaId) {
+        // FOR UPDATE: si alguien está eliminando esa cuenta justo ahora, esperamos
+        $stmt = $pdo->prepare('SELECT id, nombre, telefono FROM cuentas_corrientes WHERE id = ? FOR UPDATE');
+        $stmt->execute([$cuentaId]);
+        $cuenta = $stmt->fetch();
+        if (!$cuenta) {
+            throw new Exception('Esa cuenta corriente ya no existe.');
+        }
+        $nombreCliente = $cuenta['nombre'];
+        $telefonoCliente = $cuenta['telefono'] ?: '-';
+    }
+
     $codigo = generarCodigo($pdo);
     $stmt = $pdo->prepare(
         "INSERT INTO pedidos (codigo, nombre_cliente, telefono_cliente, origen, estado, total, vence_en)
-         VALUES (?, 'Venta mostrador', '-', 'mostrador', 'entregado', 0, NULL)"
+         VALUES (?, ?, ?, 'mostrador', 'entregado', 0, NULL)"
     );
-    $stmt->execute([$codigo]);
+    $stmt->execute([$codigo, $nombreCliente, $telefonoCliente]);
     $pedidoId = (int) $pdo->lastInsertId();
 
     $subtotalGeneral = 0;
@@ -153,10 +178,34 @@ try {
             . " · Vuelto $" . number_format($vuelto, 0, ',', '.');
     }
 
-    $notas = implode(' · ', array_filter([$descripcionDescuento, $descripcionPago]));
+    $descripcionCuenta = $cuenta ? 'Cuenta corriente: ' . $cuenta['nombre'] : null;
+
+    $notas = implode(' · ', array_filter([$descripcionDescuento, $descripcionPago, $descripcionCuenta]));
 
     $pdo->prepare('UPDATE pedidos SET total = ?, notas = ? WHERE id = ?')
         ->execute([$totalFinal, $notas ?: null, $pedidoId]);
+
+    // --- Cargo a la cuenta corriente (si corresponde) ---
+    $infoCuenta = null;
+    if ($cuenta) {
+        if ($totalFinal > 0) {
+            $pdo->prepare(
+                "INSERT INTO cuenta_movimientos (cuenta_id, tipo, monto, pedido_id, nota)
+                 VALUES (?, 'cargo', ?, ?, ?)"
+            )->execute([$cuentaId, $totalFinal, $pedidoId, 'Venta ' . $codigo]);
+        }
+
+        $stmt = $pdo->prepare(
+            "SELECT COALESCE(SUM(CASE tipo WHEN 'cargo' THEN monto ELSE -monto END), 0)
+             FROM cuenta_movimientos WHERE cuenta_id = ?"
+        );
+        $stmt->execute([$cuentaId]);
+        $infoCuenta = [
+            'id' => (int) $cuenta['id'],
+            'nombre' => $cuenta['nombre'],
+            'saldo' => (float) $stmt->fetchColumn(),
+        ];
+    }
 
     $pdo->commit();
 
@@ -168,6 +217,7 @@ try {
         'total' => $totalFinal,
         'monto_pagado' => $montoPagado,
         'vuelto' => $vuelto,
+        'cuenta' => $infoCuenta,
     ]);
 
 } catch (Exception $e) {

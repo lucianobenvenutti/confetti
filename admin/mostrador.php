@@ -113,6 +113,55 @@
     cursor:pointer;
   }
   .btn-secundario.activo{ border-color:var(--rojo); color:var(--rojo); }
+  .btn-secundario:disabled{ opacity:.4; cursor:not-allowed; }
+  .acciones-secundarias{ flex-wrap:wrap; }
+  .btn-cuenta{ flex:1 1 100%; }
+
+  .cuenta-info{
+    font-size:0.85rem; background:#EFEAF7; color:#4b3577; border-radius:10px;
+    padding:9px 12px; margin-bottom:10px; display:none;
+  }
+  .cuenta-info button{ border:none; background:none; color:#4b3577; text-decoration:underline; cursor:pointer; font-size:0.78rem; margin-left:6px; }
+
+  /* Ventana para elegir / crear la cuenta */
+  .modal-cuentas{
+    position:fixed; inset:0; background:rgba(31,42,68,0.45); z-index:60;
+    display:none; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-cuentas.visible{ display:flex; }
+  .modal-cuentas .tarjeta{
+    background:#fff; border-radius:16px; padding:22px; width:100%; max-width:440px;
+    max-height:90vh; display:flex; flex-direction:column; gap:12px;
+  }
+  .modal-cuentas h2{ font-size:1.1rem; margin:0; }
+  .modal-cuentas input[type="text"]{
+    width:100%; padding:10px 12px; border-radius:9px; border:1px solid var(--linea);
+    font-family:inherit; font-size:0.92rem;
+  }
+  .lista-cuentas{ overflow-y:auto; max-height:240px; display:flex; flex-direction:column; gap:6px; }
+  .fila-cuenta{
+    display:flex; justify-content:space-between; align-items:center; gap:10px; text-align:left;
+    border:1px solid var(--linea); background:#fff; border-radius:10px; padding:10px 12px; cursor:pointer;
+    font-family:inherit; font-size:0.9rem;
+  }
+  .fila-cuenta:hover{ border-color:#6E4E9E; }
+  .fila-cuenta small{ display:block; color:var(--ink-soft); font-size:0.75rem; }
+  .fila-cuenta .saldo{ font-size:0.8rem; font-weight:700; white-space:nowrap; }
+  .saldo.debe{ color:var(--rojo); }
+  .saldo.favor{ color:var(--verde); }
+  .saldo.cero{ color:var(--ink-soft); font-weight:500; }
+  .nueva-cuenta{ border-top:1px solid var(--linea); padding-top:12px; display:flex; flex-direction:column; gap:8px; }
+  .nueva-cuenta h3{ font-size:0.85rem; margin:0; color:var(--ink-soft); }
+  .nueva-cuenta .fila-inputs{ display:flex; gap:8px; }
+  .modal-cuentas .btn-crear{
+    border:none; background:#6E4E9E; color:#fff; font-weight:600; border-radius:9px;
+    padding:10px 14px; cursor:pointer; font-family:inherit; font-size:0.88rem;
+  }
+  .modal-cuentas .btn-cerrar{
+    border:1px solid var(--linea); background:#fff; border-radius:9px; padding:9px;
+    cursor:pointer; font-family:inherit; font-size:0.88rem;
+  }
+  .picker-error{ color:var(--rojo); font-size:0.82rem; display:none; }
 
   .resumen{ font-size:0.88rem; margin-bottom:8px; }
   .resumen .fila{ display:flex; justify-content:space-between; padding:3px 0; }
@@ -171,13 +220,36 @@
     <div class="acciones-secundarias">
       <button class="btn-secundario" id="btn-descuento">Descuento</button>
       <button class="btn-secundario" id="btn-pago">Pago con...</button>
+      <button class="btn-secundario btn-cuenta" id="btn-cuenta">Cuenta corriente</button>
     </div>
+
+    <div class="cuenta-info" id="cuenta-info"></div>
 
     <div class="resumen" id="resumen"></div>
     <div class="total-row"><span>Total</span><span id="total-venta">$0</span></div>
     <div id="vuelto-info"></div>
 
     <button class="grande" id="btn-registrar" disabled>Registrar venta</button>
+  </div>
+</div>
+
+<div class="modal-cuentas" id="modal-cuentas">
+  <div class="tarjeta">
+    <h2>Cargar a cuenta corriente</h2>
+    <input type="text" id="buscar-cuenta" placeholder="Buscar por nombre o teléfono…" autocomplete="off">
+    <div class="lista-cuentas" id="lista-cuentas"></div>
+
+    <div class="nueva-cuenta">
+      <h3>¿No está? Creá una cuenta nueva</h3>
+      <div class="fila-inputs">
+        <input type="text" id="nueva-cuenta-nombre" placeholder="Nombre">
+        <input type="text" id="nueva-cuenta-telefono" placeholder="Teléfono (opcional)">
+      </div>
+      <button type="button" class="btn-crear" id="btn-crear-cuenta">Crear y usar</button>
+      <div class="picker-error" id="picker-error"></div>
+    </div>
+
+    <button type="button" class="btn-cerrar" id="btn-cerrar-cuentas">Cancelar</button>
   </div>
 </div>
 
@@ -188,6 +260,16 @@
   let venta = []; // { tipo, id, nombre, precio, tipo_venta, cantidad }
   let descuento = null;   // { tipo: 'porcentaje'|'monto', valor: number }
   let montoPagado = null; // number o null
+  let cuentaSeleccionada = null; // { id, nombre, saldo } si la venta va a cuenta corriente
+  let cuentasCache = [];
+
+  // Escapa texto que se mete dentro de innerHTML (nombres cargados a mano)
+  const esc = s => String(s ?? '').replace(/[&<>"']/g,
+    c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  function textoBotonRegistrar() {
+    return cuentaSeleccionada ? `Cargar a la cuenta de ${cuentaSeleccionada.nombre}` : 'Registrar venta';
+  }
 
   const formatoPrecio = new Intl.NumberFormat('es-AR', {
     style: 'currency', currency: 'ARS', maximumFractionDigits: 0,
@@ -428,6 +510,24 @@
     document.getElementById('btn-descuento').classList.toggle('activo', !!descuento);
     document.getElementById('btn-pago').classList.toggle('activo', montoPagado !== null);
 
+    // Cuenta corriente: si hay una elegida no tiene sentido calcular vuelto
+    const infoCuenta = document.getElementById('cuenta-info');
+    document.getElementById('btn-pago').disabled = !!cuentaSeleccionada;
+    document.getElementById('btn-cuenta').classList.toggle('activo', !!cuentaSeleccionada);
+    if (cuentaSeleccionada) {
+      infoCuenta.style.display = 'block';
+      infoCuenta.innerHTML = `Se carga a la cuenta de <strong>${esc(cuentaSeleccionada.nombre)}</strong>`
+        + `<button type="button" id="btn-quitar-cuenta">quitar</button>`;
+      document.getElementById('btn-quitar-cuenta').addEventListener('click', () => {
+        cuentaSeleccionada = null;
+        renderVenta();
+      });
+    } else {
+      infoCuenta.style.display = 'none';
+      infoCuenta.innerHTML = '';
+    }
+
+    btnRegistrar.textContent = textoBotonRegistrar();
     btnRegistrar.disabled = venta.length === 0;
   }
 
@@ -482,6 +582,7 @@
       const body = { items };
       if (descuento) body.descuento = descuento;
       if (montoPagado !== null) body.monto_pagado = montoPagado;
+      if (cuentaSeleccionada) body.cuenta_id = cuentaSeleccionada.id;
 
       const res = await fetch('registrar_venta.php', {
         method: 'POST',
@@ -500,7 +601,7 @@
       errorBox.textContent = err.message;
       errorBox.style.display = 'block';
       btn.disabled = false;
-      btn.textContent = 'Registrar venta';
+      btn.textContent = textoBotonRegistrar();
     }
   }
 
@@ -513,18 +614,132 @@
     if (data.vuelto !== null && data.vuelto !== undefined) {
       detallePago += `Pagó ${formatoPrecio.format(data.monto_pagado)} · Vuelto ${formatoPrecio.format(data.vuelto)}`;
     }
+    if (data.cuenta) {
+      const saldo = data.cuenta.saldo;
+      const textoSaldo = saldo > 0.004 ? `Ahora debe ${formatoPrecio.format(saldo)}`
+        : saldo < -0.004 ? `Saldo a favor ${formatoPrecio.format(-saldo)}` : 'Sin deuda';
+      detallePago += `Cargado a la cuenta de <strong>${esc(data.cuenta.nombre)}</strong><br>${textoSaldo}`;
+    }
 
     panel.innerHTML = `
       <div class="confirmacion">
         <div class="check">✓</div>
         <div class="codigo">${data.codigo}</div>
-        <div class="monto">Venta registrada por ${formatoPrecio.format(data.total)}</div>
+        <div class="monto">${data.cuenta ? 'Venta a cuenta corriente por' : 'Venta registrada por'} ${formatoPrecio.format(data.total)}</div>
         <div class="detalle-pago">${detallePago}</div>
         <button class="grande" id="btn-nueva-venta">Nueva venta</button>
       </div>
     `;
     document.getElementById('btn-nueva-venta').addEventListener('click', () => location.reload());
   }
+
+  // =========================================================
+  // Cuenta corriente: elegir o crear la cuenta a la que se carga la venta
+  // =========================================================
+  function etiquetaSaldo(saldo) {
+    const n = parseFloat(saldo);
+    if (n > 0.004) return { texto: `Debe ${formatoPrecio.format(n)}`, clase: 'debe' };
+    if (n < -0.004) return { texto: `A favor ${formatoPrecio.format(-n)}`, clase: 'favor' };
+    return { texto: 'Sin deuda', clase: 'cero' };
+  }
+
+  async function abrirCuentas() {
+    document.getElementById('modal-cuentas').classList.add('visible');
+    document.getElementById('buscar-cuenta').value = '';
+    document.getElementById('picker-error').style.display = 'none';
+    await cargarCuentas();
+    document.getElementById('buscar-cuenta').focus();
+  }
+
+  function cerrarCuentas() {
+    document.getElementById('modal-cuentas').classList.remove('visible');
+  }
+
+  async function cargarCuentas() {
+    const lista = document.getElementById('lista-cuentas');
+    lista.innerHTML = '<p class="vacio">Cargando…</p>';
+    try {
+      const res = await fetch('cuentas_api.php?accion=listar');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'No se pudieron cargar las cuentas.');
+      cuentasCache = data;
+      renderListaCuentas();
+    } catch (err) {
+      lista.innerHTML = `<p class="vacio">${esc(err.message)}</p>`;
+    }
+  }
+
+  function renderListaCuentas() {
+    const q = document.getElementById('buscar-cuenta').value.trim().toLowerCase();
+    const lista = document.getElementById('lista-cuentas');
+    const filtradas = cuentasCache.filter(c =>
+      !q || c.nombre.toLowerCase().includes(q) || (c.telefono || '').includes(q));
+
+    if (!filtradas.length) {
+      lista.innerHTML = '<p class="vacio">No hay cuentas con ese dato. Podés crear una acá abajo.</p>';
+      return;
+    }
+
+    lista.innerHTML = '';
+    filtradas.forEach(c => {
+      const s = etiquetaSaldo(c.saldo);
+      const fila = document.createElement('button');
+      fila.type = 'button';
+      fila.className = 'fila-cuenta';
+      fila.innerHTML = `
+        <span><strong>${esc(c.nombre)}</strong>${c.telefono ? `<small>${esc(c.telefono)}</small>` : ''}</span>
+        <span class="saldo ${s.clase}">${s.texto}</span>`;
+      fila.addEventListener('click', () => elegirCuenta(c));
+      lista.appendChild(fila);
+    });
+  }
+
+  function elegirCuenta(c) {
+    cuentaSeleccionada = { id: c.id, nombre: c.nombre, saldo: parseFloat(c.saldo) };
+    montoPagado = null; // fiado: no se calcula vuelto
+    cerrarCuentas();
+    renderVenta();
+  }
+
+  document.getElementById('btn-cuenta').addEventListener('click', abrirCuentas);
+  document.getElementById('btn-cerrar-cuentas').addEventListener('click', cerrarCuentas);
+  document.getElementById('buscar-cuenta').addEventListener('input', renderListaCuentas);
+  document.getElementById('modal-cuentas').addEventListener('click', (e) => {
+    if (e.target.id === 'modal-cuentas') cerrarCuentas();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') cerrarCuentas();
+  });
+
+  document.getElementById('btn-crear-cuenta').addEventListener('click', async () => {
+    const errorBox = document.getElementById('picker-error');
+    const nombre = document.getElementById('nueva-cuenta-nombre').value.trim();
+    const telefono = document.getElementById('nueva-cuenta-telefono').value.trim();
+    errorBox.style.display = 'none';
+
+    if (!nombre) {
+      errorBox.textContent = 'Poné al menos el nombre.';
+      errorBox.style.display = 'block';
+      return;
+    }
+
+    try {
+      const res = await fetch('cuentas_api.php?accion=crear', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, telefono }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'No se pudo crear la cuenta.');
+
+      document.getElementById('nueva-cuenta-nombre').value = '';
+      document.getElementById('nueva-cuenta-telefono').value = '';
+      elegirCuenta(data);
+    } catch (err) {
+      errorBox.textContent = err.message;
+      errorBox.style.display = 'block';
+    }
+  });
 
   cargarCategorias();
   cargarProductos();

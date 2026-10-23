@@ -116,7 +116,7 @@ $etiquetasOrigen = ['web' => 'Pedidos web', 'mostrador' => 'Mostrador'];
 </head>
 <body>
 
-<div class="nav-admin"><a href="index.php">← Panel</a> · <a href="pedidos.php">Pedidos web</a> · <a href="mostrador.php">Mostrador</a> · Ventas · <a href="horarios.php">Horario</a></div>
+<div class="nav-admin"><a href="index.php">← Panel</a> · <a href="pedidos.php">Pedidos web</a> · <a href="mostrador.php">Mostrador</a> · Ventas · <a href="horarios.php">Horario</a> · <a href="cuentas.php">Cuentas</a></div>
 
 <h1>Ventas</h1>
 <p class="sub">No incluye pedidos cancelados.</p>

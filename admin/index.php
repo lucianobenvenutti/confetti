@@ -14,6 +14,27 @@ $stmt = $pdo->query(
      WHERE origen = 'web' AND estado IN ('pendiente', 'en_preparacion')"
 );
 $pedidosWebActivos = $stmt->fetch()['cantidad'];
+
+// Cuentas corrientes: cuánta plata hay por cobrar (solo saldos que son deuda).
+// En try/catch para que el panel siga abriendo aunque todavía no se haya
+// corrido la migración de cuentas corrientes.
+$deudaTotal = null;
+$cuentasConDeuda = 0;
+try {
+    $fila = $pdo->query(
+        "SELECT COALESCE(SUM(saldo), 0) AS total, COUNT(*) AS cuentas
+         FROM (
+            SELECT SUM(CASE tipo WHEN 'cargo' THEN monto ELSE -monto END) AS saldo
+            FROM cuenta_movimientos
+            GROUP BY cuenta_id
+            HAVING saldo > 0
+         ) t"
+    )->fetch();
+    $deudaTotal = (float) $fila['total'];
+    $cuentasConDeuda = (int) $fila['cuentas'];
+} catch (PDOException $e) {
+    // tabla inexistente: se muestra el acceso igual, sin el número
+}
 ?>
 <!DOCTYPE html>
 <html lang="es-AR">
@@ -118,6 +139,15 @@ $pedidosWebActivos = $stmt->fetch()['cantidad'];
     <div class="monto">$<?= number_format($resumenHoy['total_hoy'], 0, ',', '.') ?></div>
     <p><?= $resumenHoy['cantidad_hoy'] ?> pedido(s) hoy (web + mostrador)</p>
   </div>
+
+  <a class="tile" href="cuentas.php" style="--acento:var(--violeta);">
+    <div class="icono">📒</div>
+    <h2>Cuentas corrientes</h2>
+    <p>Clientes que compran fiado: cobrar, sumar o eliminar.</p>
+    <?php if ($deudaTotal !== null && $deudaTotal > 0): ?>
+      <span class="badge">$<?= number_format($deudaTotal, 0, ',', '.') ?> por cobrar · <?= $cuentasConDeuda ?> cuenta(s)</span>
+    <?php endif; ?>
+  </a>
 
   <a class="tile" href="ventas.php" style="--acento:var(--azul);">
     <div class="icono">📊</div>
