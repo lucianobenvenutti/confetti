@@ -6,6 +6,7 @@
  *   "nombre_cliente": "Martina Gómez",
  *   "telefono_cliente": "3482555123",
  *   "origen": "web",
+ *   "notas": "globos rojos y azules",   // comentario opcional del cliente (máx. 255 caracteres)
  *   "items": [
  *     { "tipo": "producto", "id": 3, "cantidad": 2 },
  *     { "tipo": "producto", "id": 6, "cantidad": 0.25 },   // producto por peso, en kg
@@ -28,6 +29,21 @@ $nombre   = trim($body['nombre_cliente'] ?? '');
 $telefono = trim($body['telefono_cliente'] ?? '');
 $origen   = in_array($body['origen'] ?? '', ['web', 'mostrador'], true) ? $body['origen'] : 'web';
 $items    = is_array($body['items'] ?? null) ? $body['items'] : [];
+
+// Comentario libre del cliente ("globos rojos y azules", "sin pasas"...). Se limpia
+// antes de guardarlo: saltos de línea normales, sin caracteres de control, sin espacios
+// de sobra. Se cuentan caracteres (no bytes) para que una "ñ" o una tilde cuenten como uno.
+$notas = is_string($body['notas'] ?? null) ? $body['notas'] : '';
+$notas = str_replace(["\r\n", "\r"], "\n", $notas);
+$notas = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $notas);
+$notas = preg_replace("/\n{3,}/", "\n\n", trim($notas));
+if (!preg_match('//u', $notas)) {
+    responder(422, ['error' => 'El comentario tiene caracteres que no se pueden guardar.']);
+}
+if (preg_match_all('/./su', $notas) > 255) {
+    responder(422, ['error' => 'El comentario es demasiado largo (máximo 255 caracteres).']);
+}
+$notas = $notas !== '' ? $notas : null;
 
 if ($nombre === '' || $telefono === '') {
     responder(422, ['error' => 'Falta el nombre o el teléfono.']);
@@ -97,10 +113,10 @@ try {
     // no viene del cliente, por eso puede ir directo en el SQL.
     $venceSql = $origen === 'web' ? 'DATE_ADD(NOW(), INTERVAL 24 HOUR)' : 'NULL';
     $stmt = $pdo->prepare(
-        "INSERT INTO pedidos (codigo, nombre_cliente, telefono_cliente, origen, estado, total, vence_en)
-         VALUES (?, ?, ?, ?, 'pendiente', 0, $venceSql)"
+        "INSERT INTO pedidos (codigo, nombre_cliente, telefono_cliente, origen, estado, total, notas, vence_en)
+         VALUES (?, ?, ?, ?, 'pendiente', 0, ?, $venceSql)"
     );
-    $stmt->execute([$codigo, $nombre, $telefono, $origen]);
+    $stmt->execute([$codigo, $nombre, $telefono, $origen, $notas]);
     $pedidoId = (int) $pdo->lastInsertId();
 
     $total = 0;
@@ -178,6 +194,7 @@ try {
         'codigo' => $codigo,
         'total' => $total,
         'detalle' => $detalle,
+        'notas' => $notas,
     ]);
 
 } catch (Exception $e) {

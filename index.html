@@ -521,7 +521,7 @@
   @media (max-width:900px){
     .hero-grid{ grid-template-columns:1fr; }
     .hero-scene{ margin-top:20px; }
-    .grid-productos{ grid-template-columns:repeat(2,1fr); }
+    .grid-productos{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
     .combo-panel{ grid-template-columns:1fr; padding:32px; }
     .pasos{ grid-template-columns:1fr; }
   }
@@ -567,13 +567,14 @@
     width:min(420px, 100%);
     background:var(--paper);
     z-index:50;
-    box-shadow:-12px 0 30px rgba(31,42,68,0.15);
     transform:translateX(100%);
     transition:transform .25s ease;
     display:flex;
     flex-direction:column;
   }
-  .drawer.visible{ transform:translateX(0); }
+  /* La sombra va solo cuando el carrito está abierto: si no, con el carrito escondido
+     fuera de la pantalla su sombra se filtraba como una franja gris en el borde derecho */
+  .drawer.visible{ transform:translateX(0); box-shadow:-12px 0 30px rgba(31,42,68,0.15); }
   .drawer-head{
     padding:20px 22px;
     border-bottom:1px solid var(--linea);
@@ -627,6 +628,26 @@
     font-weight:700;
   }
   .carrito-vacio{ color:var(--ink-soft); padding:20px 0; }
+  .carrito-nota{
+    display:none;
+    padding:14px 22px 0;
+    border-top:1px solid var(--linea);
+  }
+  .carrito-nota label{ display:block; font-size:0.85rem; font-weight:600; margin-bottom:6px; }
+  .carrito-nota label span{ font-weight:400; color:var(--ink-soft); }
+  .carrito-nota textarea{
+    width:100%;
+    box-sizing:border-box;
+    padding:10px 12px;
+    border-radius:10px;
+    border:1px solid var(--linea);
+    font-family:inherit;
+    font-size:0.9rem;
+    resize:vertical;
+    min-height:68px;
+  }
+  .carrito-nota textarea:focus{ outline:2px solid var(--rojo); outline-offset:1px; }
+  .nota-contador{ text-align:right; font-size:0.72rem; color:var(--ink-soft); margin-top:3px; }
   .drawer-foot{
     padding:18px 22px 22px;
     border-top:1px solid var(--linea);
@@ -731,16 +752,109 @@
     display:flex; justify-content:space-between; font-weight:700;
     padding-top:8px; margin-top:4px; border-top:1px solid var(--linea);
   }
+
+  /* ---------- Encabezado en celulares: menú a la izquierda, logo al centro, carrito a la derecha ---------- */
+  .btn-menu{ display:none; }
+
+  @keyframes bajar-menu{
+    from{ opacity:0; transform:translateY(-6px); }
+    to{ opacity:1; transform:none; }
+  }
+
+  @media (max-width:768px){
+    header{ position:relative; z-index:30; padding:12px 0; }
+    .header-row{
+      display:grid;
+      grid-template-columns:1fr auto 1fr;
+      align-items:center;
+      gap:12px;
+      flex-wrap:nowrap;
+    }
+    .logo-mark{ grid-column:2; justify-content:center; }
+    .logo-mark img{ height:46px; }
+
+    /* Menú y carrito: mismo celeste que el fondo del logo */
+    .btn-menu, .btn-carrito{
+      width:44px; height:44px; padding:0;
+      display:flex; align-items:center; justify-content:center;
+      background:#A8E0E8;
+      border:1px solid #8CCFD9;
+      border-radius:12px;
+      color:var(--ink);
+      cursor:pointer;
+    }
+    .btn-menu:active, .btn-carrito:active{ background:#93D3DD; }
+    .btn-menu:focus-visible, .btn-carrito:focus-visible{ outline:3px solid var(--ink); outline-offset:2px; }
+
+    .btn-menu{ grid-column:1; justify-self:start; flex-direction:column; gap:5px; }
+    .btn-carrito{ grid-column:3; justify-self:end; }
+
+    .btn-menu .barra{
+      display:block;
+      width:20px; height:2.5px;
+      background:var(--ink);
+      border-radius:2px;
+      transition:transform .2s ease, opacity .2s ease;
+    }
+    /* Al abrirse, las tres rayitas se vuelven una X */
+    .btn-menu[aria-expanded="true"] .barra:nth-child(1){ transform:translateY(7.5px) rotate(45deg); }
+    .btn-menu[aria-expanded="true"] .barra:nth-child(2){ opacity:0; }
+    .btn-menu[aria-expanded="true"] .barra:nth-child(3){ transform:translateY(-7.5px) rotate(-45deg); }
+
+    /* Los links dejan de estar en fila y pasan a un desplegable debajo del encabezado */
+    nav{
+      display:none;
+      position:absolute;
+      top:100%; left:0; right:0;
+      background:var(--paper);
+      border-bottom:1px solid var(--linea);
+      box-shadow:0 14px 24px rgba(31,42,68,0.12);
+    }
+    nav.abierto{ display:block; animation:bajar-menu .18s ease-out; }
+    nav ul{ flex-direction:column; gap:0; padding:6px 0 10px; }
+    nav li + li{ border-top:1px solid var(--linea); }
+    nav a{
+      display:block;
+      padding:15px 28px;
+      border-bottom:none;
+      color:var(--ink);
+      font-size:1.02rem;
+    }
+    nav a:hover{ background:var(--paper-dim); }
+  }
+
+  /* ---------- Celulares: que las tarjetas entren en 2 columnas sin desbordar la página ---------- */
+  @media (max-width:480px){
+    .wrap{ padding:0 18px; }
+    .grid-productos{ gap:12px; }
+    .card-producto{ padding:14px 12px 14px 14px; }
+    .cantidad-row{ gap:5px; }
+    .qty-btn{ width:28px; height:28px; }
+    .qty-input{ flex:1 1 0; width:auto; min-width:0; padding:6px 2px; }
+  }
+  /* En pantallas muy angostas (320 px) dos columnas ya no dejan lugar para escribir la cantidad */
+  @media (max-width:359px){
+    .grid-productos{ grid-template-columns:1fr; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    nav.abierto{ animation:none; }
+    .btn-menu .barra{ transition:none; }
+  }
 </style>
 </head>
 <body>
 
 <header>
   <div class="wrap header-row">
+    <button type="button" id="btn-menu" class="btn-menu" aria-label="Abrir menú"
+            aria-expanded="false" aria-controls="nav-principal">
+      <span class="barra"></span><span class="barra"></span><span class="barra"></span>
+    </button>
     <div class="logo-mark">
       <img src="assets/logo-confetti.jpg" alt="Confetti - Snack, Panadería, Repostería">
     </div>
-    <nav>
+    <nav id="nav-principal" aria-label="Menú principal">
       <ul>
         <li><a href="#catalogo">Catálogo</a></li>
         <li><a href="#combos">Armá tu combo</a></li>
@@ -858,6 +972,12 @@
   </div>
   <div class="drawer-body" id="carrito-body">
     <p class="carrito-vacio">Todavía no agregaste nada.</p>
+  </div>
+  <div class="carrito-nota" id="carrito-nota-bloque">
+    <label for="carrito-nota">Comentario o aclaraciones <span>(opcional)</span></label>
+    <textarea id="carrito-nota" maxlength="255"
+              placeholder="Ej: globos rojos y azules · torta sin pasas · lo retiro a las 18 hs"></textarea>
+    <div class="nota-contador"><span id="nota-contador">0</span>/255</div>
   </div>
   <div class="drawer-foot">
     <div class="total-row"><span>Total</span><span id="carrito-total">$0</span></div>
@@ -1146,7 +1266,7 @@
   // Carrito
   // =========================================================
   const PESO_STEP = 0.25; // kg que suma cada click en un producto por peso
-  const NUMERO_WHATSAPP_LOCAL = '5493482312178'; // TODO: reemplazar por el número real del local
+  const NUMERO_WHATSAPP_LOCAL = '5493482000000'; // TODO: reemplazar por el número real del local
 
   let carrito = cargarCarritoGuardado();
 
@@ -1162,6 +1282,21 @@
     localStorage.setItem('confetti_carrito', JSON.stringify(carrito));
     renderCarrito();
   }
+
+  // Comentario del pedido (ej: el color de los globos). Se guarda en el navegador
+  // igual que el carrito, así no se pierde si cierran la pestaña antes de confirmar.
+  const inputNota = document.getElementById('carrito-nota');
+  inputNota.value = localStorage.getItem('confetti_nota') || '';
+
+  function pintarContadorNota() {
+    document.getElementById('nota-contador').textContent = inputNota.value.length;
+  }
+  pintarContadorNota();
+
+  inputNota.addEventListener('input', () => {
+    localStorage.setItem('confetti_nota', inputNota.value);
+    pintarContadorNota();
+  });
 
   // Estas dos son las que usan las cards del catálogo: suman la cantidad que
   // el cliente haya elegido con el selector, avisan con un toast, y a
@@ -1239,6 +1374,9 @@
     badge.style.display = cantidadItems ? 'flex' : 'none';
     badge.textContent = cantidadItems;
 
+    // El campo de comentario solo aparece si hay algo en el carrito
+    document.getElementById('carrito-nota-bloque').style.display = cantidadItems ? 'block' : 'none';
+
     if (!carrito.length) {
       cont.innerHTML = '<p class="carrito-vacio">Todavía no agregaste nada.</p>';
     } else {
@@ -1272,6 +1410,8 @@
   }
 
   function abrirCarrito() {
+    // El aviso "Agregado al carrito" no tiene que quedar tapando el botón de confirmar
+    document.getElementById('toast').classList.remove('visible');
     document.getElementById('drawer-carrito').classList.add('visible');
     document.getElementById('overlay').classList.add('visible');
   }
@@ -1317,6 +1457,7 @@
     }
 
     const items = carrito.map(i => ({ tipo: i.tipo, id: i.id, cantidad: i.cantidad }));
+    const notas = inputNota.value.trim();
 
     boton.disabled = true;
     boton.textContent = 'Confirmando…';
@@ -1325,7 +1466,7 @@
       const res = await fetch(API + 'crear_pedido.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre_cliente: nombre, telefono_cliente: telefono, origen: 'web', items }),
+        body: JSON.stringify({ nombre_cliente: nombre, telefono_cliente: telefono, origen: 'web', items, notas }),
       });
       const data = await res.json();
 
@@ -1336,6 +1477,9 @@
       mostrarConfirmacion(data, nombre);
       carrito = [];
       guardarCarrito();
+      inputNota.value = '';
+      localStorage.removeItem('confetti_nota');
+      pintarContadorNota();
       document.getElementById('input-nombre').value = '';
       document.getElementById('input-telefono').value = '';
       document.getElementById('modal-checkout').classList.remove('visible');
@@ -1363,7 +1507,9 @@
       return `- ${item.nombre} (${cant})`;
     }).join('\n');
 
-    const mensaje = `¡Hola! Quiero confirmar mi pedido ${data.codigo}:\n${lineas}\nTotal: ${formatoPrecio.format(data.total)}\nNombre: ${nombre}\nPaso a buscarlo cuando esté listo, ¡gracias!`;
+    // data.notas es el comentario ya limpio tal como quedó guardado
+    const comentario = data.notas ? `\nComentario: ${data.notas}` : '';
+    const mensaje = `¡Hola! Quiero confirmar mi pedido ${data.codigo}:\n${lineas}${comentario}\nTotal: ${formatoPrecio.format(data.total)}\nNombre: ${nombre}\nPaso a buscarlo cuando esté listo, ¡gracias!`;
 
     document.getElementById('btn-whatsapp').href =
       `https://wa.me/${NUMERO_WHATSAPP_LOCAL}?text=${encodeURIComponent(mensaje)}`;
@@ -1505,6 +1651,31 @@
   });
 
   renderCarrito();
+
+  // ---------- Menú hamburguesa (celulares) ----------
+  const btnMenu = document.getElementById('btn-menu');
+  const navPrincipal = document.getElementById('nav-principal');
+
+  function cerrarMenu() {
+    navPrincipal.classList.remove('abierto');
+    btnMenu.setAttribute('aria-expanded', 'false');
+    btnMenu.setAttribute('aria-label', 'Abrir menú');
+  }
+
+  btnMenu.addEventListener('click', () => {
+    const abierto = navPrincipal.classList.toggle('abierto');
+    btnMenu.setAttribute('aria-expanded', String(abierto));
+    btnMenu.setAttribute('aria-label', abierto ? 'Cerrar menú' : 'Abrir menú');
+  });
+
+  // Se cierra al elegir una opción, al tocar cualquier otra cosa (incluido el carrito),
+  // con Escape, o si la pantalla se agranda y el menú vuelve a mostrarse completo.
+  navPrincipal.addEventListener('click', (e) => { if (e.target.closest('a')) cerrarMenu(); });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#btn-menu') && !e.target.closest('#nav-principal')) cerrarMenu();
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') cerrarMenu(); });
+  window.addEventListener('resize', () => { if (window.innerWidth > 768) cerrarMenu(); });
 
   async function cargarHorario() {
     const barra = document.getElementById('barra-horario');
