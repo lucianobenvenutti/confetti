@@ -8,6 +8,8 @@
  */
 
 require '../api/db.php'; // conexión PDO + hora de MySQL fija + headers JSON
+require __DIR__ . '/auth.php';
+$usuarioActual = exigirSesion(ROLES_TODOS, true);
 
 function responder($codigo, $payload) {
     http_response_code($codigo);

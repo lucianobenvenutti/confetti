@@ -1,5 +1,7 @@
 <?php
 require 'conexion.php';
+require __DIR__ . '/auth.php';
+$usuarioActual = exigirSesion([ROL_DUENO]);
 
 // "Hoy" lo decide MySQL (el mismo reloj que le puso la fecha a cada pedido), no PHP.
 $hoy = $pdo->query('SELECT CURDATE()')->fetchColumn();
@@ -58,10 +60,11 @@ if ($desde !== $hasta) {
 
 // --- Listado de pedidos del período ---
 $stmt = $pdo->prepare(
-    "SELECT codigo, nombre_cliente, origen, estado, total, creado_en
-     FROM pedidos
-     WHERE DATE(creado_en) BETWEEN ? AND ? AND estado != 'cancelado'
-     ORDER BY creado_en DESC
+    "SELECT p.codigo, p.nombre_cliente, p.origen, p.estado, p.total, p.creado_en, u.nombre AS atendio
+     FROM pedidos p
+     LEFT JOIN usuarios u ON u.id = p.usuario_id
+     WHERE DATE(p.creado_en) BETWEEN ? AND ? AND p.estado != 'cancelado'
+     ORDER BY p.creado_en DESC
      LIMIT 300"
 );
 $stmt->execute([$desde, $hasta]);
@@ -70,7 +73,7 @@ $pedidos = $stmt->fetchAll();
 $etiquetasOrigen = ['web' => 'Pedidos web', 'mostrador' => 'Mostrador'];
 ?>
 <!DOCTYPE html>
-<html lang="es-AR">
+<html lang="es-AR" translate="no">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -116,7 +119,7 @@ $etiquetasOrigen = ['web' => 'Pedidos web', 'mostrador' => 'Mostrador'];
 </head>
 <body>
 
-<div class="nav-admin"><a href="index.php">← Panel</a> · <a href="pedidos.php">Pedidos web</a> · <a href="mostrador.php">Mostrador</a> · Ventas · <a href="horarios.php">Horario</a> · <a href="cuentas.php">Cuentas</a></div>
+<div class="nav-admin"><a href="index.php">← Panel</a> · <a href="pedidos.php">Pedidos web</a> · <a href="mostrador.php">Mostrador</a> · Ventas · <a href="horarios.php">Horario</a> · <a href="cuentas.php">Cuentas</a> <?= barraSesionHtml() ?></div>
 
 <h1>Ventas</h1>
 <p class="sub">No incluye pedidos cancelados.</p>
@@ -186,10 +189,10 @@ $etiquetasOrigen = ['web' => 'Pedidos web', 'mostrador' => 'Mostrador'];
 
 <h2>Detalle de pedidos</h2>
 <table>
-  <thead><tr><th>Código</th><th>Cliente</th><th>Canal</th><th>Estado</th><th>Fecha</th><th>Total</th></tr></thead>
+  <thead><tr><th>Código</th><th>Cliente</th><th>Canal</th><th>Estado</th><th>Atendió</th><th>Fecha</th><th>Total</th></tr></thead>
   <tbody>
     <?php if (!$pedidos): ?>
-      <tr><td colspan="6" class="sin-datos">No hay pedidos en este período.</td></tr>
+      <tr><td colspan="7" class="sin-datos">No hay pedidos en este período.</td></tr>
     <?php endif; ?>
     <?php foreach ($pedidos as $p): ?>
       <tr>
@@ -197,6 +200,7 @@ $etiquetasOrigen = ['web' => 'Pedidos web', 'mostrador' => 'Mostrador'];
         <td><?= htmlspecialchars($p['nombre_cliente']) ?></td>
         <td><span class="badge-origen"><?= $etiquetasOrigen[$p['origen']] ?? $p['origen'] ?></span></td>
         <td><span class="badge-estado"><?= htmlspecialchars($p['estado']) ?></span></td>
+        <td><?= $p['atendio'] ? htmlspecialchars($p['atendio']) : '<span style="color:#aab;">—</span>' ?></td>
         <td><?= date('d/m H:i', strtotime($p['creado_en'])) ?></td>
         <td>$<?= number_format($p['total'], 0, ',', '.') ?></td>
       </tr>

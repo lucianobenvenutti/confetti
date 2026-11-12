@@ -1,5 +1,7 @@
 <?php
 require 'conexion.php';
+require __DIR__ . '/auth.php';
+$usuarioActual = exigirSesion([ROL_DUENO]);
 
 $proveedores = $pdo->query(
     "SELECT pr.*,
@@ -13,7 +15,7 @@ $mensaje = $_GET['msg'] ?? null;
 $tipoMensaje = $_GET['tipo'] ?? 'error';
 ?>
 <!DOCTYPE html>
-<html lang="es-AR">
+<html lang="es-AR" translate="no">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -48,7 +50,7 @@ $tipoMensaje = $_GET['tipo'] ?? 'error';
 </head>
 <body>
 
-<div class="nav-admin"><a href="index.php">← Panel</a> · <a href="productos.php">Productos</a> · <a href="categorias.php">Categorías</a> · <a href="combos.php">Combos</a> · Proveedores · <a href="ventas.php">Ventas</a> · <a href="horarios.php">Horario</a> · <a href="cuentas.php">Cuentas</a></div>
+<div class="nav-admin"><a href="index.php">← Panel</a> · <a href="productos.php">Productos</a> · <a href="categorias.php">Categorías</a> · <a href="combos.php">Combos</a> · Proveedores · <a href="ventas.php">Ventas</a> · <a href="horarios.php">Horario</a> · <a href="cuentas.php">Cuentas</a> <?= barraSesionHtml() ?></div>
 
 <div class="cabecera">
   <div>

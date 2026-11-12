@@ -1,5 +1,7 @@
 <?php
 require 'conexion.php';
+require __DIR__ . '/auth.php';
+$usuarioActual = exigirSesion([ROL_DUENO]);
 
 $productos = $pdo->query(
     "SELECT p.*, c.nombre AS categoria_nombre, prov.nombre AS proveedor_nombre,
@@ -29,7 +31,7 @@ function hace($segundos) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="es-AR">
+<html lang="es-AR" translate="no">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -86,7 +88,7 @@ function hace($segundos) {
 </head>
 <body>
 
-<div class="nav-admin"><a href="index.php">← Panel</a> · Productos · <a href="categorias.php">Categorías</a> · <a href="combos.php">Combos</a> · <a href="proveedores.php">Proveedores</a> · <a href="ventas.php">Ventas</a> · <a href="horarios.php">Horario</a> · <a href="cuentas.php">Cuentas</a></div>
+<div class="nav-admin"><a href="index.php">← Panel</a> · Productos · <a href="categorias.php">Categorías</a> · <a href="combos.php">Combos</a> · <a href="proveedores.php">Proveedores</a> · <a href="ventas.php">Ventas</a> · <a href="horarios.php">Horario</a> · <a href="cuentas.php">Cuentas</a> <?= barraSesionHtml() ?></div>
 
 <div class="cabecera">
   <div>

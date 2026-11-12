@@ -1,5 +1,7 @@
 <?php
 require 'conexion.php';
+require __DIR__ . '/auth.php';
+$usuarioActual = exigirSesion(ROLES_TODOS);
 
 $stmt = $pdo->query(
     "SELECT COALESCE(SUM(total), 0) AS total_hoy, COUNT(*) AS cantidad_hoy
@@ -37,7 +39,7 @@ try {
 }
 ?>
 <!DOCTYPE html>
-<html lang="es-AR">
+<html lang="es-AR" translate="no">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -101,6 +103,12 @@ try {
 </head>
 <body>
 
+<div style="overflow:hidden; margin-bottom:14px; font-size:0.85rem; color:#5B6478;"><?= barraSesionHtml() ?></div>
+
+<?php if (isset($_GET['clave_cambiada'])): ?>
+  <div style="background:#E4F5EE; color:#1E9C7C; border:1px solid #bfe6d7; border-radius:10px; padding:11px 16px; margin-bottom:18px; max-width:560px; font-size:0.92rem;">Contraseña cambiada.</div>
+<?php endif; ?>
+
 <h1>Panel de Confetti</h1>
 <p class="sub">Accesos rápidos al día a día del local.</p>
 
@@ -121,6 +129,7 @@ try {
     <p>Cargar una venta hecha en persona en el local.</p>
   </a>
 
+<?php if (esDueno($usuarioActual)): ?>
   <a class="tile" href="productos.php" style="--acento:var(--verde);">
     <div class="icono">🖼️</div>
     <h2>Productos y categorías</h2>
@@ -161,6 +170,12 @@ try {
     <p>Define el cartel de "abierto ahora" en la página.</p>
   </a>
 
+  <a class="tile" href="usuarios.php" style="--acento:var(--rojo);">
+    <div class="icono">🔐</div>
+    <h2>Usuarios</h2>
+    <p>Quién puede ingresar al panel y con qué rol.</p>
+  </a>
+<?php endif; ?>
 </div>
 
 </body>

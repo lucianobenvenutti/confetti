@@ -12,6 +12,8 @@
  */
 
 require 'conexion.php';
+require __DIR__ . '/auth.php';
+$usuarioActual = exigirSesion(ROLES_TODOS);
 
 // ---------------------------------------------------------------------------
 // Datos del local para el mensaje de "tu pedido está listo".
@@ -23,8 +25,8 @@ require 'conexion.php';
 //   (Compartir → Copiar vínculo), pegalo acá y se usa ese. Si lo dejás vacío,
 //   se arma solo un link de "cómo llegar" a partir de la dirección.
 // ---------------------------------------------------------------------------
-const LOCAL_DIRECCION = 'Calle 117 Numero 644 - Avellaneda';
-const LOCAL_MAPS_LINK = 'https://maps.app.goo.gl/PD7g51CrznPWzKgP7';
+const LOCAL_DIRECCION = '';
+const LOCAL_MAPS_LINK = '';
 
 // Bloque de texto con la dirección y el link para llegar. Vacío si no hay dirección cargada.
 function textoUbicacion() {

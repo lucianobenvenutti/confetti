@@ -1,5 +1,7 @@
 <?php
 require 'conexion.php';
+require __DIR__ . '/auth.php';
+$usuarioActual = exigirSesion([ROL_DUENO]);
 
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 if (!$id) {
@@ -30,7 +32,7 @@ $productos = $stmt->fetchAll();
 $productosBajos = array_filter($productos, fn($p) => (float) $p['stock_actual'] <= (float) $p['stock_minimo']);
 ?>
 <!DOCTYPE html>
-<html lang="es-AR">
+<html lang="es-AR" translate="no">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">

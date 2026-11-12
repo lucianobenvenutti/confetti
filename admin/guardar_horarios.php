@@ -1,12 +1,14 @@
 <?php
 require 'conexion.php';
+require __DIR__ . '/auth.php';
+$usuarioActual = exigirSesion([ROL_DUENO]);
 
 $nombresDias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
 // Si algo está mal, mostramos el motivo con un botón "Volver" que usa el historial
 // del navegador: así no se pierde lo que ya se había completado en los otros días.
 function error($mensaje) {
-    echo '<!DOCTYPE html><html lang="es-AR"><head><meta charset="UTF-8">'
+    echo '<!DOCTYPE html><html lang="es-AR" translate="no"><head><meta charset="UTF-8">'
        . '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
        . '<title>Revisá el horario</title></head>'
        . '<body style="font-family:system-ui,sans-serif;background:#FFFBF3;color:#1F2A44;padding:40px 24px;">'

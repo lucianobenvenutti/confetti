@@ -1,5 +1,7 @@
 <?php
 require 'conexion.php';
+require __DIR__ . '/auth.php';
+$usuarioActual = exigirSesion([ROL_DUENO]);
 
 $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
 

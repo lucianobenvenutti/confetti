@@ -1,5 +1,7 @@
 <?php
 require 'conexion.php';
+require __DIR__ . '/auth.php';
+$usuarioActual = exigirSesion([ROL_DUENO]);
 
 $horarios = $pdo->query('SELECT * FROM horarios_atencion ORDER BY dia ASC')->fetchAll(PDO::FETCH_ASSOC | PDO::FETCH_UNIQUE);
 $nombresDias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
@@ -12,7 +14,7 @@ function hora($valor) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="es-AR">
+<html lang="es-AR" translate="no">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -50,7 +52,7 @@ function hora($valor) {
 </head>
 <body>
 
-<div class="nav-admin"><a href="index.php">← Panel</a> · Horario de atención</div>
+<div class="nav-admin"><a href="index.php">← Panel</a> · Horario de atención <?= barraSesionHtml() ?></div>
 
 <h1>Horario de atención</h1>
 <p class="sub">Esto define el cartel de "abierto ahora" que ve el cliente en la página.</p>

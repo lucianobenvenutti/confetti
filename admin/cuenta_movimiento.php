@@ -5,6 +5,8 @@
  */
 
 require 'conexion.php';
+require __DIR__ . '/auth.php';
+$usuarioActual = exigirSesion([ROL_DUENO]);
 
 $cuentaId = filter_input(INPUT_POST, 'cuenta_id', FILTER_VALIDATE_INT);
 $tipo = $_POST['tipo'] ?? '';

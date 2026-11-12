@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es-AR">
+<html lang="es-AR" translate="no">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,7 +25,7 @@
   }
 
   *{ box-sizing:border-box; }
-  html{ scroll-behavior:smooth; }
+  html{ scroll-behavior:smooth; scroll-padding-top:64px; } /* al ir a una sección, el encabezado fijo no la tapa */
   body{
     margin:0;
     background:var(--paper);
@@ -48,10 +48,29 @@
   }
 
   /* ---------- Header ---------- */
-  header{
-    padding:22px 0 18px;
-    border-bottom:1px solid var(--linea);
+  /* Medidas del encabezado: normal arriba de todo, compacto cuando se baja.
+     El espacio total que ocupa en la página es siempre el mismo (lo que se achica por
+     dentro se devuelve como margen), así el contenido de abajo no pega saltos. */
+  :root{
+    --h-arriba:22px; --h-abajo:18px; --h-fila:52px;
+    --h-arriba-c:8px; --h-abajo-c:8px; --h-fila-c:38px;
   }
+  header{
+    position:-webkit-sticky;
+    position:sticky;
+    top:0;
+    z-index:30;
+    background:var(--paper);
+    padding:var(--h-arriba) 0 var(--h-abajo);
+    border-bottom:1px solid var(--linea);
+    transition:padding .2s ease, margin-bottom .2s ease, box-shadow .2s ease;
+  }
+  header.compacto{
+    padding:var(--h-arriba-c) 0 var(--h-abajo-c);
+    margin-bottom:calc(var(--h-arriba) + var(--h-abajo) + var(--h-fila) - var(--h-arriba-c) - var(--h-abajo-c) - var(--h-fila-c));
+    box-shadow:0 6px 16px rgba(31,42,68,0.08);
+  }
+  header.compacto .header-row{ height:var(--h-fila-c); }
   .barra-horario{
     background:var(--paper-dim);
     border-bottom:1px solid var(--linea);
@@ -76,6 +95,8 @@
     justify-content:space-between;
     gap:24px;
     flex-wrap:wrap;
+    height:var(--h-fila);
+    transition:height .2s ease;
   }
   .logo-mark{
     display:flex;
@@ -86,7 +107,10 @@
     height:52px;
     width:auto;
     border-radius:10px;
+    transition:height .2s ease;
   }
+  header.compacto .logo-mark img{ height:36px; }
+  header.compacto .header-row .btn-carrito{ padding:6px 12px; }
   nav ul{
     list-style:none;
     display:flex;
@@ -214,7 +238,7 @@
   }
 
   /* ---------- Categorías ---------- */
-  .categorias{ padding:8px 0 12px; }
+  .categorias{ padding-top:8px; padding-bottom:12px; }
   .section-head{
     display:flex;
     align-items:baseline;
@@ -274,7 +298,7 @@
   .chip.c-naranja:hover{ border-color:var(--naranja); }
 
   /* ---------- Productos ---------- */
-  .productos{ padding:36px 0; }
+  .productos{ padding-top:36px; padding-bottom:36px; } /* solo vertical: el lateral lo pone .wrap */
   .grid-productos{
     display:grid;
     grid-template-columns:repeat(4, 1fr);
@@ -402,7 +426,8 @@
 
   /* ---------- Combo destacado ---------- */
   .combo{
-    padding:20px 0 56px;
+    padding-top:20px;
+    padding-bottom:56px;
   }
   .combo-panel{
     background:var(--ink);
@@ -473,7 +498,7 @@
   .combo-total span:last-child{ color:var(--naranja); }
 
   /* ---------- Cómo funciona ---------- */
-  .como-funciona{ padding:12px 0 60px; }
+  .como-funciona{ padding-top:12px; padding-bottom:60px; }
   .pasos{
     display:grid;
     grid-template-columns:repeat(3,1fr);
@@ -762,7 +787,10 @@
   }
 
   @media (max-width:768px){
-    header{ position:relative; z-index:30; padding:12px 0; }
+    :root{
+      --h-arriba:12px; --h-abajo:12px; --h-fila:46px;
+      --h-arriba-c:5px; --h-abajo-c:5px; --h-fila-c:40px;
+    }
     .header-row{
       display:grid;
       grid-template-columns:1fr auto 1fr;
@@ -783,7 +811,11 @@
       color:var(--ink);
       cursor:pointer;
     }
+    .btn-menu, .btn-carrito{ transition:width .2s ease, height .2s ease, background .15s ease; }
     .btn-menu:active, .btn-carrito:active{ background:#93D3DD; }
+    header.compacto .logo-mark img{ height:34px; }
+    header.compacto .btn-menu,
+    header.compacto .header-row .btn-carrito{ width:38px; height:38px; padding:0; }
     .btn-menu:focus-visible, .btn-carrito:focus-visible{ outline:3px solid var(--ink); outline-offset:2px; }
 
     .btn-menu{ grid-column:1; justify-self:start; flex-direction:column; gap:5px; }
@@ -825,7 +857,7 @@
 
   /* ---------- Celulares: que las tarjetas entren en 2 columnas sin desbordar la página ---------- */
   @media (max-width:480px){
-    .wrap{ padding:0 18px; }
+    .wrap{ padding-left:18px; padding-right:18px; }
     .grid-productos{ gap:12px; }
     .card-producto{ padding:14px 12px 14px 14px; }
     .cantidad-row{ gap:5px; }
@@ -838,10 +870,58 @@
   }
 
   @media (prefers-reduced-motion: reduce){
+    header, .header-row, .logo-mark img, .btn-menu, .btn-carrito{ transition:none; }
     nav.abierto{ animation:none; }
     .btn-menu .barra{ transition:none; }
   }
+
+  /* ---------- Efectos: cards, carga y confetti ---------- */
+  .card-producto{
+    transition:transform .25s cubic-bezier(.2,.9,.25,1), box-shadow .25s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .card-producto .icono{ display:inline-block; transition:transform .3s cubic-bezier(.3,1.6,.5,1); }
+  @media (hover:hover){
+    .card-producto:not(.sin-efecto):hover{
+      transform:translateY(-4px) scale(1.03);
+      box-shadow:0 14px 28px -10px color-mix(in srgb, var(--acento, var(--rojo)) 55%, transparent);
+    }
+    .card-producto:not(.sin-efecto):hover .icono{ transform:rotate(-12deg) scale(1.15); }
+  }
+  /* En el celu: mini zoom mientras se toca con el dedo */
+  .card-producto:not(.sin-efecto):active{
+    transform:scale(1.03);
+    box-shadow:0 10px 22px -10px color-mix(in srgb, var(--acento, var(--rojo)) 55%, transparent);
+  }
+
+  .cargador{
+    grid-column:1 / -1;
+    display:flex; flex-direction:column; align-items:center; gap:14px;
+    padding:36px 0; color:var(--ink-soft); font-size:.95rem;
+  }
+  .cargador .puntos{ display:flex; gap:9px; height:34px; align-items:flex-end; }
+  .cargador .puntos span{
+    width:12px; height:12px; border-radius:3px;
+    background:var(--c);
+    animation:salto-confetti .9s ease-in-out infinite;
+    animation-delay:calc(var(--i) * .12s);
+  }
+  .cargador .puntos span:nth-child(even){ border-radius:50%; }
+  @keyframes salto-confetti{
+    0%,100%{ transform:translateY(0) rotate(0deg); }
+    50%{ transform:translateY(-22px) rotate(180deg); }
+  }
+  canvas#confetti-explosion{
+    position:fixed; inset:0; width:100%; height:100%;
+    pointer-events:none; z-index:200;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .card-producto, .card-producto .icono{ transition:none; }
+    .card-producto:not(.sin-efecto):hover, .card-producto:not(.sin-efecto):active{ transform:none; }
+    .cargador .puntos span{ animation:none; }
+  }
 </style>
+
 </head>
 <body>
 
@@ -915,9 +995,7 @@
     <p>Los productos que más se piden en el local.</p>
   </div>
   <div class="grid-productos" id="grid-productos">
-    <div class="card-producto" style="--acento:var(--rojo);">
-      <p>Cargando productos…</p>
-    </div>
+    <div class="cargador"><div class="puntos"><span style="--i:0;--c:var(--rojo)"></span><span style="--i:1;--c:var(--naranja)"></span><span style="--i:2;--c:var(--verde)"></span><span style="--i:3;--c:var(--azul)"></span><span style="--i:4;--c:var(--magenta)"></span></div>Cargando productos…</div>
   </div>
 </section>
 
@@ -927,7 +1005,7 @@
     <p>Armados por nosotros, con precio especial.</p>
   </div>
   <div class="grid-productos" id="grid-combos">
-    <div class="card-producto"><p>Cargando combos…</p></div>
+    <div class="cargador"><div class="puntos"><span style="--i:0;--c:var(--rojo)"></span><span style="--i:1;--c:var(--naranja)"></span><span style="--i:2;--c:var(--verde)"></span><span style="--i:3;--c:var(--azul)"></span><span style="--i:4;--c:var(--magenta)"></span></div>Cargando combos…</div>
   </div>
 </section>
 
@@ -1171,7 +1249,7 @@
 
   async function cargarProductos() {
     const cont = document.getElementById('grid-productos');
-    cont.innerHTML = '<div class="card-producto"><p>Cargando productos…</p></div>';
+    cont.innerHTML = '<div class="cargador"><div class="puntos"><span style="--i:0;--c:var(--rojo)"></span><span style="--i:1;--c:var(--naranja)"></span><span style="--i:2;--c:var(--verde)"></span><span style="--i:3;--c:var(--azul)"></span><span style="--i:4;--c:var(--magenta)"></span></div>Cargando productos…</div>';
     try {
       const params = new URLSearchParams();
       if (categoriaActiva) params.set('categoria_id', categoriaActiva);
@@ -1187,7 +1265,7 @@
       }
       productos.forEach(p => cont.appendChild(tarjetaProducto(p)));
     } catch (err) {
-      cont.innerHTML = '<div class="card-producto"><p>No se pudieron cargar los productos.</p></div>';
+      cont.innerHTML = '<div class="card-producto sin-efecto"><p>No se pudieron cargar los productos.</p></div>';
       console.error(err);
     }
   }
@@ -1252,12 +1330,12 @@
       const combos = await pedirJSON(API + 'combos.php');
       cont.innerHTML = '';
       if (!combos.length) {
-        cont.innerHTML = '<div class="card-producto"><p>Todavía no hay combos armados.</p></div>';
+        cont.innerHTML = '<div class="card-producto sin-efecto"><p>Todavía no hay combos armados.</p></div>';
         return;
       }
       combos.forEach(c => cont.appendChild(tarjetaCombo(c)));
     } catch (err) {
-      cont.innerHTML = '<div class="card-producto"><p>No se pudieron cargar los combos.</p></div>';
+      cont.innerHTML = '<div class="card-producto sin-efecto"><p>No se pudieron cargar los combos.</p></div>';
       console.error(err);
     }
   }
@@ -1494,6 +1572,53 @@
     }
   }
 
+
+  /* ---------- Explosión de confetti (al confirmar el pedido) ---------- */
+  function explosionConfetti() {
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const viejo = document.getElementById('confetti-explosion');
+    if (viejo) viejo.remove();
+    const cv = document.createElement('canvas');
+    cv.id = 'confetti-explosion';
+    document.body.appendChild(cv);
+    const ctx = cv.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const W = cv.width = innerWidth * dpr, H = cv.height = innerHeight * dpr;
+    const colores = ['#E8483C', '#F5941F', '#1E9C7C', '#1B4A9C', '#C24F9E', '#6E4E9E', '#A8E0E8'];
+    const piezas = [];
+    // dos cañones, uno en cada esquina de abajo, disparando hacia el centro
+    for (let i = 0; i < 140; i++) {
+      const izq = i % 2 === 0;
+      const ang = 0.15 + Math.random() * 0.75; // desvío respecto de la vertical
+      const vel = (11 + Math.random() * 12) * dpr;
+      piezas.push({
+        x: (izq ? 0.08 : 0.92) * W, y: H * 0.95,
+        vx: (izq ? 1 : -1) * Math.sin(ang) * vel, vy: -Math.cos(ang) * vel * 1.15,
+        w: (6 + Math.random() * 7) * dpr, h: (4 + Math.random() * 6) * dpr,
+        rot: Math.random() * 6.28, vr: (Math.random() - .5) * .4,
+        c: colores[(Math.random() * colores.length) | 0],
+        redondo: Math.random() < .3
+      });
+    }
+    const inicio = performance.now();
+    (function cuadro(t) {
+      const seg = (t - inicio) / 1000;
+      ctx.clearRect(0, 0, W, H);
+      for (const p of piezas) {
+        p.vy += 0.38 * dpr; p.vx *= 0.99; p.vy *= 0.992;
+        p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, Math.min(1, 3.4 - seg));
+        ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+        ctx.fillStyle = p.c;
+        if (p.redondo) { ctx.beginPath(); ctx.arc(0, 0, p.w / 2, 0, 6.28); ctx.fill(); }
+        else ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      }
+      if (seg < 3.4) requestAnimationFrame(cuadro); else cv.remove();
+    })(inicio);
+  }
+
   let ultimoCodigoPedido = null;
 
   function mostrarConfirmacion(data, nombre) {
@@ -1516,6 +1641,7 @@
 
     document.getElementById('overlay').classList.add('visible');
     document.getElementById('modal-confirmacion').classList.add('visible');
+    explosionConfetti();
   }
 
   document.getElementById('btn-cerrar-confirmacion').addEventListener('click', cerrarModales);
@@ -1651,6 +1777,17 @@
   });
 
   renderCarrito();
+
+  // ---------- Encabezado fijo: se achica al bajar y vuelve a su tamaño arriba de todo ----------
+  const encabezado = document.querySelector('header');
+  function ajustarEncabezado() {
+    const y = window.scrollY;
+    // Dos umbrales distintos (60 para achicar, 20 para agrandar) para que no parpadee cerca del límite
+    if (!encabezado.classList.contains('compacto') && y > 60) encabezado.classList.add('compacto');
+    else if (encabezado.classList.contains('compacto') && y <= 20) encabezado.classList.remove('compacto');
+  }
+  window.addEventListener('scroll', ajustarEncabezado, { passive: true });
+  ajustarEncabezado();
 
   // ---------- Menú hamburguesa (celulares) ----------
   const btnMenu = document.getElementById('btn-menu');

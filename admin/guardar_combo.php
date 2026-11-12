@@ -1,5 +1,7 @@
 <?php
 require 'conexion.php';
+require __DIR__ . '/auth.php';
+$usuarioActual = exigirSesion([ROL_DUENO]);
 
 function volverForm($msg, $id = null) {
     $url = 'combo_form.php?msg=' . urlencode($msg);

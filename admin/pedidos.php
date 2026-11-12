@@ -1,5 +1,7 @@
 <?php
 require 'conexion.php';
+require __DIR__ . '/auth.php';
+$usuarioActual = exigirSesion(ROLES_TODOS);
 require __DIR__ . '/../api/vencimientos.php';
 
 // Lo primero: cancelar (y devolver el stock de) lo que ya pasó las 24hs.
@@ -73,7 +75,7 @@ function etiquetaCantidad($item) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="es-AR">
+<html lang="es-AR" translate="no">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -253,10 +255,13 @@ function etiquetaCantidad($item) {
 <div class="nav-admin" style="font-size:0.85rem; color:#5B6478; margin-bottom:18px;">
   <a href="index.php" style="color:#5B6478; text-decoration:none;">← Panel</a> ·
   Pedidos web ·
-  <a href="mostrador.php" style="color:#5B6478; text-decoration:none;">Mostrador</a> ·
-  <a href="ventas.php" style="color:#5B6478; text-decoration:none;">Ventas</a> ·
-  <a href="horarios.php" style="color:#5B6478; text-decoration:none;">Horario</a> ·
-  <a href="cuentas.php" style="color:#5B6478; text-decoration:none;">Cuentas</a>
+  <a href="mostrador.php" style="color:#5B6478; text-decoration:none;">Mostrador</a>
+  <?php if (esDueno($usuarioActual)): ?>
+    · <a href="ventas.php" style="color:#5B6478; text-decoration:none;">Ventas</a> ·
+    <a href="horarios.php" style="color:#5B6478; text-decoration:none;">Horario</a> ·
+    <a href="cuentas.php" style="color:#5B6478; text-decoration:none;">Cuentas</a>
+  <?php endif; ?>
+  <?= barraSesionHtml() ?>
 </div>
 
 <h1>Pedidos</h1>
@@ -423,6 +428,7 @@ function etiquetaCantidad($item) {
   let ultimaActualizacion = Date.now();
   let fallos = 0;
   let consultando = false;
+  let sesionVencida = false;
   const nuevosIds = new Set();   // pedidos web que llegaron y todavía no se vieron
 
   // Los ids siempre crecen: un pedido con id mayor a todos los vistos es nuevo.
@@ -510,6 +516,8 @@ function etiquetaCantidad($item) {
   // ----- Traer y aplicar la pantalla -----
   async function traerPagina(url, opciones = {}) {
     const res = await fetch(url, { cache: 'no-store', ...opciones });
+    // Si la sesión venció, el servidor responde con la pantalla de ingreso en lugar de la lista
+    if (res.redirected && /login\.php/.test(res.url)) throw new Error('SESION_VENCIDA');
     const html = await res.text();
     return new DOMParser().parseFromString(html, 'text/html');
   }
@@ -566,15 +574,22 @@ function etiquetaCantidad($item) {
     avisos.replaceChildren(div);
   }
 
+  function avisarSesionVencida() {
+    sesionVencida = true;
+    estadoVivo.innerHTML = '⚠ Tu sesión venció. <a href="login.php">Ingresá de nuevo</a> para seguir viendo los pedidos.';
+    estadoVivo.classList.add('sin-conexion');
+  }
+
   async function actualizar() {
-    if (consultando) return;
+    if (consultando || sesionVencida) return;
     consultando = true;
     try {
       aplicarPagina(await traerPagina('pedidos.php'), false);
       fallos = 0;
       ultimaActualizacion = Date.now();
     } catch (err) {
-      fallos++;
+      if (err.message === 'SESION_VENCIDA') avisarSesionVencida();
+      else fallos++;
     } finally {
       consultando = false;
       pintarEstado();
@@ -582,6 +597,7 @@ function etiquetaCantidad($item) {
   }
 
   function pintarEstado() {
+    if (sesionVencida) return;
     if (fallos >= 2) {
       estadoVivo.textContent = '⚠ Sin conexión: los pedidos no se están actualizando';
       estadoVivo.classList.add('sin-conexion');
@@ -619,6 +635,10 @@ function etiquetaCantidad($item) {
         body: new URLSearchParams(new FormData(form)),
       });
     } catch (err) {
+      if (err.message === 'SESION_VENCIDA') {
+        window.location.href = 'login.php';   // la acción no se ejecutó: hay que ingresar de nuevo
+        return;
+      }
       boton.disabled = false;
       mostrarError('No se pudo conectar con el servidor. Revisá la conexión y probá de nuevo.');
       return;

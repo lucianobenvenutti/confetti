@@ -19,6 +19,8 @@
  */
 
 require '../api/db.php'; // misma conexión PDO que ya usa el resto de la API
+require __DIR__ . '/auth.php';
+$usuarioActual = exigirSesion(ROLES_TODOS, true);
 
 $body = json_decode(file_get_contents('php://input'), true);
 $items = is_array($body['items'] ?? null) ? $body['items'] : [];
@@ -49,7 +51,7 @@ function generarCodigo(PDO $pdo): string {
     throw new Exception('No se pudo generar un código único.');
 }
 
-function descontarStock(PDO $pdo, int $productoId, float $cantidad, int $pedidoId): array {
+function descontarStock(PDO $pdo, int $productoId, float $cantidad, int $pedidoId, int $usuarioId): array {
     $stmt = $pdo->prepare('SELECT id, nombre, precio, tipo_venta FROM productos WHERE id = ? AND activo = 1');
     $stmt->execute([$productoId]);
     $producto = $stmt->fetch();
@@ -68,9 +70,9 @@ function descontarStock(PDO $pdo, int $productoId, float $cantidad, int $pedidoI
     }
 
     $pdo->prepare(
-        "INSERT INTO movimientos_stock (producto_id, tipo, cantidad, pedido_id)
-         VALUES (?, 'venta_mostrador', ?, ?)"
-    )->execute([$productoId, -$cantidad, $pedidoId]);
+        "INSERT INTO movimientos_stock (producto_id, tipo, cantidad, pedido_id, usuario_id)
+         VALUES (?, 'venta_mostrador', ?, ?, ?)"
+    )->execute([$productoId, -$cantidad, $pedidoId, $usuarioId]);
 
     return $producto;
 }
@@ -96,10 +98,10 @@ try {
 
     $codigo = generarCodigo($pdo);
     $stmt = $pdo->prepare(
-        "INSERT INTO pedidos (codigo, nombre_cliente, telefono_cliente, origen, estado, total, vence_en)
-         VALUES (?, ?, ?, 'mostrador', 'entregado', 0, NULL)"
+        "INSERT INTO pedidos (codigo, nombre_cliente, telefono_cliente, origen, estado, total, vence_en, usuario_id)
+         VALUES (?, ?, ?, 'mostrador', 'entregado', 0, NULL, ?)"
     );
-    $stmt->execute([$codigo, $nombreCliente, $telefonoCliente]);
+    $stmt->execute([$codigo, $nombreCliente, $telefonoCliente, $usuarioActual['id']]);
     $pedidoId = (int) $pdo->lastInsertId();
 
     $subtotalGeneral = 0;
@@ -114,7 +116,7 @@ try {
         }
 
         if ($tipo === 'producto') {
-            $producto = descontarStock($pdo, $id, $cantidad, $pedidoId);
+            $producto = descontarStock($pdo, $id, $cantidad, $pedidoId, (int) $usuarioActual['id']);
             $subtotal = $producto['precio'] * $cantidad;
 
             $pdo->prepare(
@@ -135,7 +137,7 @@ try {
             $stmt = $pdo->prepare('SELECT producto_id, cantidad FROM combo_productos WHERE combo_id = ?');
             $stmt->execute([$id]);
             foreach ($stmt->fetchAll() as $c) {
-                descontarStock($pdo, (int) $c['producto_id'], $c['cantidad'] * $cantidad, $pedidoId);
+                descontarStock($pdo, (int) $c['producto_id'], $c['cantidad'] * $cantidad, $pedidoId, (int) $usuarioActual['id']);
             }
 
             $subtotal = $combo['precio'] * $cantidad;

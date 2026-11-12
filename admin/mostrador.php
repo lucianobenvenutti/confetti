@@ -1,5 +1,10 @@
+<?php
+require 'conexion.php';
+require __DIR__ . '/auth.php';
+$usuarioActual = exigirSesion(ROLES_TODOS);
+?>
 <!DOCTYPE html>
-<html lang="es-AR">
+<html lang="es-AR" translate="no">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -201,6 +206,9 @@
 
 <div class="layout">
   <div class="panel-productos">
+    <div style="overflow:hidden; font-size:0.85rem; color:#5B6478; margin-bottom:12px;">
+      <a href="index.php" style="color:#5B6478; text-decoration:none;">← Panel</a> <?= barraSesionHtml() ?>
+    </div>
     <h1>Mostrador rápido</h1>
     <p class="sub">Tocá un producto para sumarlo a la venta actual, o buscalo por nombre.</p>
     <div class="buscador-row">

@@ -9,6 +9,8 @@
  */
 
 require 'conexion.php';
+require __DIR__ . '/auth.php';
+$usuarioActual = exigirSesion([ROL_DUENO]);
 
 function volver($mensaje, $tipo, $productoId = null) {
     $url = 'productos.php?msg=' . urlencode($mensaje) . '&tipo=' . $tipo;
@@ -69,8 +71,8 @@ try {
         ->execute([$cantidad, $productoId]);
 
     $pdo->prepare(
-        "INSERT INTO movimientos_stock (producto_id, tipo, cantidad) VALUES (?, 'entrada_stock', ?)"
-    )->execute([$productoId, $cantidad]);
+        "INSERT INTO movimientos_stock (producto_id, tipo, cantidad, usuario_id) VALUES (?, 'entrada_stock', ?, ?)"
+    )->execute([$productoId, $cantidad, $usuarioActual['id']]);
 
     $stmt = $pdo->prepare('SELECT stock_actual FROM productos WHERE id = ?');
     $stmt->execute([$productoId]);
