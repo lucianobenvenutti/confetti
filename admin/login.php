@@ -98,7 +98,7 @@ if (isset($_GET['clave']))  $aviso = 'Contraseña cambiada. Ingresá de nuevo co
 </head>
 <body>
 <main class="tarjeta">
-  <img class="logo" src="../assets/logo-confetti.jpg" alt="Confetti" onerror="this.style.display='none'">
+  <img class="logo" src="../assets/logo-confetti.png" alt="Confetti" onerror="this.style.display='none'">
   <h1>Panel de Confetti</h1>
   <p class="sub">Ingresá con tu usuario y contraseña.</p>
 
