@@ -920,7 +920,13 @@
     .card-producto:not(.sin-efecto):hover, .card-producto:not(.sin-efecto):active{ transform:none; }
     .cargador .puntos span{ animation:none; }
   }
+
+  .aviso-demo{
+    background:#FFF4DE; color:#8A5A00; border-bottom:1px solid #F5D9A0;
+    text-align:center; font-size:.88rem; padding:10px 16px; line-height:1.4;
+  }
 </style>
+
 
 </head>
 <body>
@@ -1130,10 +1136,90 @@
 
   let categoriaActiva = null; // null = todas
 
+  // =========================================================
+  // Modo ejemplo: si no hay servidor PHP/base de datos detrás (por ejemplo
+  // la página subida a GitHub Pages), se muestran productos y combos de muestra.
+  // En cuanto la API responde de verdad, esto no se usa para nada.
+  // =========================================================
+  let MODO_DEMO = false;
+
+  const DEMO_CATEGORIAS = [
+    { id: 1, nombre: 'Copetín',     color_acento: '#E8483C' },
+    { id: 2, nombre: 'Panificados', color_acento: '#F5941F' },
+    { id: 3, nombre: 'Repostería',  color_acento: '#1E9C7C' },
+    { id: 4, nombre: 'Fiambrería',  color_acento: '#6E4E9E' },
+    { id: 5, nombre: 'Bebidas',     color_acento: '#1B4A9C' },
+  ];
+  const DEMO_PRODUCTOS = [
+    { id: 1, categoria_id: 1, nombre: 'Empanaditas de jamón y queso', descripcion: 'Docena, recién horneadas', tipo_venta: 'unidad', precio: 4200 },
+    { id: 2, categoria_id: 2, nombre: 'Facturas surtidas', descripcion: 'Por unidad, mínimo 6', tipo_venta: 'unidad', precio: 650 },
+    { id: 3, categoria_id: 2, nombre: 'Grisines caseros', descripcion: 'Paquete casero (sin TACC)', tipo_venta: 'unidad', precio: 900 },
+    { id: 4, categoria_id: 3, nombre: 'Torta individual de dulce de leche', descripcion: 'Porción generosa', tipo_venta: 'unidad', precio: 1800 },
+    { id: 5, categoria_id: 3, nombre: 'Alfajores de maicena', descripcion: 'Rellenos de dulce de leche', tipo_venta: 'unidad', precio: 800 },
+    { id: 6, categoria_id: 4, nombre: 'Queso cremoso', descripcion: 'Se pide por gramos', tipo_venta: 'peso', precio: 3600 },
+    { id: 7, categoria_id: 4, nombre: 'Jamón crudo', descripcion: 'Se pide por gramos', tipo_venta: 'peso', precio: 10500 },
+    { id: 8, categoria_id: 5, nombre: 'Gaseosa 500ml', descripcion: 'Línea cola y lima-limón', tipo_venta: 'unidad', precio: 1200 },
+  ].map(p => {
+    const c = DEMO_CATEGORIAS.find(c => c.id === p.categoria_id);
+    return { ...p, categoria_nombre: c.nombre, color_acento: c.color_acento, imagen: null, disponible: true };
+  });
+  const DEMO_COMBOS = [
+    { id: 1, nombre: 'Picada Confetti para 2', descripcion: 'Fiambres, quesos, pan y algo dulce para cerrar', precio: 6040, imagen: null,
+      items: [
+        { nombre: 'Jamón crudo', tipo_venta: 'peso', cantidad: 0.2 },
+        { nombre: 'Queso cremoso', tipo_venta: 'peso', cantidad: 0.2 },
+        { nombre: 'Grisines caseros', tipo_venta: 'unidad', cantidad: 1 },
+        { nombre: 'Alfajores de maicena', tipo_venta: 'unidad', cantidad: 2 },
+      ] },
+    { id: 2, nombre: 'Merienda dulce', descripcion: 'Facturas, alfajores y una gaseosa para compartir', precio: 5600, imagen: null,
+      items: [
+        { nombre: 'Facturas surtidas', tipo_venta: 'unidad', cantidad: 6 },
+        { nombre: 'Alfajores de maicena', tipo_venta: 'unidad', cantidad: 2 },
+        { nombre: 'Gaseosa 500ml', tipo_venta: 'unidad', cantidad: 1 },
+      ] },
+  ];
+
+  function sinTildes(t) {
+    return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  }
+
+  function datosDeEjemplo(url) {
+    const u = new URL(url, location.href);
+    const ruta = u.pathname;
+    if (ruta.endsWith('categorias.php')) return DEMO_CATEGORIAS;
+    if (ruta.endsWith('combos.php')) return DEMO_COMBOS;
+    if (ruta.endsWith('productos.php')) {
+      const cat = u.searchParams.get('categoria_id');
+      const q = sinTildes(u.searchParams.get('buscar'));
+      return DEMO_PRODUCTOS.filter(p =>
+        (!cat || String(p.categoria_id) === cat) &&
+        (!q || sinTildes(p.nombre + ' ' + p.descripcion).includes(q)));
+    }
+    return null; // otras rutas (horario, seguimiento, pedidos) no tienen versión de ejemplo
+  }
+
+  function avisarModoDemo() {
+    if (MODO_DEMO) return;
+    MODO_DEMO = true;
+    const aviso = document.createElement('div');
+    aviso.className = 'aviso-demo';
+    aviso.textContent = '🧁 Vista de ejemplo: estos productos son de muestra mientras terminamos de conectar la tienda. Todavía no se pueden hacer pedidos.';
+    const ref = document.getElementById('barra-horario');
+    ref.parentNode.insertBefore(aviso, ref.nextSibling);
+  }
+
   async function pedirJSON(url) {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('Error al pedir ' + url);
-    return res.json();
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Error al pedir ' + url);
+      return await res.json();
+    } catch (err) {
+      const demo = datosDeEjemplo(url);
+      if (demo === null) throw err;
+      console.warn('Sin servidor: mostrando datos de ejemplo.', err);
+      avisarModoDemo();
+      return demo;
+    }
   }
 
   function colorVar(hex, fallback) {
@@ -1357,6 +1443,7 @@
   }
 
   function guardarCarrito() {
+    if (MODO_DEMO) return; // los productos de ejemplo no deben quedar guardados
     localStorage.setItem('confetti_carrito', JSON.stringify(carrito));
     renderCarrito();
   }
@@ -1530,6 +1617,12 @@
 
     if (!nombre || !telefono) {
       errorBox.textContent = 'Completá tu nombre y teléfono.';
+      errorBox.style.display = 'block';
+      return;
+    }
+
+    if (MODO_DEMO) {
+      errorBox.textContent = 'Todavía no se pueden hacer pedidos: la tienda está en modo de ejemplo. ¡Pronto estará lista!';
       errorBox.style.display = 'block';
       return;
     }
