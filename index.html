@@ -1185,7 +1185,7 @@
     <h3>Dónde nos encontramos</h3>
     <div class="mapa-direccion">📍 Calle 117 N° 644, Avellaneda, Santa Fe</div>
     <div class="mapa-marco" id="mapa-marco"></div>
-    <a class="btn btn-primary" id="btn-como-llegar" href="https://www.google.com/maps/dir/?api=1&destination=-29.1189598,-59.6757768" target="_blank" rel="noopener"
+    <a class="btn btn-primary" id="btn-como-llegar" href="https://www.google.com/maps/dir/?api=1&destination=-29.119206220302086,-59.67336967361836" target="_blank" rel="noopener"
        style="width:100%; text-align:center; display:block; box-sizing:border-box; text-decoration:none;">Cómo llegar</a>
     <button class="btn btn-ghost" id="btn-cerrar-ubicacion" style="width:100%; margin-top:10px;">Cerrar</button>
   </div>
@@ -2092,7 +2092,7 @@
 
   // "Dónde estamos": el mapa de Google se carga recién la primera vez que se abre,
   // así no hace más lenta la carga de la tienda.
-  const MAPA_EMBED_URL = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3485.5501370389743!2d-59.67577682456666!3d-29.118959775402708!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x944eb096a48b0d39%3A0x16ed8b6bfcfad879!2sC.%20117%20644%2C%20S3561%20Avellaneda%2C%20Santa%20Fe!5e0!3m2!1ses!2sar!4v1794544637776!5m2!1ses!2sar";
+  const MAPA_EMBED_URL = "https://www.google.com/maps?q=-29.119206220302086,-59.67336967361836&z=17&hl=es&output=embed";
   document.getElementById('link-abrir-ubicacion').addEventListener('click', (e) => {
     e.preventDefault();
     const marco = document.getElementById('mapa-marco');

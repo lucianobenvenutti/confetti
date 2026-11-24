@@ -8,7 +8,7 @@
 // LOCAL_DIRECCION: calle, número y ciudad. Vacía = el mensaje sale sin ubicación.
 // LOCAL_MAPS_LINK: link de "cómo llegar". Vacío = se arma solo a partir de la dirección.
 const LOCAL_DIRECCION = 'Calle 117 N° 644, Avellaneda, Santa Fe';
-const LOCAL_MAPS_LINK = 'https://www.google.com/maps/dir/?api=1&destination=-29.1189598,-59.6757768';
+const LOCAL_MAPS_LINK = 'https://www.google.com/maps/dir/?api=1&destination=-29.119206220302086,-59.67336967361836';
 
 function textoUbicacion() {
     if (LOCAL_DIRECCION === '') {
