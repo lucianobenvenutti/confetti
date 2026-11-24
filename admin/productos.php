@@ -34,6 +34,11 @@ function hace($segundos) {
 <html lang="es-AR" translate="no">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+<link rel="icon" href="../favicon.ico" sizes="48x48">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<meta name="theme-color" content="#A9E0EA">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Confetti — Productos</title>
 <style>
