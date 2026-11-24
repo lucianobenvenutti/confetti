@@ -23,7 +23,7 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
   }
   .layout{
     display:grid;
-    grid-template-columns:1fr 360px;
+    grid-template-columns:1fr clamp(440px, 36vw, 600px);   /* panel de venta ancho */
     min-height:100vh;
   }
   .panel-productos{ padding:24px; overflow-y:auto; }
@@ -97,10 +97,46 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
     display:flex; justify-content:space-between; align-items:center;
     padding:10px 0; border-bottom:1px solid var(--linea); font-size:0.9rem; gap:8px;
   }
-  .item-venta .nombre{ font-weight:600; }
-  .item-venta .detalle{ color:var(--ink-soft); font-size:0.8rem; }
-  .item-venta button{
-    border:none; background:none; color:var(--rojo); font-size:0.8rem; cursor:pointer;
+  .item-venta .info{ display:flex; align-items:center; gap:12px; min-width:0; flex:1; }
+  .item-venta .mini-venta{
+    flex:none; width:56px; height:56px; border-radius:10px; object-fit:cover;
+    background:var(--paper-dim); border:1px solid var(--linea);
+  }
+  .item-venta .mini-venta.sin-foto{
+    display:flex; align-items:center; justify-content:center; font-size:1.5rem;
+  }
+  .item-venta .textos{ min-width:0; }
+  .item-venta .nombre{ font-weight:600; font-size:0.98rem; overflow-wrap:anywhere; }
+  .item-venta .detalle{ color:var(--ink-soft); font-size:0.85rem; margin-top:2px; }
+  .item-venta .btn-quitar{
+    border:none; background:none; color:var(--rojo); font-size:0.85rem; cursor:pointer; flex:none;
+  }
+
+  /* Cantidad editable de cada producto de la venta: − [número] + */
+  .cantidad-ctl{ display:flex; align-items:center; gap:6px; margin-top:8px; }
+  .btn-cant{
+    width:36px; height:36px; flex:none; border-radius:9px; cursor:pointer;
+    border:1px solid var(--linea); background:#fff; color:var(--ink);
+    font-size:1.25rem; line-height:1; font-family:inherit; padding:0;
+  }
+  .btn-cant:hover{ background:var(--paper-dim); }
+  .btn-cant:active{ transform:scale(0.94); }
+  .btn-cant:disabled{ opacity:0.35; cursor:default; }
+  .input-cant{
+    width:74px; height:36px; box-sizing:border-box; text-align:center;
+    border:1px solid var(--linea); border-radius:9px; font-size:1rem; font-weight:600;
+    font-family:inherit; color:var(--ink); background:#fff; -moz-appearance:textfield;
+  }
+  .input-cant::-webkit-outer-spin-button, .input-cant::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+  .input-cant:focus{ outline:2px solid var(--azul, #1B4A9C); outline-offset:1px; }
+  .unidad-cant{ color:var(--ink-soft); font-size:0.85rem; margin-right:2px; }
+  .aviso-cant{ color:var(--rojo); font-size:0.8rem; margin-top:4px; }
+
+  /* En pantallas chicas (celular / tablet vertical) el panel de venta pasa abajo */
+  @media (max-width: 900px){
+    .layout{ grid-template-columns:1fr; }
+    .panel-venta{ position:static; height:auto; border-left:none; border-top:1px solid var(--linea); }
+    .lista-venta{ max-height:50vh; }
   }
   .vacio{ color:var(--ink-soft); font-size:0.9rem; }
 
@@ -316,7 +352,7 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
 
   function bloqueMiniFoto(p) {
     if (p.imagen) {
-      return `<img class="mini-foto" src="../assets/productos/${p.imagen}" alt=""
+      return `<img class="mini-foto" src="../assets/productos/${encodeURIComponent(p.imagen)}" alt=""
                 onerror="this.style.display='none'">`;
     }
     return '';
@@ -326,7 +362,12 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
   // búsqueda se hace después en el navegador, así no hay que ir al servidor
   // cada vez que se toca un chip o se escribe una letra.
   async function cargarProductos() {
-    productosCache = await pedirJSON(API + 'productos.php');
+    const datos = await pedirJSON('productos_mostrador.php');
+    if (!Array.isArray(datos)) {          // sesión vencida u otro error: volver al login
+      location.href = 'login.php';
+      return;
+    }
+    productosCache = datos;
     renderGrid();
   }
 
@@ -405,16 +446,17 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
       const gramos = parseFloat(gramosTexto);
       if (!gramos || gramos <= 0) return;
       venta.push({
-        tipo: 'producto', id: p.id, nombre: p.nombre,
+        tipo: 'producto', id: p.id, nombre: p.nombre, imagen: p.imagen,
         precio: parseFloat(p.precio), tipo_venta: 'peso', cantidad: gramos / 1000,
       });
     } else {
       const existente = venta.find(i => i.tipo === 'producto' && i.id === p.id);
       if (existente) {
-        existente.cantidad += 1;
+        fijarCantidad(venta.indexOf(existente), existente.cantidad + 1);
+        return;
       } else {
         venta.push({
-          tipo: 'producto', id: p.id, nombre: p.nombre,
+          tipo: 'producto', id: p.id, nombre: p.nombre, imagen: p.imagen,
           precio: parseFloat(p.precio), tipo_venta: 'unidad', cantidad: 1,
         });
       }
@@ -424,6 +466,34 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
 
   function quitarItem(index) {
     venta.splice(index, 1);
+    renderVenta();
+  }
+
+  // Cambia la cantidad de una línea de la venta. Unidades: número entero; peso: gramos.
+  // Nunca deja pasar más de lo que hay en stock (el servidor igual lo vuelve a controlar al registrar).
+  function fijarCantidad(index, valor) {
+    const item = venta[index];
+    if (!item) return;
+    const esPeso = item.tipo_venta === 'peso';
+    const minimo = esPeso ? 10 : 1;             // 10 g / 1 unidad
+    const tope = esPeso ? 100000 : 9999;
+    item.aviso = '';
+
+    if (!isFinite(valor)) { renderVenta(); return; }     // campo vacío o inválido: queda como estaba
+    valor = esPeso ? Math.round(valor) : Math.floor(valor);
+    if (valor < minimo) valor = minimo;
+    if (valor > tope) valor = tope;
+
+    const p = productosCache.find(x => x.id === item.id);
+    if (p && p.stock_actual !== undefined && p.stock_actual !== null) {
+      const stock = parseFloat(p.stock_actual);
+      const maxDisponible = esPeso ? Math.floor(stock * 1000) : Math.floor(stock);
+      if (valor > maxDisponible) {
+        valor = Math.max(minimo, maxDisponible);
+        item.aviso = esPeso ? `Solo hay ${maxDisponible} g en stock` : `Solo hay ${maxDisponible} en stock`;
+      }
+    }
+    item.cantidad = esPeso ? valor / 1000 : valor;
     renderVenta();
   }
 
@@ -462,14 +532,48 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
       venta.forEach((item, index) => {
         const div = document.createElement('div');
         div.className = 'item-venta';
+        const foto = item.imagen
+          ? `<img class="mini-venta" src="../assets/productos/${encodeURIComponent(item.imagen)}" alt=""
+                  onerror="this.outerHTML='<div class=&quot;mini-venta sin-foto&quot;>🧁</div>'">`
+          : '<div class="mini-venta sin-foto">🧁</div>';
+        const esPeso = item.tipo_venta === 'peso';
+        const valorMostrado = esPeso ? Math.round(item.cantidad * 1000) : item.cantidad;
+        const precioUnit = esPeso ? `${formatoPrecio.format(item.precio)}/kg` : `${formatoPrecio.format(item.precio)} c/u`;
         div.innerHTML = `
-          <div>
-            <div class="nombre">${item.nombre}</div>
-            <div class="detalle">${etiquetaCantidad(item)} · ${formatoPrecio.format(item.precio * item.cantidad)}</div>
+          <div class="info">
+            ${foto}
+            <div class="textos">
+              <div class="nombre">${esc(item.nombre)}</div>
+              <div class="detalle">${precioUnit} · <strong>${formatoPrecio.format(item.precio * item.cantidad)}</strong></div>
+              <div class="cantidad-ctl">
+                <button type="button" class="btn-cant menos" aria-label="Menos">−</button>
+                <input type="number" class="input-cant" inputmode="${esPeso ? 'numeric' : 'numeric'}"
+                       min="${esPeso ? 10 : 1}" step="${esPeso ? 50 : 1}" value="${valorMostrado}"
+                       aria-label="Cantidad${esPeso ? ' en gramos' : ''}">
+                ${esPeso ? '<span class="unidad-cant">g</span>' : ''}
+                <button type="button" class="btn-cant mas" aria-label="Más">+</button>
+              </div>
+              ${item.aviso ? `<div class="aviso-cant">${esc(item.aviso)}</div>` : ''}
+            </div>
           </div>
-          <button aria-label="Quitar">Quitar</button>
+          <button type="button" class="btn-quitar" aria-label="Quitar">Quitar</button>
         `;
-        div.querySelector('button').addEventListener('click', () => quitarItem(index));
+        const paso = esPeso ? 50 : 1;
+        const input = div.querySelector('.input-cant');
+        const actual = () => esPeso ? Math.round(item.cantidad * 1000) : item.cantidad;
+        div.querySelector('.btn-cant.menos').addEventListener('click', () => fijarCantidad(index, actual() - paso));
+        div.querySelector('.btn-cant.mas').addEventListener('click', () => fijarCantidad(index, actual() + paso));
+        if (actual() - paso < (esPeso ? 10 : 1)) div.querySelector('.btn-cant.menos').disabled = true;
+        // Escribir el número: se aplica al apretar Enter o al salir del campo
+        input.addEventListener('focus', () => input.select());
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+        });
+        input.addEventListener('change', () => {
+          fijarCantidad(index, parseFloat(input.value));
+          document.getElementById('input-buscar').focus();   // listo para escanear el próximo producto
+        });
+        div.querySelector('.btn-quitar').addEventListener('click', () => quitarItem(index));
         cont.appendChild(div);
       });
     }

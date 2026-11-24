@@ -1,7 +1,7 @@
 <?php
 /**
  * Crea al PRIMER usuario (dueño). Se bloquea solo apenas existe cualquier usuario.
- * Además pide la clave de instalación (CLAVE_INSTALACION en auth.php), para que nadie
+ * Además pide la clave de instalación (clave_instalacion en config.php), para que nadie
  * pueda adueñarse del panel si lo publicás antes de crear tu usuario.
  */
 require 'conexion.php';
@@ -114,8 +114,9 @@ if ($estado === 'formulario' && $_SERVER['REQUEST_METHOD'] === 'POST') {
   <?php elseif ($estado === 'falta_clave'): ?>
     <p class="sub">Antes de usar esta pantalla hay que elegir una clave de instalación.</p>
     <div class="aviso info">
-      Abrí <strong>admin/auth.php</strong> y cambiá el valor de <strong>CLAVE_INSTALACION</strong> por una clave larga y secreta
-      (al menos 12 caracteres). Después recargá esta página. La clave solo sirve para crear al primer usuario.
+      Copiá <strong>config.example.php</strong> como <strong>config.php</strong> (en la carpeta principal del sitio) y completá
+      <strong>clave_instalacion</strong> con una frase larga y secreta (al menos 12 caracteres). Después recargá esta página.
+      La clave solo sirve para crear al primer usuario.
     </div>
 
   <?php else: ?>

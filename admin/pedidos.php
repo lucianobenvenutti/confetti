@@ -3,6 +3,7 @@ require 'conexion.php';
 require __DIR__ . '/auth.php';
 $usuarioActual = exigirSesion(ROLES_TODOS);
 require __DIR__ . '/../api/vencimientos.php';
+require __DIR__ . '/whatsapp.php';
 
 // Lo primero: cancelar (y devolver el stock de) lo que ya pasó las 24hs.
 $vencidosAhora = liberarPedidosVencidos($pdo);
@@ -12,7 +13,7 @@ $vencidosAhora = liberarPedidosVencidos($pdo);
 // Cuánto pasó y cuánto queda lo calcula MySQL, en segundos reales: no depende
 // de la zona horaria de nadie.
 $pedidos = $pdo->query(
-    "SELECT id, codigo, nombre_cliente, telefono_cliente, origen, estado, total, notas, creado_en,
+    "SELECT id, codigo, nombre_cliente, telefono_cliente, origen, estado, total, notas, metodo_pago, comprobante, creado_en,
             UNIX_TIMESTAMP() - UNIX_TIMESTAMP(creado_en) AS seg_transcurridos,
             UNIX_TIMESTAMP(vence_en) - UNIX_TIMESTAMP() AS seg_restantes
      FROM pedidos
@@ -145,6 +146,37 @@ function etiquetaCantidad($item) {
   }
   .badge.origen{ background:#EFEAF7; color:#6E4E9E; }
 
+  /* Cómo eligió pagar el cliente */
+  .pago-fila{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    margin-top:12px; font-size:0.88rem;
+  }
+  .badge.pago-local{ background:#E4F5EE; color:#1E9C7C; }
+  .badge.pago-transf{ background:#E3ECFA; color:#1B4A9C; }
+  .sin-comprobante{ color:#8a6d00; font-size:0.82rem; }
+  .btn-comprobante{
+    background:#1B4A9C; color:#fff; padding:6px 14px; font-size:0.82rem;
+  }
+  .btn-comprobante:hover{ background:#153a7c; }
+
+  /* Visor del comprobante (se abre arriba de la página, sin salir de Pedidos) */
+  .visor{
+    position:fixed; inset:0; z-index:100; display:none;
+    background:rgba(31,42,68,0.7); align-items:center; justify-content:center; padding:20px;
+  }
+  .visor.visible{ display:flex; }
+  .visor-card{
+    background:#fff; border-radius:16px; padding:16px; width:100%; max-width:760px;
+    max-height:92vh; display:flex; flex-direction:column; gap:12px;
+  }
+  .visor-barra{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .visor-barra strong{ font-size:0.95rem; }
+  .visor-barra a{ font-size:0.82rem; color:#1B4A9C; }
+  .visor-cuerpo{ overflow:auto; text-align:center; min-height:200px; }
+  .visor-cuerpo img{ max-width:100%; max-height:74vh; border-radius:8px; }
+  .visor-cuerpo iframe{ width:100%; height:74vh; border:0; border-radius:8px; }
+  .btn-cerrar-visor{ background:#F2F4F8; color:#1F2A44; }
+
   .items{
     margin:14px 0 10px;
     padding-top:12px;
@@ -183,6 +215,8 @@ function etiquetaCantidad($item) {
   }
   .btn-avanzar{ background:#1E9C7C; color:#fff; }
   .btn-avanzar:hover{ background:#178067; }
+  .btn-avisar{ display:inline-block; background:#25D366; color:#fff; font-weight:700; font-size:0.9rem; padding:10px 16px; border-radius:10px; text-decoration:none; }
+  .btn-avisar:hover{ background:#1ebe5a; }
   .btn-cancelar{ background:transparent; color:#E8483C; border:1px solid #E8483C; }
   .btn-cancelar:hover{ background:#FBEAE8; }
   .sin-pedidos{ color:#5B6478; }
@@ -324,6 +358,24 @@ function etiquetaCantidad($item) {
         </div>
       </div>
 
+      <?php if ($p['origen'] === 'web'): ?>
+        <div class="pago-fila">
+          <?php if ($p['metodo_pago'] === 'transferencia'): ?>
+            <span class="badge pago-transf">🏦 Pago por transferencia</span>
+            <?php if (!empty($p['comprobante'])):
+              $extComp = strtolower(pathinfo($p['comprobante'], PATHINFO_EXTENSION)); ?>
+              <button type="button" class="btn-comprobante" data-id="<?= (int) $p['id'] ?>"
+                      data-tipo="<?= $extComp === 'pdf' ? 'pdf' : 'img' ?>"
+                      data-codigo="<?= htmlspecialchars($p['codigo']) ?>">📎 Ver comprobante</button>
+            <?php else: ?>
+              <span class="sin-comprobante">Todavía no mandó el comprobante</span>
+            <?php endif; ?>
+          <?php else: ?>
+            <span class="badge pago-local">💵 Paga en el local</span>
+          <?php endif; ?>
+        </div>
+      <?php endif; ?>
+
       <?php if ($p['seg_restantes'] !== null && in_array($p['estado'], ['pendiente', 'en_preparacion', 'listo'], true)): ?>
         <div class="cuenta-atras" data-seg="<?= (int) $p['seg_restantes'] ?>">
           Se cancela solo en <span class="cuenta-valor"><?= duracion($p['seg_restantes']) ?></span>
@@ -365,6 +417,11 @@ function etiquetaCantidad($item) {
               ?>
             </button>
           </form>
+          <?php if ($p['estado'] === 'listo' && $p['origen'] === 'web'): ?>
+            <a class="btn-avisar" href="<?= htmlspecialchars(linkAvisoListo($p)) ?>" target="_blank" rel="noopener">
+              📲 Avisar al cliente · <?= htmlspecialchars($p['codigo']) ?>
+            </a>
+          <?php endif; ?>
           <?php if ($p['estado'] !== 'listo'): ?>
             <form method="post" action="cambiar_estado.php" style="display:inline;"
                   onsubmit="return confirm('¿Cancelar este pedido y liberar su stock reservado?');">
@@ -379,7 +436,53 @@ function etiquetaCantidad($item) {
   <?php endforeach; ?>
 </div>
 
+<!-- Visor del comprobante: está FUERA de la lista para que la actualización automática no lo cierre -->
+<div class="visor" id="visor" role="dialog" aria-modal="true" aria-label="Comprobante de transferencia">
+  <div class="visor-card">
+    <div class="visor-barra">
+      <strong id="visor-titulo">Comprobante</strong>
+      <span>
+        <a id="visor-abrir" href="#" target="_blank" rel="noopener">Abrir en otra pestaña</a>
+        <button type="button" class="btn-cerrar-visor" id="visor-cerrar">Cerrar</button>
+      </span>
+    </div>
+    <div class="visor-cuerpo" id="visor-cuerpo"></div>
+  </div>
+</div>
+
 <script>
+  // =========================================================
+  // Visor de comprobantes
+  // =========================================================
+  const visor = document.getElementById('visor');
+  const visorCuerpo = document.getElementById('visor-cuerpo');
+  function cerrarVisor() {
+    visor.classList.remove('visible');
+    visorCuerpo.replaceChildren();   // suelta la imagen / el PDF
+  }
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn-comprobante');
+    if (btn) {
+      const url = 'ver_comprobante.php?id=' + encodeURIComponent(btn.dataset.id);
+      document.getElementById('visor-titulo').textContent = 'Comprobante · ' + btn.dataset.codigo;
+      document.getElementById('visor-abrir').href = url;
+      let el;
+      if (btn.dataset.tipo === 'pdf') {
+        el = document.createElement('iframe');
+        el.title = 'Comprobante en PDF';
+      } else {
+        el = document.createElement('img');
+        el.alt = 'Comprobante de transferencia';
+      }
+      el.src = url;
+      visorCuerpo.replaceChildren(el);
+      visor.classList.add('visible');
+      return;
+    }
+    if (e.target === visor || e.target.id === 'visor-cerrar') cerrarVisor();
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') cerrarVisor(); });
+
   // =========================================================
   // Cuenta atrás de cada pedido
   // El servidor manda los segundos que faltaban al armar la lista (calculados

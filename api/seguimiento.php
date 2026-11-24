@@ -2,11 +2,18 @@
 /**
  * GET /api/seguimiento.php?codigo=CF-A1B2
  * Devuelve el estado de un pedido y sus ítems, sin necesitar login.
- * No devuelve el teléfono del cliente ni datos de otros pedidos.
+ * No devuelve el teléfono ni el nombre del cliente, ni datos de otros pedidos.
  */
 
 require 'db.php';
 require __DIR__ . '/vencimientos.php';
+require __DIR__ . '/limites.php';
+
+// Freno a quien prueba códigos al azar para espiar pedidos ajenos
+if (limiteSuperado($pdo, 'seguimiento', 40, 600)) {
+    demasiadosIntentos('Demasiadas consultas seguidas. Esperá unos minutos.');
+}
+registrarUso($pdo, 'seguimiento');
 
 // Si el plazo de este pedido ya pasó, que se vea como cancelado en el momento.
 liberarPedidosVencidos($pdo);
@@ -20,7 +27,7 @@ if ($codigo === '') {
 }
 
 $stmt = $pdo->prepare(
-    'SELECT codigo, nombre_cliente, origen, estado, total, creado_en, vence_en,
+    'SELECT codigo, origen, estado, total, metodo_pago, (comprobante IS NOT NULL) AS tiene_comprobante, creado_en, vence_en,
             UNIX_TIMESTAMP() - UNIX_TIMESTAMP(creado_en) AS seg_transcurridos,
             UNIX_TIMESTAMP(vence_en) - UNIX_TIMESTAMP() AS seg_restantes
      FROM pedidos WHERE codigo = ?'

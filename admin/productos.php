@@ -117,6 +117,7 @@ function hace($segundos) {
       <th>Foto</th>
       <th>Producto</th>
       <th>Código</th>
+      <th>Precio de compra</th>
       <th>Precio</th>
       <th>Stock</th>
       <th>Ingresó mercadería</th>
@@ -128,6 +129,10 @@ function hace($segundos) {
     <?php foreach ($productos as $p):
       $stockBajo = (float) $p['stock_actual'] <= (float) $p['stock_minimo'];
       $precio = $p['tipo_venta'] === 'peso' ? '$' . number_format($p['precio'], 0, ',', '.') . '/kg' : '$' . number_format($p['precio'], 0, ',', '.');
+      $fmt = fn($v) => '$' . number_format((float) $v, fmod((float) $v, 1) == 0 ? 0 : 2, ',', '.');
+      $precioCompra = $p['precio_compra'] === null
+          ? '<span style="color:#aab;" title="Todavía no cargado">—</span>'
+          : $fmt($p['precio_compra']) . ($p['tipo_venta'] === 'peso' ? '/kg' : '');
       $stockTexto = $p['tipo_venta'] === 'peso' ? number_format($p['stock_actual'], 3) . 'kg' : (int) $p['stock_actual'];
     ?>
       <tr id="prod-<?= $p['id'] ?>" class="<?= $p['activo'] ? '' : 'inactivo' ?>"
@@ -146,6 +151,7 @@ function hace($segundos) {
           </div>
         </td>
         <td><?= $p['codigo_barras'] ? htmlspecialchars($p['codigo_barras']) : '<span style="color:#aab;">—</span>' ?></td>
+        <td><?= $precioCompra ?></td>
         <td><?= $precio ?></td>
         <td class="<?= $stockBajo ? 'stock-bajo' : '' ?>"><?= $stockTexto ?><?= $stockBajo ? ' ⚠' : '' ?></td>
         <td>
@@ -176,7 +182,7 @@ function hace($segundos) {
         </td>
       </tr>
     <?php endforeach; ?>
-    <tr id="sin-resultados" style="display:none;"><td colspan="8">Ningún producto coincide con esa búsqueda.</td></tr>
+    <tr id="sin-resultados" style="display:none;"><td colspan="9">Ningún producto coincide con esa búsqueda.</td></tr>
   </tbody>
 </table>
 

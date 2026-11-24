@@ -187,9 +187,9 @@
 <div class="wrap">
   <div class="buscador">
     <h1>Seguí tu pedido</h1>
-    <p>Ingresá el código que te dimos al confirmar (ej: CF-A1B2).</p>
+    <p>Ingresá el código que te dimos al confirmar (ej: CF-A1B2C3D4).</p>
     <div class="form-buscar">
-      <input type="text" id="input-codigo" placeholder="CF-XXXX" maxlength="12">
+      <input type="text" id="input-codigo" placeholder="CF-XXXXXXXX" maxlength="12">
       <button id="btn-buscar">Buscar</button>
     </div>
     <div class="aviso-error" id="aviso-error" style="display:none;"></div>
@@ -223,6 +223,11 @@
   }
 
   // Convierte segundos en un texto corto: 3725 -> "1 h 2 min"
+  // Todo texto que viene de la base se escapa antes de meterlo en la página
+  function esc(t) {
+    return String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
   function formatoDuracion(seg) {
     const min = Math.floor(Math.max(0, Number(seg)) / 60);
     if (min < 1) return 'menos de 1 minuto';
@@ -266,7 +271,7 @@
 
     let html = `
       <div class="cabecera-pedido">
-        <span class="codigo"><strong>${pedido.codigo}</strong></span>
+        <span class="codigo"><strong>${esc(pedido.codigo)}</strong></span>
         <span class="fecha">Pedido hecho hace ${formatoDuracion(pedido.seg_transcurridos)}</span>
       </div>
     `;
@@ -299,11 +304,16 @@
       }
     }
 
+    const lineaPago = pedido.metodo_pago === 'transferencia'
+      ? (Number(pedido.tiene_comprobante) ? '🏦 Transferencia · comprobante recibido ✓' : '🏦 Transferencia · todavía no recibimos el comprobante')
+      : '💵 Pago en el local';
+    html += `<p style="font-size:0.85rem; color:#5B6478; margin:10px 0 0;">${lineaPago}</p>`;
+
     html += '<div class="items">';
     pedido.items.forEach(item => {
       html += `
         <div class="fila">
-          <span>${item.nombre_item} (${etiquetaCantidad(item)})</span>
+          <span>${esc(item.nombre_item)} (${etiquetaCantidad(item)})</span>
           <span>${formatoPrecio.format(item.subtotal)}</span>
         </div>
       `;

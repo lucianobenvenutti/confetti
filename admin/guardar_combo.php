@@ -1,6 +1,7 @@
 <?php
 require 'conexion.php';
 require __DIR__ . '/auth.php';
+require __DIR__ . '/imagenes.php';
 $usuarioActual = exigirSesion([ROL_DUENO]);
 
 function volverForm($msg, $id = null) {
@@ -86,7 +87,7 @@ if (!empty($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
     $nombreNuevo = 'combo_' . $comboId . '.' . $extension;
     $rutaDestino = $carpetaDestino . $nombreNuevo;
 
-    if (move_uploaded_file($archivo['tmp_name'], $rutaDestino)) {
+    if (guardarImagenOptimizada($archivo['tmp_name'], $rutaDestino, $extension)) {
         if ($imagenVieja && $imagenVieja !== $nombreNuevo) {
             $rutaVieja = $carpetaDestino . $imagenVieja;
             if (is_file($rutaVieja)) @unlink($rutaVieja);

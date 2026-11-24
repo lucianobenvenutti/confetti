@@ -6,10 +6,12 @@
  * (cuando pasemos esto a Hostinger conviene unificarlos en un solo lugar).
  */
 
-$host      = 'localhost';
-$nombre_bd = 'confetti';
-$usuario   = 'root';
-$clave     = '';
+// Los datos vienen de config.php (ver config.example.php). Si no existe, XAMPP por defecto.
+$cfg = is_file(__DIR__ . '/../config.php') ? require __DIR__ . '/../config.php' : [];
+$host      = $cfg['host']      ?? 'localhost';
+$nombre_bd = $cfg['nombre_bd'] ?? 'confetti';
+$usuario   = $cfg['usuario']   ?? 'root';
+$clave     = $cfg['clave']     ?? '';
 $charset   = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$nombre_bd;charset=$charset";
@@ -25,5 +27,9 @@ try {
     // Misma hora de MySQL que en api/db.php (Argentina, UTC-3).
     $pdo->exec("SET time_zone = '-03:00'");
 } catch (PDOException $e) {
-    die('No se pudo conectar a la base de datos: ' . $e->getMessage());
+    error_log('Confetti: no se pudo conectar a la base: ' . $e->getMessage());
+    http_response_code(500);
+    die(!empty($cfg['debug'])
+        ? 'No se pudo conectar a la base de datos: ' . htmlspecialchars($e->getMessage())
+        : 'No se pudo conectar a la base de datos.');
 }

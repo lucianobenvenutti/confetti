@@ -1,6 +1,7 @@
 <?php
 require 'conexion.php';
 require __DIR__ . '/auth.php';
+require __DIR__ . '/imagenes.php';
 $usuarioActual = exigirSesion([ROL_DUENO]);
 
 function volverForm($msg, $id = null) {
@@ -17,6 +18,7 @@ $categoriaId = filter_input(INPUT_POST, 'categoria_id', FILTER_VALIDATE_INT);
 $proveedorId = filter_input(INPUT_POST, 'proveedor_id', FILTER_VALIDATE_INT) ?: null;
 $tipoVenta = in_array($_POST['tipo_venta'] ?? '', ['unidad', 'peso'], true) ? $_POST['tipo_venta'] : 'unidad';
 $precio = filter_input(INPUT_POST, 'precio', FILTER_VALIDATE_FLOAT);
+$precioCompra = filter_input(INPUT_POST, 'precio_compra', FILTER_VALIDATE_FLOAT);
 $stockActual = filter_input(INPUT_POST, 'stock_actual', FILTER_VALIDATE_FLOAT);
 $stockMinimo = filter_input(INPUT_POST, 'stock_minimo', FILTER_VALIDATE_FLOAT) ?: 0;
 $sinTacc = isset($_POST['sin_tacc']) ? 1 : 0;
@@ -27,7 +29,8 @@ $codigoBarras = $codigoBarras === '' ? null : $codigoBarras;
 
 if ($nombre === '') volverForm('El nombre es obligatorio.', $id);
 if (!$categoriaId) volverForm('Elegí una categoría.', $id);
-if ($precio === false || $precio === null || $precio < 0) volverForm('El precio no es válido.', $id);
+if ($precioCompra === false || $precioCompra === null || $precioCompra < 0) volverForm('Cargá el precio de compra (lo que pagaste por el producto).', $id);
+if ($precio === false || $precio === null || $precio < 0) volverForm('El precio de venta no es válido.', $id);
 if ($stockActual === false || $stockActual === null || $stockActual < 0) volverForm('El stock actual no es válido.', $id);
 
 if ($codigoBarras !== null) {
@@ -40,16 +43,16 @@ if ($codigoBarras !== null) {
 
 if ($id) {
     $pdo->prepare(
-        'UPDATE productos SET categoria_id=?, proveedor_id=?, nombre=?, descripcion=?, tipo_venta=?, precio=?,
+        'UPDATE productos SET categoria_id=?, proveedor_id=?, nombre=?, descripcion=?, tipo_venta=?, precio=?, precio_compra=?,
                 stock_actual=?, stock_minimo=?, sin_tacc=?, destacado=?, activo=?, codigo_barras=?
          WHERE id=?'
-    )->execute([$categoriaId, $proveedorId, $nombre, $descripcion, $tipoVenta, $precio, $stockActual, $stockMinimo, $sinTacc, $destacado, $activo, $codigoBarras, $id]);
+    )->execute([$categoriaId, $proveedorId, $nombre, $descripcion, $tipoVenta, $precio, $precioCompra, $stockActual, $stockMinimo, $sinTacc, $destacado, $activo, $codigoBarras, $id]);
     $productoId = $id;
 } else {
     $pdo->prepare(
-        'INSERT INTO productos (categoria_id, proveedor_id, nombre, descripcion, tipo_venta, precio, stock_actual, stock_minimo, sin_tacc, destacado, activo, codigo_barras)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-    )->execute([$categoriaId, $proveedorId, $nombre, $descripcion, $tipoVenta, $precio, $stockActual, $stockMinimo, $sinTacc, $destacado, $activo, $codigoBarras]);
+        'INSERT INTO productos (categoria_id, proveedor_id, nombre, descripcion, tipo_venta, precio, precio_compra, stock_actual, stock_minimo, sin_tacc, destacado, activo, codigo_barras)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    )->execute([$categoriaId, $proveedorId, $nombre, $descripcion, $tipoVenta, $precio, $precioCompra, $stockActual, $stockMinimo, $sinTacc, $destacado, $activo, $codigoBarras]);
     $productoId = (int) $pdo->lastInsertId();
 }
 
@@ -79,7 +82,7 @@ if (!empty($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
     $nombreNuevo = 'producto_' . $productoId . '.' . $extension;
     $rutaDestino = $carpetaDestino . $nombreNuevo;
 
-    if (move_uploaded_file($archivo['tmp_name'], $rutaDestino)) {
+    if (guardarImagenOptimizada($archivo['tmp_name'], $rutaDestino, $extension)) {
         if ($imagenVieja && $imagenVieja !== $nombreNuevo) {
             $rutaVieja = $carpetaDestino . $imagenVieja;
             if (is_file($rutaVieja)) @unlink($rutaVieja);

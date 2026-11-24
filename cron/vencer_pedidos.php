@@ -17,9 +17,12 @@
  * pero mejor no dejarla abierta.
  */
 
-$CLAVE_CRON = 'cambiar-esto-por-algo-secreto';
+// La clave se escribe en config.php (clave_cron), que NO se sube a GitHub.
+$__cfg = is_file(__DIR__ . '/../config.php') ? (require __DIR__ . '/../config.php') : [];
+$CLAVE_CRON = (string) ($__cfg['clave_cron'] ?? 'cambiar-esto-por-algo-secreto');
 
-if (($_GET['clave'] ?? '') !== $CLAVE_CRON) {
+// Mientras la clave siga siendo la de ejemplo (que está publicada en GitHub), no funciona.
+if ($CLAVE_CRON === 'cambiar-esto-por-algo-secreto' || !hash_equals($CLAVE_CRON, (string) ($_GET['clave'] ?? ''))) {
     http_response_code(403);
     echo 'Acceso denegado.';
     exit;

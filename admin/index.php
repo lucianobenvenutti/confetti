@@ -170,6 +170,12 @@ try {
     <p>Define el cartel de "abierto ahora" en la página.</p>
   </a>
 
+  <a class="tile" href="datos_pago.php" style="--acento:var(--verde);">
+    <div class="icono">🏦</div>
+    <h2>Datos de pago</h2>
+    <p>Alias y CBU que ven los clientes al pagar por transferencia.</p>
+  </a>
+
   <a class="tile" href="usuarios.php" style="--acento:var(--rojo);">
     <div class="icono">🔐</div>
     <h2>Usuarios</h2>

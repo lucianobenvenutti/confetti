@@ -7,6 +7,7 @@
  *   "telefono_cliente": "3482555123",
  *   "origen": "web",
  *   "notas": "globos rojos y azules",   // comentario opcional del cliente (máx. 255 caracteres)
+ *   "metodo_pago": "local" | "transferencia",   // opcional, por defecto "local"
  *   "items": [
  *     { "tipo": "producto", "id": 3, "cantidad": 2 },
  *     { "tipo": "producto", "id": 6, "cantidad": 0.25 },   // producto por peso, en kg
@@ -22,13 +23,18 @@
 
 require 'db.php';
 require __DIR__ . '/vencimientos.php';
+require __DIR__ . '/limites.php';
 
 $body = json_decode(file_get_contents('php://input'), true);
 
 $nombre   = trim($body['nombre_cliente'] ?? '');
 $telefono = trim($body['telefono_cliente'] ?? '');
-$origen   = in_array($body['origen'] ?? '', ['web', 'mostrador'], true) ? $body['origen'] : 'web';
+// Este endpoint es público: todo pedido que entra por acá es "web" y vence a las 24 h.
+// (Antes aceptaba origen "mostrador", que no vence nunca: cualquiera podía dejar el stock reservado para siempre.)
+$origen   = 'web';
 $items    = is_array($body['items'] ?? null) ? $body['items'] : [];
+// Cómo piensa pagar: en el local (por defecto) o por transferencia
+$metodoPago = (($body['metodo_pago'] ?? '') === 'transferencia') ? 'transferencia' : 'local';
 
 // Comentario libre del cliente ("globos rojos y azules", "sin pasas"...). Se limpia
 // antes de guardarlo: saltos de línea normales, sin caracteres de control, sin espacios
@@ -45,12 +51,34 @@ if (preg_match_all('/./su', $notas) > 255) {
 }
 $notas = $notas !== '' ? $notas : null;
 
+// Límites de tamaño y formato (los datos vienen de cualquiera, no solo de nuestra página)
+if (!is_array($body)) {
+    responder(400, ['error' => 'Pedido inválido.']);
+}
+$nombre   = preg_replace('/[\x00-\x1F\x7F]/', '', (string) $nombre);
+$telefono = preg_replace('/[\x00-\x1F\x7F]/', '', (string) $telefono);
 if ($nombre === '' || $telefono === '') {
     responder(422, ['error' => 'Falta el nombre o el teléfono.']);
+}
+if (!preg_match('//u', $nombre) || preg_match_all('/./su', $nombre) > 60) {
+    responder(422, ['error' => 'El nombre es demasiado largo (máximo 60 caracteres).']);
+}
+$soloDigitos = preg_replace('/\D/', '', $telefono);
+if (!preg_match('/^[\d\s+().\-]{6,25}$/', $telefono) || strlen($soloDigitos) < 8 || strlen($soloDigitos) > 15) {
+    responder(422, ['error' => 'Revisá el teléfono: con código de área y sin 15 (ej: 3482000000).']);
 }
 if (!$items) {
     responder(422, ['error' => 'El pedido está vacío.']);
 }
+if (count($items) > 30) {
+    responder(422, ['error' => 'El pedido tiene demasiados productos distintos (máximo 30).']);
+}
+
+// Frenos contra abuso: pocos pedidos por IP en poco tiempo, y pocos pedidos activos por teléfono
+if (limiteSuperado($pdo, 'pedido', 10, 600)) {
+    demasiadosIntentos('Hiciste muchos intentos seguidos. Esperá unos minutos y probá de nuevo.');
+}
+registrarUso($pdo, 'pedido');
 
 function responder($codigo, $payload) {
     http_response_code($codigo);
@@ -60,7 +88,12 @@ function responder($codigo, $payload) {
 
 function generarCodigo(PDO $pdo): string {
     for ($intento = 0; $intento < 5; $intento++) {
-        $codigo = 'CF-' . strtoupper(substr(bin2hex(random_bytes(3)), 0, 4));
+        // 8 caracteres sin letras/números que se confunden (0/O, 1/I): imposible de adivinar
+        $alfabeto = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        $codigo = 'CF-';
+        for ($i = 0; $i < 8; $i++) {
+            $codigo .= $alfabeto[random_int(0, strlen($alfabeto) - 1)];
+        }
         $stmt = $pdo->prepare('SELECT 1 FROM pedidos WHERE codigo = ?');
         $stmt->execute([$codigo]);
         if (!$stmt->fetch()) {
@@ -79,6 +112,9 @@ function reservarStock(PDO $pdo, int $productoId, float $cantidad, int $pedidoId
 
     if (!$producto) {
         throw new Exception("Uno de los productos del pedido ya no está disponible.");
+    }
+    if ($producto['tipo_venta'] === 'unidad' && $cantidad != floor($cantidad)) {
+        throw new Exception("\"{$producto['nombre']}\" se pide por unidad (cantidad entera).");
     }
 
     $stmt = $pdo->prepare(
@@ -103,6 +139,15 @@ function reservarStock(PDO $pdo, int $productoId, float $cantidad, int $pedidoId
 // decirle "no hay" a alguien por culpa de una reserva vieja.
 liberarPedidosVencidos($pdo);
 
+$stmt = $pdo->prepare(
+    "SELECT COUNT(*) FROM pedidos
+     WHERE telefono_cliente = ? AND origen = 'web' AND estado IN ('pendiente','en_preparacion','listo')"
+);
+$stmt->execute([$telefono]);
+if ((int) $stmt->fetchColumn() >= 3) {
+    responder(429, ['error' => 'Ya tenés 3 pedidos pendientes con ese teléfono. Retiralos o esperá a que venzan para hacer otro.']);
+}
+
 try {
     $pdo->beginTransaction();
 
@@ -113,10 +158,10 @@ try {
     // no viene del cliente, por eso puede ir directo en el SQL.
     $venceSql = $origen === 'web' ? 'DATE_ADD(NOW(), INTERVAL 24 HOUR)' : 'NULL';
     $stmt = $pdo->prepare(
-        "INSERT INTO pedidos (codigo, nombre_cliente, telefono_cliente, origen, estado, total, notas, vence_en)
-         VALUES (?, ?, ?, ?, 'pendiente', 0, ?, $venceSql)"
+        "INSERT INTO pedidos (codigo, nombre_cliente, telefono_cliente, origen, estado, total, notas, metodo_pago, vence_en)
+         VALUES (?, ?, ?, ?, 'pendiente', 0, ?, ?, $venceSql)"
     );
-    $stmt->execute([$codigo, $nombre, $telefono, $origen, $notas]);
+    $stmt->execute([$codigo, $nombre, $telefono, $origen, $notas, $metodoPago]);
     $pedidoId = (int) $pdo->lastInsertId();
 
     $total = 0;
@@ -127,7 +172,7 @@ try {
         $id = (int) ($item['id'] ?? 0);
         $cantidad = (float) ($item['cantidad'] ?? 0);
 
-        if ($cantidad <= 0) {
+        if (!is_finite($cantidad) || $cantidad <= 0 || $cantidad > 100) {
             throw new Exception('Cantidad inválida en uno de los ítems.');
         }
 
@@ -195,6 +240,7 @@ try {
         'total' => $total,
         'detalle' => $detalle,
         'notas' => $notas,
+        'metodo_pago' => $metodoPago,
     ]);
 
 } catch (Exception $e) {

@@ -6,7 +6,7 @@ $usuarioActual = exigirSesion([ROL_DUENO]);
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 $producto = [
     'nombre' => '', 'descripcion' => '', 'categoria_id' => '', 'proveedor_id' => '', 'tipo_venta' => 'unidad',
-    'precio' => '', 'stock_actual' => 0, 'stock_minimo' => 0,
+    'precio' => '', 'precio_compra' => '', 'stock_actual' => 0, 'stock_minimo' => 0,
     'sin_tacc' => 0, 'destacado' => 0, 'activo' => 1, 'imagen' => null, 'codigo_barras' => '',
 ];
 
@@ -117,13 +117,20 @@ $mensaje = $_GET['msg'] ?? null;
 
   <div class="dos-columnas">
     <div class="campo">
-      <label for="precio">Precio <span id="sufijo-precio"></span></label>
-      <input type="number" id="precio" name="precio" step="0.01" min="0" value="<?= htmlspecialchars($producto['precio']) ?>" required>
+      <label for="precio_compra">Precio de compra <span class="sufijo-kg"></span></label>
+      <input type="number" id="precio_compra" name="precio_compra" step="0.01" min="0" placeholder="Lo que pagaste vos"
+             value="<?= htmlspecialchars($producto['precio_compra'] ?? '') ?>" required>
     </div>
     <div class="campo">
-      <label for="stock_actual">Stock actual</label>
-      <input type="number" id="stock_actual" name="stock_actual" step="0.001" min="0" value="<?= htmlspecialchars($producto['stock_actual']) ?>" required>
+      <label for="precio">Precio de venta <span class="sufijo-kg"></span></label>
+      <input type="number" id="precio" name="precio" step="0.01" min="0" value="<?= htmlspecialchars($producto['precio']) ?>" required>
     </div>
+  </div>
+  <p id="ganancia" style="margin:-6px 0 16px; font-size:0.85rem; color:#5B6478;"></p>
+
+  <div class="campo">
+    <label for="stock_actual">Stock actual</label>
+    <input type="number" id="stock_actual" name="stock_actual" step="0.001" min="0" value="<?= htmlspecialchars($producto['stock_actual']) ?>" required>
   </div>
 
   <div class="campo">
@@ -172,11 +179,29 @@ $mensaje = $_GET['msg'] ?? null;
 <script>
   // Pequeño detalle: aclarar "/kg" al lado del precio cuando el tipo de venta es por peso
   const radios = document.querySelectorAll('input[name="tipo_venta"]');
-  const sufijo = document.getElementById('sufijo-precio');
   function actualizarSufijo() {
     const elegido = document.querySelector('input[name="tipo_venta"]:checked');
-    sufijo.textContent = elegido && elegido.value === 'peso' ? '(por kg)' : '';
+    document.querySelectorAll('.sufijo-kg').forEach(s => {
+      s.textContent = elegido && elegido.value === 'peso' ? '(por kg)' : '';
+    });
   }
+
+  // Muestra al instante cuánto se gana con lo que se cargó (solo orientativo)
+  const inCompra = document.getElementById('precio_compra');
+  const inVenta = document.getElementById('precio');
+  const pGanancia = document.getElementById('ganancia');
+  function actualizarGanancia() {
+    const compra = parseFloat(inCompra.value), venta = parseFloat(inVenta.value);
+    if (isNaN(compra) || isNaN(venta) || venta <= 0) { pGanancia.textContent = ''; return; }
+    const ganancia = venta - compra;
+    const pct = compra > 0 ? ' (' + Math.round(ganancia / compra * 100) + '% sobre lo que pagaste)' : '';
+    pGanancia.textContent = (ganancia >= 0 ? 'Ganancia por unidad: $' : 'Ojo: perdés $')
+      + Math.abs(ganancia).toLocaleString('es-AR', { maximumFractionDigits: 2 }) + pct;
+    pGanancia.style.color = ganancia >= 0 ? '#1E9C7C' : '#E8483C';
+  }
+  inCompra.addEventListener('input', actualizarGanancia);
+  inVenta.addEventListener('input', actualizarGanancia);
+  actualizarGanancia();
   radios.forEach(r => r.addEventListener('change', actualizarSufijo));
   actualizarSufijo();
 

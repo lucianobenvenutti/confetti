@@ -925,7 +925,54 @@
     background:#FFF4DE; color:#8A5A00; border-bottom:1px solid #F5D9A0;
     text-align:center; font-size:.88rem; padding:10px 16px; line-height:1.4;
   }
+
+  /* ---------- Modal "Dónde estamos" ---------- */
+  .modal-card-mapa{ max-width:560px; }
+  .mapa-direccion{ font-size:1.02rem; font-weight:600; color:var(--ink); margin:2px 0 14px; }
+  .mapa-marco{
+    position:relative; width:100%; height:300px;
+    border-radius:12px; overflow:hidden; background:var(--paper-dim);
+    border:1px solid var(--linea); margin-bottom:14px;
+  }
+  .mapa-marco iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+  @media (max-width:480px){ .mapa-marco{ height:240px; } }
+
+  /* ---------- Forma de pago (en el paso final del pedido) ---------- */
+  .modal-card{ max-height:92vh; overflow-y:auto; }
+  .pago-titulo{ font-size:0.85rem; font-weight:600; margin-bottom:8px; }
+  .pago-opciones{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+  .pago-opcion{
+    position:relative; border:2px solid var(--linea); border-radius:12px; padding:12px 8px;
+    cursor:pointer; text-align:center; font-weight:600; font-size:0.88rem; background:#fff;
+    transition:border-color .15s, background .15s;
+  }
+  .pago-opcion input{ position:absolute; opacity:0; pointer-events:none; }
+  .pago-opcion .ico{ display:block; font-size:1.5rem; margin-bottom:4px; }
+  .pago-opcion.sel{ border-color:var(--azul); background:#E8F0FB; }
+  .pago-opcion:focus-within{ outline:2px solid var(--azul); outline-offset:2px; }
+  .transf-box{
+    background:var(--paper-dim); border-radius:12px; padding:14px; margin-bottom:14px; font-size:0.9rem;
+  }
+  .transf-total{ margin:0 0 10px !important; color:var(--ink) !important; font-size:0.95rem !important; }
+  .transf-dato{
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    padding:7px 0; border-top:1px dashed var(--linea);
+  }
+  .transf-dato span{ color:var(--ink-soft); font-size:0.8rem; }
+  .transf-dato strong{ overflow-wrap:anywhere; text-align:right; font-size:0.9rem; }
+  .btn-copiar{
+    flex:none; border:1px solid var(--linea); background:#fff; border-radius:8px;
+    padding:5px 10px; font-size:0.76rem; font-weight:600; cursor:pointer; font-family:inherit; color:var(--ink);
+  }
+  .transf-nota{ margin:10px 0 0 !important; font-size:0.84rem !important; }
+  .comprobante-campo{ margin-top:12px; padding-top:12px; border-top:1px dashed var(--linea); }
+  .comprobante-campo label{ display:block; font-size:0.85rem; font-weight:600; margin-bottom:6px; }
+  .comprobante-campo input[type=file]{ width:100%; font-size:0.85rem; font-family:inherit; }
+  .comprobante-campo .ayuda{ font-size:0.78rem; color:var(--ink-soft); margin-top:4px; }
+  .confirmacion-pago{ background:var(--paper-dim); border-radius:10px; padding:10px 12px; font-size:0.88rem; margin:0 0 12px !important; color:var(--ink) !important; }
 </style>
+
+
 
 
 </head>
@@ -946,6 +993,7 @@
         <li><a href="#combos">Armá tu combo</a></li>
         <li><a href="#como-funciona">Cómo pedís</a></li>
         <li><a href="#" id="link-abrir-seguimiento">Seguir mi pedido</a></li>
+        <li><a href="#" id="link-abrir-ubicacion">Dónde estamos</a></li>
       </ul>
     </nav>
     <button id="btn-abrir-carrito" class="btn-carrito" aria-label="Ver carrito">
@@ -1083,6 +1131,35 @@
       <label for="input-telefono">Teléfono</label>
       <input type="tel" id="input-telefono" placeholder="Tu numero con codigo de area y sin 15 (Ej: 3482000000)">
     </div>
+    <div id="bloque-pago" style="display:none;">
+      <div class="pago-titulo">¿Cómo vas a pagar?</div>
+      <div class="pago-opciones">
+        <label class="pago-opcion sel" id="opcion-local">
+          <input type="radio" name="metodo-pago" value="local" checked>
+          <span class="ico">💵</span>Pago en el local
+        </label>
+        <label class="pago-opcion" id="opcion-transf">
+          <input type="radio" name="metodo-pago" value="transferencia">
+          <span class="ico">🏦</span>Transferencia
+        </label>
+      </div>
+
+      <div class="transf-box" id="transf-box" style="display:none;">
+        <p class="transf-total">Transferí <strong id="transf-total">$0</strong> a esta cuenta:</p>
+        <div class="transf-dato" id="td-titular-fila"><span>Titular</span><strong id="td-titular"></strong></div>
+        <div class="transf-dato" id="td-banco-fila"><span>Banco</span><strong id="td-banco"></strong></div>
+        <div class="transf-dato" id="td-alias-fila"><span>Alias</span><strong id="td-alias"></strong>
+          <button type="button" class="btn-copiar" data-copiar="td-alias">Copiar</button></div>
+        <div class="transf-dato" id="td-cbu-fila"><span>CBU/CVU</span><strong id="td-cbu"></strong>
+          <button type="button" class="btn-copiar" data-copiar="td-cbu">Copiar</button></div>
+        <p class="transf-nota" id="transf-nota"></p>
+        <div class="comprobante-campo">
+          <label for="input-comprobante">Comprobante de la transferencia (opcional)</label>
+          <input type="file" id="input-comprobante" accept="image/*,application/pdf">
+          <div class="ayuda">Foto o PDF, hasta 5 MB. Podés subirlo ahora o mandarlo después por WhatsApp.</div>
+        </div>
+      </div>
+    </div>
     <button class="btn btn-primary" id="btn-confirmar-pedido" style="width:100%;">Confirmar pedido</button>
     <button class="btn btn-ghost" id="btn-cancelar-checkout" style="width:100%; margin-top:10px;">Volver</button>
   </div>
@@ -1094,6 +1171,7 @@
     <h3>¡Pedido confirmado!</h3>
     <p>Guardá este código para consultar el estado de tu pedido.</p>
     <div class="confirmacion-codigo" id="confirmacion-codigo">CF-0000</div>
+    <p class="confirmacion-pago" id="confirmacion-pago"></p>
     <p>Tenés 24 horas para pasarlo a buscar. Tocá el botón para avisarle a Confetti por WhatsApp.</p>
     <a class="btn btn-primary" id="btn-whatsapp" style="width:100%; text-align:center; display:block; box-sizing:border-box;" target="_blank">Avisar por WhatsApp</a>
     <button class="btn btn-ghost" id="btn-ver-estado" style="width:100%; margin-top:10px;">Ver estado de mi pedido</button>
@@ -1101,15 +1179,27 @@
   </div>
 </div>
 
+<!-- Dónde estamos -->
+<div class="modal" id="modal-ubicacion">
+  <div class="modal-card modal-card-mapa">
+    <h3>Dónde nos encontramos</h3>
+    <div class="mapa-direccion">📍 Calle 117 N° 644, Avellaneda, Santa Fe</div>
+    <div class="mapa-marco" id="mapa-marco"></div>
+    <a class="btn btn-primary" id="btn-como-llegar" href="https://www.google.com/maps/dir/?api=1&destination=-29.1189598,-59.6757768" target="_blank" rel="noopener"
+       style="width:100%; text-align:center; display:block; box-sizing:border-box; text-decoration:none;">Cómo llegar</a>
+    <button class="btn btn-ghost" id="btn-cerrar-ubicacion" style="width:100%; margin-top:10px;">Cerrar</button>
+  </div>
+</div>
+
 <!-- Seguimiento -->
 <div class="modal" id="modal-seguimiento">
   <div class="modal-card modal-card-ancho">
     <h3>Seguí tu pedido</h3>
-    <p>Ingresá el código que te dimos al confirmar (ej: CF-A1B2).</p>
+    <p>Ingresá el código que te dimos al confirmar (ej: CF-A1B2C3D4).</p>
     <div class="modal-error" id="seguimiento-error"></div>
     <div class="campo">
       <label for="input-codigo-seg">Código de pedido</label>
-      <input type="text" id="input-codigo-seg" placeholder="CF-XXXX" style="text-transform:uppercase;">
+      <input type="text" id="input-codigo-seg" placeholder="CF-XXXXXXXX" style="text-transform:uppercase;">
     </div>
     <button class="btn btn-primary" id="btn-buscar-seg" style="width:100%;">Buscar</button>
 
@@ -1188,6 +1278,9 @@
     const ruta = u.pathname;
     if (ruta.endsWith('categorias.php')) return DEMO_CATEGORIAS;
     if (ruta.endsWith('combos.php')) return DEMO_COMBOS;
+    if (ruta.endsWith('datos_pago.php')) return { transferencia: {
+      titular: 'Confetti (datos de ejemplo)', banco: 'Banco de ejemplo', alias: 'confetti.ejemplo',
+      cbu: '0000000000000000000000', nota: 'Estos datos son de muestra: todavía no se pueden hacer pedidos.' } };
     if (ruta.endsWith('productos.php')) {
       const cat = u.searchParams.get('categoria_id');
       const q = sinTildes(u.searchParams.get('buscar'));
@@ -1206,6 +1299,11 @@
     aviso.textContent = '🧁 Vista de ejemplo: estos productos son de muestra mientras terminamos de conectar la tienda. Todavía no se pueden hacer pedidos.';
     const ref = document.getElementById('barra-horario');
     ref.parentNode.insertBefore(aviso, ref.nextSibling);
+  }
+
+  // Todo texto que viene de la base se escapa antes de meterlo en la página (defensa contra HTML/JS inyectado)
+  function esc(t) {
+    return String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
   async function pedirJSON(url) {
@@ -1242,7 +1340,7 @@
       categorias.forEach(cat => {
         const chip = document.createElement('div');
         chip.className = 'chip';
-        chip.innerHTML = `<span class="sw" style="background:${cat.color_acento || '#1F2A44'};"></span> ${cat.nombre}`;
+        chip.innerHTML = `<span class="sw" style="background:${esc(cat.color_acento || '#1F2A44')};"></span> ${esc(cat.nombre)}`;
         chip.addEventListener('click', () => seleccionarCategoria(cat.id, chip));
         cont.appendChild(chip);
       });
@@ -1274,7 +1372,8 @@
   function bloqueVisual(p) {
     const icono = ICONOS[p.categoria_nombre] || '🍽️';
     if (p.imagen) {
-      return `<img class="foto-producto" src="assets/productos/${p.imagen}" alt="${p.nombre}"
+      return `<img class="foto-producto" src="assets/productos/${encodeURIComponent(p.imagen)}" alt="${esc(p.nombre)}"
+                loading="lazy" decoding="async" width="300" height="120"
                 onerror="this.outerHTML='<div class=&quot;icono&quot;>${icono}</div>'">`;
     }
     return `<div class="icono">${icono}</div>`;
@@ -1296,9 +1395,9 @@
 
     div.innerHTML = `
       ${bloqueVisual(p)}
-      <span class="etiqueta">${p.categoria_nombre}</span>
-      <h3>${p.nombre}</h3>
-      <p>${p.descripcion || ''}${p.disponible ? '' : ' — sin stock por ahora'}</p>
+      <span class="etiqueta">${esc(p.categoria_nombre)}</span>
+      <h3>${esc(p.nombre)}</h3>
+      <p>${esc(p.descripcion || '')}${p.disponible ? '' : ' — sin stock por ahora'}</p>
       <div class="precio-row">
         <span class="precio">${precio}</span>
       </div>
@@ -1366,14 +1465,15 @@
 
   function bloqueVisualCombo(c) {
     if (c.imagen) {
-      return `<img class="foto-producto" src="assets/combos/${c.imagen}" alt="${c.nombre}"
+      return `<img class="foto-producto" src="assets/combos/${encodeURIComponent(c.imagen)}" alt="${esc(c.nombre)}"
+                loading="lazy" decoding="async" width="300" height="120"
                 onerror="this.outerHTML='<div class=&quot;icono&quot;>🎉</div>'">`;
     }
     return '<div class="icono">🎉</div>';
   }
 
   function tarjetaCombo(c) {
-    const detalleItems = c.items.map(item => `${item.nombre} (${etiquetaCantidad(item)})`).join(', ');
+    const detalleItems = c.items.map(item => `${esc(item.nombre)} (${etiquetaCantidad(item)})`).join(', ');
 
     const div = document.createElement('div');
     div.className = 'card-producto';
@@ -1382,8 +1482,8 @@
     div.innerHTML = `
       ${bloqueVisualCombo(c)}
       <span class="etiqueta" style="color:var(--magenta);">Combo</span>
-      <h3>${c.nombre}</h3>
-      <p>${c.descripcion || detalleItems}</p>
+      <h3>${esc(c.nombre)}</h3>
+      <p>${c.descripcion ? esc(c.descripcion) : detalleItems}</p>
       <div class="precio-row">
         <span class="precio">${formatoPrecio.format(c.precio)}</span>
       </div>
@@ -1430,7 +1530,7 @@
   // Carrito
   // =========================================================
   const PESO_STEP = 0.25; // kg que suma cada click en un producto por peso
-  const NUMERO_WHATSAPP_LOCAL = '5493482000000'; // TODO: reemplazar por el número real del local
+  const NUMERO_WHATSAPP_LOCAL = '5493482308288'; // WhatsApp del local (54 9 + código de área + número)
 
   let carrito = cargarCarritoGuardado();
 
@@ -1588,6 +1688,7 @@
     document.getElementById('modal-checkout').classList.remove('visible');
     document.getElementById('modal-confirmacion').classList.remove('visible');
     document.getElementById('modal-seguimiento').classList.remove('visible');
+    document.getElementById('modal-ubicacion').classList.remove('visible');
     document.getElementById('overlay').classList.remove('visible');
   }
 
@@ -1595,11 +1696,97 @@
   document.getElementById('btn-cerrar-carrito').addEventListener('click', cerrarCarrito);
   document.getElementById('overlay').addEventListener('click', () => { cerrarCarrito(); cerrarModales(); });
 
-  document.getElementById('btn-ir-checkout').addEventListener('click', () => {
+  document.getElementById('btn-ir-checkout').addEventListener('click', async () => {
     if (!carrito.length) return;
     document.getElementById('drawer-carrito').classList.remove('visible');
     document.getElementById('checkout-error').style.display = 'none';
     document.getElementById('modal-checkout').classList.add('visible');
+    await prepararPago();
+  });
+
+  // ---------- Forma de pago ----------
+  // Los datos para transferir los carga el dueño desde el panel ("Datos de pago").
+  // Si no cargó ninguno, la tienda no ofrece transferencia y todo se paga en el local.
+  let datosPago = undefined;   // undefined = todavía no se pidieron; null = no hay transferencia
+  const TIPOS_COMPROBANTE = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+  const MAX_COMPROBANTE = 5 * 1024 * 1024;
+
+  function metodoPagoElegido() {
+    const r = document.querySelector('input[name="metodo-pago"]:checked');
+    return r ? r.value : 'local';
+  }
+
+  function pintarMetodoPago() {
+    const transf = metodoPagoElegido() === 'transferencia';
+    document.getElementById('opcion-local').classList.toggle('sel', !transf);
+    document.getElementById('opcion-transf').classList.toggle('sel', transf);
+    document.getElementById('transf-box').style.display = transf ? 'block' : 'none';
+    document.getElementById('transf-total').textContent = formatoPrecio.format(calcularTotal());
+  }
+
+  async function prepararPago() {
+    if (datosPago === undefined) {
+      try {
+        const r = await pedirJSON(API + 'datos_pago.php');
+        datosPago = r && r.transferencia ? r.transferencia : null;
+      } catch (e) {
+        datosPago = null;
+      }
+    }
+    const bloque = document.getElementById('bloque-pago');
+    if (!datosPago) {
+      bloque.style.display = 'none';
+      document.querySelector('input[name="metodo-pago"][value="local"]').checked = true;
+      return;
+    }
+    const filas = [['titular', datosPago.titular], ['banco', datosPago.banco], ['alias', datosPago.alias], ['cbu', datosPago.cbu]];
+    filas.forEach(([k, v]) => {
+      document.getElementById('td-' + k).textContent = v || '';
+      document.getElementById('td-' + k + '-fila').style.display = v ? 'flex' : 'none';
+    });
+    const nota = document.getElementById('transf-nota');
+    nota.textContent = datosPago.nota || '';
+    nota.style.display = datosPago.nota ? 'block' : 'none';
+    bloque.style.display = 'block';
+    pintarMetodoPago();
+  }
+
+  document.querySelectorAll('input[name="metodo-pago"]').forEach(r => r.addEventListener('change', pintarMetodoPago));
+
+  // Botones "Copiar" de alias y CBU
+  document.getElementById('transf-box').addEventListener('click', async (e) => {
+    const btn = e.target.closest('.btn-copiar');
+    if (!btn) return;
+    const texto = document.getElementById(btn.dataset.copiar).textContent;
+    try {
+      await navigator.clipboard.writeText(texto);
+    } catch (err) {
+      const ta = document.createElement('textarea');       // plan B para navegadores viejos / sin HTTPS
+      ta.value = texto; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch (e2) {}
+      ta.remove();
+    }
+    const original = btn.textContent;
+    btn.textContent = '¡Copiado!';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+  });
+
+  // Revisa el comprobante apenas se elige, así el error se ve en el momento
+  document.getElementById('input-comprobante').addEventListener('change', (e) => {
+    const f = e.target.files[0];
+    const errorBox = document.getElementById('checkout-error');
+    if (!f) return;
+    if (!TIPOS_COMPROBANTE.includes(f.type)) {
+      errorBox.textContent = 'El comprobante tiene que ser una foto (JPG, PNG, WEBP) o un PDF.';
+      errorBox.style.display = 'block';
+      e.target.value = '';
+    } else if (f.size > MAX_COMPROBANTE) {
+      errorBox.textContent = 'El comprobante pesa demasiado (máximo 5 MB).';
+      errorBox.style.display = 'block';
+      e.target.value = '';
+    } else {
+      errorBox.style.display = 'none';
+    }
   });
 
   document.getElementById('btn-cancelar-checkout').addEventListener('click', () => {
@@ -1629,6 +1816,8 @@
 
     const items = carrito.map(i => ({ tipo: i.tipo, id: i.id, cantidad: i.cantidad }));
     const notas = inputNota.value.trim();
+    const metodoPago = (datosPago && metodoPagoElegido() === 'transferencia') ? 'transferencia' : 'local';
+    const archivoComprobante = metodoPago === 'transferencia' ? document.getElementById('input-comprobante').files[0] : null;
 
     boton.disabled = true;
     boton.textContent = 'Confirmando…';
@@ -1637,7 +1826,7 @@
       const res = await fetch(API + 'crear_pedido.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre_cliente: nombre, telefono_cliente: telefono, origen: 'web', items, notas }),
+        body: JSON.stringify({ nombre_cliente: nombre, telefono_cliente: telefono, origen: 'web', items, notas, metodo_pago: metodoPago }),
       });
       const data = await res.json();
 
@@ -1645,7 +1834,22 @@
         throw new Error(data.error || 'No se pudo confirmar el pedido.');
       }
 
-      mostrarConfirmacion(data, nombre);
+      // Comprobante (opcional): el pedido ya está hecho, así que si esto falla NO se pierde nada
+      let comprobante = null;    // null = no adjuntó; 'ok' = subido; 'fallo' = no se pudo subir
+      if (metodoPago === 'transferencia' && archivoComprobante) {
+        boton.textContent = 'Subiendo comprobante…';
+        try {
+          const fd = new FormData();
+          fd.append('codigo', data.codigo);
+          fd.append('archivo', archivoComprobante);
+          const r2 = await fetch(API + 'subir_comprobante.php', { method: 'POST', body: fd });
+          comprobante = r2.ok ? 'ok' : 'fallo';
+        } catch (e) {
+          comprobante = 'fallo';
+        }
+      }
+
+      mostrarConfirmacion(data, nombre, metodoPago, comprobante);
       carrito = [];
       guardarCarrito();
       inputNota.value = '';
@@ -1653,6 +1857,9 @@
       pintarContadorNota();
       document.getElementById('input-nombre').value = '';
       document.getElementById('input-telefono').value = '';
+      document.getElementById('input-comprobante').value = '';
+      document.querySelector('input[name="metodo-pago"][value="local"]').checked = true;
+      pintarMetodoPago();
       document.getElementById('modal-checkout').classList.remove('visible');
       cargarProductos(); // refresca stock mostrado en las cards
 
@@ -1714,7 +1921,7 @@
 
   let ultimoCodigoPedido = null;
 
-  function mostrarConfirmacion(data, nombre) {
+  function mostrarConfirmacion(data, nombre, metodoPago, comprobante) {
     ultimoCodigoPedido = data.codigo;
     document.getElementById('confirmacion-codigo').textContent = data.codigo;
 
@@ -1727,7 +1934,25 @@
 
     // data.notas es el comentario ya limpio tal como quedó guardado
     const comentario = data.notas ? `\nComentario: ${data.notas}` : '';
-    const mensaje = `¡Hola! Quiero confirmar mi pedido ${data.codigo}:\n${lineas}${comentario}\nTotal: ${formatoPrecio.format(data.total)}\nNombre: ${nombre}\nPaso a buscarlo cuando esté listo, ¡gracias!`;
+    let lineaPago, textoPago;
+    if (metodoPago === 'transferencia') {
+      if (comprobante === 'ok') {
+        lineaPago = 'Pago: transferencia (ya subí el comprobante)';
+        textoPago = '✅ Recibimos tu comprobante de transferencia. Lo revisamos y listo.';
+      } else if (comprobante === 'fallo') {
+        lineaPago = 'Pago: transferencia (te mando el comprobante por acá)';
+        textoPago = '⚠️ No pudimos subir tu comprobante, pero el pedido está hecho. Mandalo por WhatsApp con el botón de abajo.';
+      } else {
+        lineaPago = 'Pago: transferencia (te mando el comprobante por acá)';
+        textoPago = '🏦 Elegiste pagar por transferencia. Cuando la hagas, mandanos el comprobante por WhatsApp con el botón de abajo.';
+      }
+    } else {
+      lineaPago = 'Pago: en el local';
+      textoPago = '💵 Pagás en el local cuando pasás a buscarlo.';
+    }
+    document.getElementById('confirmacion-pago').textContent = textoPago;
+
+    const mensaje = `¡Hola! Quiero confirmar mi pedido ${data.codigo}:\n${lineas}${comentario}\nTotal: ${formatoPrecio.format(data.total)}\n${lineaPago}\nNombre: ${nombre}\nPaso a buscarlo cuando esté listo, ¡gracias!`;
 
     document.getElementById('btn-whatsapp').href =
       `https://wa.me/${NUMERO_WHATSAPP_LOCAL}?text=${encodeURIComponent(mensaje)}`;
@@ -1831,11 +2056,16 @@
       }
     }
 
+    const lineaPago = pedido.metodo_pago === 'transferencia'
+      ? (Number(pedido.tiene_comprobante) ? '🏦 Transferencia · comprobante recibido ✓' : '🏦 Transferencia · todavía no recibimos el comprobante')
+      : '💵 Pago en el local';
+    html += `<p style="font-size:0.85rem; color:var(--ink-soft); margin:10px 0 0;">${lineaPago}</p>`;
+
     html += '<div class="items-seg">';
     pedido.items.forEach(item => {
       html += `
         <div class="fila">
-          <span>${item.nombre_item} (${etiquetaCantidad(item)})</span>
+          <span>${esc(item.nombre_item)} (${etiquetaCantidad(item)})</span>
           <span>${formatoPrecio.format(item.subtotal)}</span>
         </div>
       `;
@@ -1859,6 +2089,30 @@
   });
 
   document.getElementById('btn-cerrar-seguimiento').addEventListener('click', cerrarModales);
+
+  // "Dónde estamos": el mapa de Google se carga recién la primera vez que se abre,
+  // así no hace más lenta la carga de la tienda.
+  const MAPA_EMBED_URL = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3485.5501370389743!2d-59.67577682456666!3d-29.118959775402708!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x944eb096a48b0d39%3A0x16ed8b6bfcfad879!2sC.%20117%20644%2C%20S3561%20Avellaneda%2C%20Santa%20Fe!5e0!3m2!1ses!2sar!4v1794544637776!5m2!1ses!2sar";
+  document.getElementById('link-abrir-ubicacion').addEventListener('click', (e) => {
+    e.preventDefault();
+    const marco = document.getElementById('mapa-marco');
+    if (!marco.firstChild) {
+      const f = document.createElement('iframe');
+      f.src = MAPA_EMBED_URL;
+      f.title = 'Mapa con la ubicación del local';
+      f.loading = 'lazy';
+      f.referrerPolicy = 'strict-origin-when-cross-origin';
+      f.allowFullscreen = true;
+      marco.appendChild(f);
+    }
+    document.getElementById('overlay').classList.add('visible');
+    document.getElementById('modal-ubicacion').classList.add('visible');
+  });
+  document.getElementById('btn-cerrar-ubicacion').addEventListener('click', cerrarModales);
+  // tocar fuera de la tarjeta también cierra el mapa
+  document.getElementById('modal-ubicacion').addEventListener('click', (e) => {
+    if (e.target.id === 'modal-ubicacion') cerrarModales();
+  });
 
   document.getElementById('btn-buscar-seg').addEventListener('click', () => {
     const codigo = document.getElementById('input-codigo-seg').value.trim();

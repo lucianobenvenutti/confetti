@@ -22,7 +22,11 @@
 // Clave de instalación: protege la pantalla que crea al PRIMER dueño (configurar_inicial.php).
 // Cambiala por algo largo y secreto ANTES de usarla. Mientras tenga este valor de ejemplo,
 // esa pantalla se niega a funcionar. Una vez creado el primer usuario, la pantalla se bloquea sola.
-const CLAVE_INSTALACION = 'clave-confetti-2026';
+// La clave se escribe en config.php (clave_instalacion), que NO se sube a GitHub.
+// Si no está ahí, queda este valor de ejemplo y la pantalla de configuración inicial se niega a funcionar.
+$__cfgClaves = is_file(__DIR__ . '/../config.php') ? (require __DIR__ . '/../config.php') : [];
+define('CLAVE_INSTALACION', (string) ($__cfgClaves['clave_instalacion'] ?? 'cambiar-esto-por-una-clave-larga-y-secreta'));
+unset($__cfgClaves);
 
 // Segundos sin usar el panel antes de pedir la clave otra vez (12 horas).
 // Mientras haya una pantalla abierta consultando (ej: pedidos.php), cuenta como uso.

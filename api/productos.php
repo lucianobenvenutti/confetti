@@ -17,7 +17,8 @@ liberarPedidosVencidos($pdo);
 
 $sql = 'SELECT
             p.id, p.nombre, p.descripcion, p.tipo_venta, p.precio,
-            p.stock_actual, p.stock_minimo, p.imagen, p.sin_tacc, p.destacado, p.codigo_barras,
+            p.imagen, p.sin_tacc, p.destacado,
+            (p.stock_actual > 0) AS disponible,
             c.id AS categoria_id, c.nombre AS categoria_nombre, c.color_acento
         FROM productos p
         JOIN categorias c ON c.id = p.categoria_id
@@ -36,7 +37,8 @@ if (!empty($_GET['destacado'])) {
 
 if (!empty($_GET['buscar'])) {
     $sql .= ' AND p.nombre LIKE :buscar';
-    $params['buscar'] = '%' . $_GET['buscar'] . '%';
+    // Los comodines % y _ que escriba el cliente se toman como letras comunes
+    $params['buscar'] = '%' . addcslashes(mb_substr((string) $_GET['buscar'], 0, 60), '%_\\') . '%';
 }
 
 $sql .= ' ORDER BY c.orden ASC, p.nombre ASC';
@@ -45,9 +47,10 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $productos = $stmt->fetchAll();
 
-// Agrego el campo calculado "disponible" sin tocar la fila original de la base
+// Se publica solo si hay o no hay stock, nunca la cantidad exacta ni el código de barras
 foreach ($productos as &$p) {
-    $p['disponible'] = (float) $p['stock_actual'] > 0;
+    $p['disponible'] = (bool) $p['disponible'];
 }
+unset($p);
 
 echo json_encode($productos);
