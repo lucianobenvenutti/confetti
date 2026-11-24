@@ -241,6 +241,41 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
     background:#FBEAE8; color:var(--rojo); border:1px solid #f3c9c4;
     border-radius:10px; padding:10px 12px; font-size:0.85rem; margin-bottom:12px; display:none;
   }
+
+  /* Aviso de pedidos web (llegan mientras se atiende el mostrador) */
+  .aviso-web{
+    display:none; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    background:#FFF1DC; border:1px solid #F5C98A; color:#8a4b00; border-radius:12px;
+    padding:10px 14px; margin-bottom:12px; font-weight:600; font-size:0.92rem;
+  }
+  .aviso-web.visible{ display:flex; }
+  .aviso-web.pulso{ animation:pulsoWeb 1.2s ease-in-out 4; }
+  @keyframes pulsoWeb{ 50%{ box-shadow:0 0 0 6px rgba(245,148,31,0.35); } }
+  .aviso-web a{
+    background:#F5941F; color:#fff; text-decoration:none; font-weight:700; font-size:0.85rem;
+    padding:8px 14px; border-radius:9px; white-space:nowrap;
+  }
+  .aviso-web small{ display:block; font-weight:500; opacity:0.85; margin-top:2px; }
+  .chip-sonido{
+    float:right; border:1px solid #d8dde7; background:#fff; color:#5B6478; border-radius:999px;
+    padding:3px 10px; font-size:0.78rem; cursor:pointer; font-family:inherit;
+  }
+  .chip-sonido.activo{ background:#E4F5EE; border-color:#bfe6d7; color:#1E9C7C; }
+  .toast-web{
+    position:fixed; top:16px; right:16px; z-index:60; max-width:340px; display:none;
+    background:#fff; border-left:6px solid #F5941F; border-radius:12px; padding:14px 16px;
+    box-shadow:0 10px 30px rgba(31,42,68,0.25); font-size:0.92rem;
+  }
+  .toast-web.visible{ display:block; animation:entraToast .35s ease-out; }
+  @keyframes entraToast{ from{ transform:translateY(-14px); opacity:0; } }
+  .toast-web strong{ display:block; font-size:1rem; margin-bottom:2px; }
+  .toast-web .toast-botones{ display:flex; gap:8px; margin-top:10px; }
+  .toast-web a, .toast-web button{
+    font:inherit; font-weight:700; font-size:0.85rem; border-radius:9px; padding:8px 12px;
+    border:0; cursor:pointer; text-decoration:none;
+  }
+  .toast-web a{ background:#F5941F; color:#fff; }
+  .toast-web button{ background:#F2F4F8; color:#1F2A44; }
 </style>
 </head>
 <body>
@@ -249,6 +284,11 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
   <div class="panel-productos">
     <div style="overflow:hidden; font-size:0.85rem; color:#5B6478; margin-bottom:12px;">
       <a href="index.php" style="color:#5B6478; text-decoration:none;">← Panel</a> <?= barraSesionHtml() ?>
+      <button type="button" class="chip-sonido" id="chip-sonido" title="Sonido cuando llega un pedido web">🔕 Sonido apagado</button>
+    </div>
+    <div class="aviso-web" id="aviso-web" role="status" aria-live="polite">
+      <div><span id="aviso-web-texto"></span><small id="aviso-web-detalle"></small></div>
+      <a href="pedidos.php" target="_blank" rel="noopener">Ver pedidos web</a>
     </div>
     <h1>Mostrador rápido</h1>
     <p class="sub">Tocá un producto para sumarlo a la venta actual, o buscalo por nombre.</p>
@@ -279,6 +319,15 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
     <div id="vuelto-info"></div>
 
     <button class="grande" id="btn-registrar" disabled>Registrar venta</button>
+  </div>
+</div>
+
+<div class="toast-web" id="toast-web" role="alert">
+  <strong id="toast-web-titulo">Llegó un pedido web</strong>
+  <span id="toast-web-detalle"></span>
+  <div class="toast-botones">
+    <a href="pedidos.php" target="_blank" rel="noopener" id="toast-web-ver">Ver en Pedidos web</a>
+    <button type="button" id="toast-web-cerrar">Cerrar</button>
   </div>
 </div>
 
@@ -861,6 +910,140 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
   cargarCategorias();
   cargarProductos();
   renderVenta();
+  // =========================================================
+  // Aviso de pedidos web: se consulta cada 15 s. Si llega uno nuevo suena, sale un
+  // cartel y queda el contador arriba. "Ver pedidos web" abre Pedidos en OTRA pestaña,
+  // así la venta que se está armando acá no se pierde.
+  // =========================================================
+  (function () {
+    const INTERVALO = 15000;
+    const banner = document.getElementById('aviso-web');
+    const bannerTexto = document.getElementById('aviso-web-texto');
+    const bannerDetalle = document.getElementById('aviso-web-detalle');
+    const toast = document.getElementById('toast-web');
+    const chip = document.getElementById('chip-sonido');
+    const tituloOriginal = document.title;
+    const plata = (n) => '$' + Number(n).toLocaleString('es-AR', { maximumFractionDigits: 0 });
+    const txt = (el, t) => { el.textContent = t; };
+
+    let ultimoId = null;        // null = todavía no hubo una primera consulta
+    let sesionVencida = false;
+    let audioCtx = null;
+    let sonidoElegidoApagado = false;
+    let cierreToast = null;
+
+    // ----- Sonido -----
+    function tocarAviso() {
+      if (!audioCtx) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+      const t0 = audioCtx.currentTime;
+      [[880, 0], [1175, 0.22], [880, 0.55], [1175, 0.77]].forEach(([f, d]) => {
+        const osc = audioCtx.createOscillator(), vol = audioCtx.createGain();
+        osc.type = 'sine'; osc.frequency.value = f;
+        vol.gain.setValueAtTime(0.0001, t0 + d);
+        vol.gain.exponentialRampToValueAtTime(0.35, t0 + d + 0.02);
+        vol.gain.exponentialRampToValueAtTime(0.0001, t0 + d + 0.2);
+        osc.connect(vol); vol.connect(audioCtx.destination);
+        osc.start(t0 + d); osc.stop(t0 + d + 0.22);
+      });
+    }
+    // Si alguien lo apagó a propósito, el navegador se acuerda y no lo vuelve a prender solo
+    const CLAVE_APAGADO = 'confetti_sonido_apagado';
+    function leerApagado() { try { return localStorage.getItem(CLAVE_APAGADO) === '1'; } catch (e) { return false; } }
+    function guardarApagado(v) { try { v ? localStorage.setItem(CLAVE_APAGADO, '1') : localStorage.removeItem(CLAVE_APAGADO); } catch (e) {} }
+
+    function pintarChip() {
+      chip.classList.toggle('activo', !!audioCtx);
+      if (!audioCtx) chip.textContent = '🔕 Sonido apagado';
+      else if (audioCtx.state === 'running') chip.textContent = '🔔 Sonido activado';
+      else chip.textContent = '🔔 Sonido listo (se activa al tocar la pantalla)';
+    }
+    function encenderSonido(conMuestra) {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx || audioCtx) return;
+      audioCtx = new Ctx();
+      audioCtx.onstatechange = pintarChip;
+      audioCtx.resume().catch(() => {});
+      pintarChip();
+      if (conMuestra) tocarAviso();
+    }
+    function apagarSonido() {
+      if (audioCtx) { audioCtx.close(); audioCtx = null; }
+      pintarChip();
+    }
+    chip.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (audioCtx) { sonidoElegidoApagado = true; guardarApagado(true); apagarSonido(); }
+      else { sonidoElegidoApagado = false; guardarApagado(false); encenderSonido(true); }
+    });
+    // El navegador no deja que una página suene hasta que la persona la toca una vez (regla de
+    // Chrome/Edge/Firefox, no se puede saltear). Por eso el sonido arranca "listo" al abrir la
+    // página y se activa del todo con el primer toque o tecla, que en el mostrador es inmediato.
+    function activarConPrimerToque() {
+      if (!sonidoElegidoApagado) {
+        if (audioCtx) audioCtx.resume().catch(() => {}); else encenderSonido(false);
+      }
+      document.removeEventListener('pointerdown', activarConPrimerToque, true);
+      document.removeEventListener('keydown', activarConPrimerToque, true);
+    }
+    document.addEventListener('pointerdown', activarConPrimerToque, true);
+    document.addEventListener('keydown', activarConPrimerToque, true);
+    sonidoElegidoApagado = leerApagado();
+    if (!sonidoElegidoApagado) encenderSonido(false);
+
+    // ----- Cartel -----
+    function mostrarToast(nuevos) {
+      const p = nuevos[0];
+      txt(document.getElementById('toast-web-titulo'),
+          nuevos.length === 1 ? '🔔 Llegó un pedido web' : '🔔 Llegaron ' + nuevos.length + ' pedidos web');
+      txt(document.getElementById('toast-web-detalle'),
+          nuevos.length === 1 ? p.codigo + ' · ' + p.nombre + ' · ' + plata(p.total)
+                              : 'El último: ' + p.codigo + ' · ' + p.nombre);
+      toast.classList.add('visible');
+      clearTimeout(cierreToast);
+      cierreToast = setTimeout(() => toast.classList.remove('visible'), 30000);
+    }
+    document.getElementById('toast-web-cerrar').addEventListener('click', () => toast.classList.remove('visible'));
+    document.getElementById('toast-web-ver').addEventListener('click', () => toast.classList.remove('visible'));
+
+    // ----- Contador fijo arriba -----
+    function pintar(datos) {
+      const n = datos.cantidad;
+      banner.classList.toggle('visible', n > 0);
+      if (n > 0) {
+        txt(bannerTexto, n === 1 ? '🔔 1 pedido web por atender' : '🔔 ' + n + ' pedidos web por atender');
+        txt(bannerDetalle, datos.pedidos.slice(0, 3).map(p => p.codigo + ' · ' + p.nombre + ' · ' + plata(p.total)).join('   |   ')
+                           + (n > 3 ? '   y ' + (n - 3) + ' más' : ''));
+      }
+      document.title = n > 0 ? '(' + n + ') Pedido web · ' + tituloOriginal : tituloOriginal;
+    }
+
+    async function consultar() {
+      if (sesionVencida) return;
+      try {
+        const res = await fetch('pedidos_web_aviso.php', { cache: 'no-store', credentials: 'same-origin' });
+        if (res.status === 401) { sesionVencida = true; return; }
+        const datos = await res.json();
+        if (!datos || !Array.isArray(datos.pedidos)) return;
+
+        const maxId = datos.pedidos.reduce((m, p) => Math.max(m, p.id), 0);
+        if (ultimoId !== null) {
+          const nuevos = datos.pedidos.filter(p => p.id > ultimoId);
+          if (nuevos.length) {
+            mostrarToast(nuevos);
+            tocarAviso();
+            banner.classList.remove('pulso'); void banner.offsetWidth; banner.classList.add('pulso');
+          }
+        }
+        ultimoId = Math.max(ultimoId || 0, maxId);
+        pintar(datos);
+      } catch (e) { /* sin conexión: se reintenta en el próximo ciclo */ }
+    }
+
+    consultar();
+    setInterval(consultar, INTERVALO);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) consultar(); });
+  })();
 </script>
 
 </body>

@@ -570,25 +570,58 @@ function etiquetaCantidad($item) {
     });
   }
 
-  btnSonido.addEventListener('click', () => {
+  // Si alguien lo apagó a propósito, el navegador se acuerda y no lo vuelve a prender solo
+  const CLAVE_APAGADO = 'confetti_sonido_apagado';
+  const leerApagado = () => { try { return localStorage.getItem(CLAVE_APAGADO) === '1'; } catch (e) { return false; } };
+  const guardarApagado = (v) => { try { v ? localStorage.setItem(CLAVE_APAGADO, '1') : localStorage.removeItem(CLAVE_APAGADO); } catch (e) {} };
+
+  function pintarSonido() {
+    btnSonido.classList.toggle('activo', !!audioCtx);
+    if (!audioCtx) btnSonido.textContent = '🔕 Activar sonido de avisos';
+    else if (audioCtx.state === 'running') btnSonido.textContent = '🔔 Sonido activado';
+    else btnSonido.textContent = '🔔 Sonido listo (se activa al tocar la pantalla)';
+  }
+
+  function encenderSonido(conMuestra) {
+    const Contexto = window.AudioContext || window.webkitAudioContext;
+    if (!Contexto) {
+      if (conMuestra) alert('Este navegador no permite reproducir sonido. Los avisos van a aparecer igual en pantalla.');
+      return;
+    }
+    if (audioCtx) return;
+    audioCtx = new Contexto();
+    audioCtx.onstatechange = pintarSonido;
+    audioCtx.resume().catch(() => {});
+    pintarSonido();
+    if (conMuestra) tocarAviso(); // una muestra, para comprobar que se escucha
+  }
+
+  btnSonido.addEventListener('click', (e) => {
+    e.stopPropagation();
     if (audioCtx) {
       audioCtx.close();
       audioCtx = null;
-      btnSonido.textContent = '🔕 Activar sonido de avisos';
-      btnSonido.classList.remove('activo');
+      guardarApagado(true);
+      pintarSonido();
       return;
     }
-    const Contexto = window.AudioContext || window.webkitAudioContext;
-    if (!Contexto) {
-      alert('Este navegador no permite reproducir sonido. Los avisos van a aparecer igual en pantalla.');
-      return;
-    }
-    audioCtx = new Contexto();
-    audioCtx.resume();
-    tocarAviso(); // una muestra, para comprobar que se escucha
-    btnSonido.textContent = '🔔 Sonido activado';
-    btnSonido.classList.add('activo');
+    guardarApagado(false);
+    encenderSonido(true);
   });
+
+  // El navegador no deja que una página suene hasta que la persona la toca una vez (regla de
+  // Chrome/Edge/Firefox, no se puede saltear). Por eso el sonido arranca "listo" al abrir la
+  // página y se activa del todo con el primer toque o tecla, sin tener que apretar el botón.
+  function activarConPrimerToque() {
+    if (!leerApagado()) {
+      if (audioCtx) audioCtx.resume().catch(() => {}); else encenderSonido(false);
+    }
+    document.removeEventListener('pointerdown', activarConPrimerToque, true);
+    document.removeEventListener('keydown', activarConPrimerToque, true);
+  }
+  document.addEventListener('pointerdown', activarConPrimerToque, true);
+  document.addEventListener('keydown', activarConPrimerToque, true);
+  if (!leerApagado()) encenderSonido(false);
 
   // ----- Aviso en pantalla -----
   function marcarNuevos() {
