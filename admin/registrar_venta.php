@@ -20,6 +20,7 @@
 
 require '../api/db.php'; // misma conexión PDO que ya usa el resto de la API
 require __DIR__ . '/auth.php';
+require __DIR__ . '/../api/precios.php';
 $usuarioActual = exigirSesion(ROLES_TODOS, true);
 
 $body = json_decode(file_get_contents('php://input'), true);
@@ -52,7 +53,7 @@ function generarCodigo(PDO $pdo): string {
 }
 
 function descontarStock(PDO $pdo, int $productoId, float $cantidad, int $pedidoId, int $usuarioId): array {
-    $stmt = $pdo->prepare('SELECT id, nombre, precio, tipo_venta FROM productos WHERE id = ? AND activo = 1');
+    $stmt = $pdo->prepare('SELECT id, nombre, precio, oferta_tipo, oferta_valor, tipo_venta FROM productos WHERE id = ? AND activo = 1');
     $stmt->execute([$productoId]);
     $producto = $stmt->fetch();
     if (!$producto) {
@@ -117,7 +118,8 @@ try {
 
         if ($tipo === 'producto') {
             $producto = descontarStock($pdo, $id, $cantidad, $pedidoId, (int) $usuarioActual['id']);
-            $subtotal = $producto['precio'] * $cantidad;
+            $producto['precio'] = precioConOferta($producto);   // el precio de oferta, si tiene
+            $subtotal = round($producto['precio'] * $cantidad, 2);
 
             $pdo->prepare(
                 'INSERT INTO pedido_items (pedido_id, producto_id, cantidad, precio_unitario, subtotal)

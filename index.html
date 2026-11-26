@@ -416,6 +416,20 @@
     font-weight:700;
     font-size:1.05rem;
   }
+  /* ---------- Ofertas ---------- */
+  .card-producto.en-oferta{ position:relative; }
+  .cinta-oferta{
+    position:absolute; top:10px; right:10px; z-index:2;
+    background:var(--rojo); color:#fff; font-weight:800; font-size:0.82rem;
+    padding:5px 11px; border-radius:999px; box-shadow:0 4px 10px rgba(232,72,60,0.35);
+    letter-spacing:.02em;
+  }
+  .bloque-precio{ display:flex; flex-direction:column; gap:1px; line-height:1.2; }
+  .precio-viejo{ text-decoration:line-through; color:var(--ink-soft); font-size:0.88rem; font-weight:500; }
+  .precio.precio-oferta{ color:var(--rojo); font-size:1.2rem; }
+  .ahorro-txt{ color:var(--verde); font-weight:700; font-size:0.82rem; }
+  .chip.chip-oferta{ color:#B35F00; font-weight:700; }
+  .chip.chip-oferta .sw{ background:var(--rojo); }
   .add-btn{
     width:36px; height:36px;
     border-radius:10px;
@@ -1248,11 +1262,11 @@
   const DEMO_PRODUCTOS = [
     { id: 1, categoria_id: 1, nombre: 'Empanaditas de jamón y queso', descripcion: 'Docena, recién horneadas', tipo_venta: 'unidad', precio: 4200 },
     { id: 2, categoria_id: 2, nombre: 'Facturas surtidas', descripcion: 'Por unidad, mínimo 6', tipo_venta: 'unidad', precio: 650 },
-    { id: 3, categoria_id: 2, nombre: 'Grisines caseros', descripcion: 'Paquete casero (sin TACC)', tipo_venta: 'unidad', precio: 900 },
-    { id: 4, categoria_id: 3, nombre: 'Torta individual de dulce de leche', descripcion: 'Porción generosa', tipo_venta: 'unidad', precio: 1800 },
+    { id: 3, categoria_id: 2, nombre: 'Grisines caseros', descripcion: 'Paquete casero (sin TACC)', tipo_venta: 'unidad', precio: 900, precio_oferta: 720, ahorro: 180, descuento_pct: 20 },
+    { id: 4, categoria_id: 3, nombre: 'Torta individual de dulce de leche', descripcion: 'Porción generosa', tipo_venta: 'unidad', precio: 1800, precio_oferta: 1500, ahorro: 300, descuento_pct: 17 },
     { id: 5, categoria_id: 3, nombre: 'Alfajores de maicena', descripcion: 'Rellenos de dulce de leche', tipo_venta: 'unidad', precio: 800 },
     { id: 6, categoria_id: 4, nombre: 'Queso cremoso', descripcion: 'Se pide por gramos', tipo_venta: 'peso', precio: 3600 },
-    { id: 7, categoria_id: 4, nombre: 'Jamón crudo', descripcion: 'Se pide por gramos', tipo_venta: 'peso', precio: 10500 },
+    { id: 7, categoria_id: 4, nombre: 'Jamón crudo', descripcion: 'Se pide por gramos', tipo_venta: 'peso', precio: 10500, precio_oferta: 9450, ahorro: 1050, descuento_pct: 10 },
     { id: 8, categoria_id: 5, nombre: 'Gaseosa 500ml', descripcion: 'Línea cola y lima-limón', tipo_venta: 'unidad', precio: 1200 },
   ].map(p => {
     const c = DEMO_CATEGORIAS.find(c => c.id === p.categoria_id);
@@ -1289,7 +1303,9 @@
     if (ruta.endsWith('productos.php')) {
       const cat = u.searchParams.get('categoria_id');
       const q = sinTildes(u.searchParams.get('buscar'));
+      const soloOf = u.searchParams.get('oferta');
       return DEMO_PRODUCTOS.filter(p =>
+        (!soloOf || p.precio_oferta) &&
         (!cat || String(p.categoria_id) === cat) &&
         (!q || sinTildes(p.nombre + ' ' + p.descripcion).includes(q)));
     }
@@ -1342,6 +1358,18 @@
       cont.innerHTML = '';
       cont.appendChild(chipTodos);
 
+      // Pestaña "Ofertas": solo aparece si hay algo en oferta ahora mismo
+      try {
+        const ofertas = await pedirJSON(API + 'productos.php?oferta=1');
+        if (Array.isArray(ofertas) && ofertas.length) {
+          const chipOf = document.createElement('div');
+          chipOf.className = 'chip chip-oferta';
+          chipOf.innerHTML = `<span class="sw"></span> Ofertas <small>(${ofertas.length})</small>`;
+          chipOf.addEventListener('click', () => seleccionarCategoria('ofertas', chipOf));
+          cont.appendChild(chipOf);
+        }
+      } catch (e) { /* sin ofertas: la pestaña simplemente no se muestra */ }
+
       categorias.forEach(cat => {
         const chip = document.createElement('div');
         chip.className = 'chip';
@@ -1370,7 +1398,7 @@
     categoriaActiva = categoriaId;
     resaltarChip(chipEl);
     const titulo = document.getElementById('titulo-productos');
-    titulo.textContent = categoriaId ? chipEl.textContent.trim() : 'Lo más pedido';
+    titulo.textContent = categoriaId === 'ofertas' ? 'Ofertas' : (categoriaId ? chipEl.textContent.trim() : 'Lo más pedido');
     cargarProductos();
   }
 
@@ -1385,26 +1413,33 @@
   }
 
   function tarjetaProducto(p) {
-    const precio = p.tipo_venta === 'peso'
-      ? `${formatoPrecio.format(p.precio)}/kg`
-      : formatoPrecio.format(p.precio);
+    const sufijo = p.tipo_venta === 'peso' ? '/kg' : '';
+    const enOferta = p.precio_oferta !== null && p.precio_oferta !== undefined && Number(p.precio_oferta) < Number(p.precio);
+    const precio = enOferta
+      ? `<div class="bloque-precio">
+           <span class="precio-viejo">${formatoPrecio.format(p.precio)}${sufijo}</span>
+           <span class="precio precio-oferta">${formatoPrecio.format(p.precio_oferta)}${sufijo}</span>
+           <span class="ahorro-txt">Ahorrás ${formatoPrecio.format(p.ahorro)}${sufijo}</span>
+         </div>`
+      : `<span class="precio">${formatoPrecio.format(p.precio)}${sufijo}</span>`;
 
     const esPeso = p.tipo_venta === 'peso';
     const pasoQty = esPeso ? 50 : 1;     // gramos por paso, o unidades
     const valorInicial = esPeso ? 250 : 1;
 
     const div = document.createElement('div');
-    div.className = 'card-producto';
+    div.className = 'card-producto' + (enOferta ? ' en-oferta' : '');
     div.style.setProperty('--acento', p.color_acento || 'var(--rojo)');
     div.style.opacity = p.disponible ? '1' : '.55';
 
     div.innerHTML = `
+      ${enOferta ? `<span class="cinta-oferta">-${Number(p.descuento_pct)}%</span>` : ''}
       ${bloqueVisual(p)}
       <span class="etiqueta">${esc(p.categoria_nombre)}</span>
       <h3>${esc(p.nombre)}</h3>
       <p>${esc(p.descripcion || '')}${p.disponible ? '' : ' — sin stock por ahora'}</p>
       <div class="precio-row">
-        <span class="precio">${precio}</span>
+        ${precio}
       </div>
       ${p.disponible ? `
         <div class="cantidad-row">
@@ -1442,14 +1477,15 @@
     cont.innerHTML = '<div class="cargador"><div class="puntos"><span style="--i:0;--c:var(--rojo)"></span><span style="--i:1;--c:var(--naranja)"></span><span style="--i:2;--c:var(--verde)"></span><span style="--i:3;--c:var(--azul)"></span><span style="--i:4;--c:var(--magenta)"></span></div>Cargando productos…</div>';
     try {
       const params = new URLSearchParams();
-      if (categoriaActiva) params.set('categoria_id', categoriaActiva);
+      if (categoriaActiva === 'ofertas') params.set('oferta', '1');
+      else if (categoriaActiva) params.set('categoria_id', categoriaActiva);
       if (textoBusquedaCatalogo) params.set('buscar', textoBusquedaCatalogo);
       const url = API + 'productos.php' + (params.toString() ? '?' + params.toString() : '');
       const productos = await pedirJSON(url);
       cont.innerHTML = '';
       if (!productos.length) {
         cont.innerHTML = '<div class="card-producto"><p>' +
-          (textoBusquedaCatalogo ? 'No encontramos ningún producto con ese nombre.' : 'No hay productos en esta categoría todavía.') +
+          (textoBusquedaCatalogo ? 'No encontramos ningún producto con ese nombre.' : (categoriaActiva === 'ofertas' ? 'Por ahora no hay ofertas.' : 'No hay productos en esta categoría todavía.')) +
           '</p></div>';
         return;
       }
@@ -1572,6 +1608,10 @@
   // el cliente haya elegido con el selector, avisan con un toast, y a
   // propósito NO abren el carrito — abrirlo en cada click es lo molesto que
   // queríamos evitar.
+  function enOfertaProd(p) {
+    return p.precio_oferta !== null && p.precio_oferta !== undefined && Number(p.precio_oferta) < Number(p.precio);
+  }
+
   function agregarProductoCantidad(p, cantidad) {
     const existente = carrito.find(i => i.tipo === 'producto' && i.id === p.id);
     if (existente) {
@@ -1579,7 +1619,7 @@
     } else {
       carrito.push({
         tipo: 'producto', id: p.id, nombre: p.nombre,
-        precio: parseFloat(p.precio), tipo_venta: p.tipo_venta, cantidad,
+        precio: parseFloat(enOfertaProd(p) ? p.precio_oferta : p.precio), tipo_venta: p.tipo_venta, cantidad,
       });
     }
     guardarCarrito();

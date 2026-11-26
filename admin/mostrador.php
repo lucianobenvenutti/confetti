@@ -86,6 +86,7 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
   }
   .card .nombre{ font-weight:600; font-size:0.9rem; }
   .card .precio{ color:var(--ink-soft); font-size:0.82rem; }
+  .tag-oferta{ background:#FFF1DC; color:#B35F00; font-weight:800; font-size:0.62rem; padding:1px 6px; border-radius:6px; letter-spacing:.03em; }
   .card.stock-bajo{ background:#FDEAEA; border-color:#f0b7b2; }
   .card .badge-bajo{
     align-self:flex-start;
@@ -451,7 +452,10 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
       const stockBajo = p.disponible && parseFloat(p.stock_actual) <= parseFloat(p.stock_minimo);
       btn.className = 'card' + (stockBajo ? ' stock-bajo' : '');
       btn.disabled = !p.disponible;
-      const precio = p.tipo_venta === 'peso' ? `${formatoPrecio.format(p.precio)}/kg` : formatoPrecio.format(p.precio);
+      const sufijo = p.tipo_venta === 'peso' ? '/kg' : '';
+      const precio = p.en_oferta
+        ? `<s style="opacity:.6">${formatoPrecio.format(p.precio_normal)}</s> <strong style="color:var(--rojo)">${formatoPrecio.format(p.precio)}${sufijo}</strong> <span class="tag-oferta">OFERTA</span>`
+        : `${formatoPrecio.format(p.precio)}${sufijo}`;
       btn.innerHTML = `
         ${bloqueMiniFoto(p)}
         ${stockBajo ? '<span class="badge-bajo">Stock bajo</span>' : ''}

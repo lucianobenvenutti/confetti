@@ -24,6 +24,7 @@
 require 'db.php';
 require __DIR__ . '/vencimientos.php';
 require __DIR__ . '/limites.php';
+require __DIR__ . '/precios.php';
 
 $body = json_decode(file_get_contents('php://input'), true);
 
@@ -106,7 +107,7 @@ function generarCodigo(PDO $pdo): string {
 // Descuenta stock de un producto de forma atómica. Devuelve el producto
 // (con nombre y precio) si había stock suficiente, o lanza una excepción si no.
 function reservarStock(PDO $pdo, int $productoId, float $cantidad, int $pedidoId): array {
-    $stmt = $pdo->prepare('SELECT id, nombre, precio, tipo_venta FROM productos WHERE id = ? AND activo = 1');
+    $stmt = $pdo->prepare('SELECT id, nombre, precio, oferta_tipo, oferta_valor, tipo_venta FROM productos WHERE id = ? AND activo = 1');
     $stmt->execute([$productoId]);
     $producto = $stmt->fetch();
 
@@ -178,7 +179,8 @@ try {
 
         if ($tipo === 'producto') {
             $producto = reservarStock($pdo, $id, $cantidad, $pedidoId);
-            $subtotal = $producto['precio'] * $cantidad;
+            $producto['precio'] = precioConOferta($producto);   // el precio de oferta, si tiene
+            $subtotal = round($producto['precio'] * $cantidad, 2);
 
             $pdo->prepare(
                 'INSERT INTO pedido_items (pedido_id, producto_id, cantidad, precio_unitario, subtotal)

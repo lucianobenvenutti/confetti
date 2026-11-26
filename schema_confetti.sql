@@ -58,6 +58,8 @@ CREATE TABLE productos (
   tipo_venta     ENUM('unidad','peso') NOT NULL,   -- 'peso' = se vende por kg
   precio         DECIMAL(10,2) NOT NULL,           -- precio por unidad o por kg, según tipo_venta
   precio_compra  DECIMAL(10,2) NULL,               -- lo que pagó el local (solo lo ve el dueño)
+  oferta_tipo    ENUM('porcentaje','monto') NULL,  -- descuento vigente (NULL = sin oferta)
+  oferta_valor   DECIMAL(10,2) NULL,               -- 20 = 20%  |  300 = $300 menos
   stock_actual   DECIMAL(10,3) NOT NULL DEFAULT 0, -- unidades o kg, según tipo_venta
   stock_minimo   DECIMAL(10,3) NOT NULL DEFAULT 0, -- umbral para alerta de bajo stock
   imagen         VARCHAR(255) NULL,

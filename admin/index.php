@@ -175,6 +175,12 @@ try {
     <p>Define el cartel de "abierto ahora" en la página.</p>
   </a>
 
+  <a class="tile" href="ofertas.php" style="--acento:var(--naranja);">
+    <div class="icono">🏷️</div>
+    <h2>Ofertas</h2>
+    <p>Poné productos en oferta con descuento en % o en $.</p>
+  </a>
+
   <a class="tile" href="datos_pago.php" style="--acento:var(--verde);">
     <div class="icono">🏦</div>
     <h2>Datos de pago</h2>
