@@ -169,6 +169,12 @@ try {
     <p>Por día, por mes, o eligiendo un rango de fechas.</p>
   </a>
 
+  <a class="tile" href="estadisticas.php" style="--acento:var(--verde);">
+    <div class="icono">📈</div>
+    <h2>Análisis</h2>
+    <p>Qué se vende más y menos, por mes, día y hora.</p>
+  </a>
+
   <a class="tile" href="horarios.php" style="--acento:var(--naranja);">
     <div class="icono">🕒</div>
     <h2>Horario de atención</h2>

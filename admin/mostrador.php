@@ -65,27 +65,35 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
   .grid{
     display:grid;
     grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));
-    gap:12px;
+    gap:8px;
+    align-items:start;   /* cada tarjeta mide lo que necesita, sin estirarse */
   }
   .card{
     background:#fff;
     border:1px solid var(--linea);
-    border-radius:12px;
-    padding:10px;
+    border-radius:10px;
+    padding:6px 8px 7px;
     cursor:pointer;
     text-align:left;
     display:flex;
     flex-direction:column;
-    gap:4px;
+    gap:2px;
+    min-width:0;
   }
   .card:hover{ border-color:var(--rojo); }
   .card:disabled{ opacity:.45; cursor:not-allowed; }
+  .card.con-foto{ flex-direction:row; align-items:flex-start; gap:8px; }
+  .card .textos-card{ display:flex; flex-direction:column; gap:2px; min-width:0; flex:1; }
   .card .mini-foto{
-    width:100%; height:64px; object-fit:cover; border-radius:8px;
+    flex:none; width:42px; height:42px; object-fit:cover; border-radius:7px;
     background:var(--paper-dim);
   }
-  .card .nombre{ font-weight:600; font-size:0.9rem; }
-  .card .precio{ color:var(--ink-soft); font-size:0.82rem; }
+  .card .nombre{ font-weight:600; font-size:0.86rem; line-height:1.2; overflow-wrap:anywhere; }
+  .card .desc{
+    color:var(--ink-soft); font-size:0.74rem; line-height:1.25; overflow-wrap:anywhere;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  }
+  .card .precio{ color:var(--ink-soft); font-size:0.8rem; margin-top:1px; }
   .tag-oferta{ background:#FFF1DC; color:#B35F00; font-weight:800; font-size:0.62rem; padding:1px 6px; border-radius:6px; letter-spacing:.03em; }
   .card.stock-bajo{ background:#FDEAEA; border-color:#f0b7b2; }
   .card .badge-bajo{
@@ -113,6 +121,7 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
   }
   .item-venta .textos{ min-width:0; }
   .item-venta .nombre{ font-weight:600; font-size:0.98rem; overflow-wrap:anywhere; }
+  .item-venta .desc-venta{ color:var(--ink-soft); font-size:0.78rem; line-height:1.25; overflow-wrap:anywhere; }
   .item-venta .detalle{ color:var(--ink-soft); font-size:0.85rem; margin-top:2px; }
   .item-venta .btn-quitar{
     border:none; background:none; color:var(--rojo); font-size:0.85rem; cursor:pointer; flex:none;
@@ -432,6 +441,7 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
       const pasaCategoria = !categoriaActiva || p.categoria_id === categoriaActiva;
       const pasaBusqueda = !busqueda
         || p.nombre.toLowerCase().includes(busqueda)
+        || (p.descripcion && p.descripcion.toLowerCase().includes(busqueda))
         || (p.codigo_barras && p.codigo_barras.toLowerCase().includes(busqueda));
       return pasaCategoria && pasaBusqueda;
     });
@@ -450,17 +460,22 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
     resultados.forEach(p => {
       const btn = document.createElement('button');
       const stockBajo = p.disponible && parseFloat(p.stock_actual) <= parseFloat(p.stock_minimo);
-      btn.className = 'card' + (stockBajo ? ' stock-bajo' : '');
+      btn.className = 'card' + (stockBajo ? ' stock-bajo' : '') + (p.imagen ? ' con-foto' : '');
       btn.disabled = !p.disponible;
       const sufijo = p.tipo_venta === 'peso' ? '/kg' : '';
       const precio = p.en_oferta
         ? `<s style="opacity:.6">${formatoPrecio.format(p.precio_normal)}</s> <strong style="color:var(--rojo)">${formatoPrecio.format(p.precio)}${sufijo}</strong> <span class="tag-oferta">OFERTA</span>`
         : `${formatoPrecio.format(p.precio)}${sufijo}`;
+      const desc = (p.descripcion || '').trim();
+      btn.title = p.nombre + (desc ? ' — ' + desc : '');   // al dejar el mouse encima se ve completa
       btn.innerHTML = `
         ${bloqueMiniFoto(p)}
-        ${stockBajo ? '<span class="badge-bajo">Stock bajo</span>' : ''}
-        <span class="nombre">${p.nombre}</span>
-        <span class="precio">${precio}${p.disponible ? '' : ' — sin stock'}</span>
+        <span class="textos-card">
+          ${stockBajo ? '<span class="badge-bajo">Stock bajo</span>' : ''}
+          <span class="nombre">${esc(p.nombre)}</span>
+          ${desc ? `<span class="desc">${esc(desc)}</span>` : ''}
+          <span class="precio">${precio}${p.disponible ? '' : ' — sin stock'}</span>
+        </span>
       `;
       btn.addEventListener('click', () => agregarProducto(p));
       cont.appendChild(btn);
@@ -504,7 +519,7 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
       const gramos = parseFloat(gramosTexto);
       if (!gramos || gramos <= 0) return;
       venta.push({
-        tipo: 'producto', id: p.id, nombre: p.nombre, imagen: p.imagen,
+        tipo: 'producto', id: p.id, nombre: p.nombre, descripcion: p.descripcion, imagen: p.imagen,
         precio: parseFloat(p.precio), tipo_venta: 'peso', cantidad: gramos / 1000,
       });
     } else {
@@ -514,7 +529,7 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
         return;
       } else {
         venta.push({
-          tipo: 'producto', id: p.id, nombre: p.nombre, imagen: p.imagen,
+          tipo: 'producto', id: p.id, nombre: p.nombre, descripcion: p.descripcion, imagen: p.imagen,
           precio: parseFloat(p.precio), tipo_venta: 'unidad', cantidad: 1,
         });
       }
@@ -602,6 +617,7 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
             ${foto}
             <div class="textos">
               <div class="nombre">${esc(item.nombre)}</div>
+              ${item.descripcion ? `<div class="desc-venta">${esc(item.descripcion)}</div>` : ''}
               <div class="detalle">${precioUnit} · <strong>${formatoPrecio.format(item.precio * item.cantidad)}</strong></div>
               <div class="cantidad-ctl">
                 <button type="button" class="btn-cant menos" aria-label="Menos">−</button>
