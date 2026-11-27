@@ -248,6 +248,9 @@
     font-size:5.2rem;
   }
 
+  .snack-emoji{ transition:opacity .35s ease, transform .35s ease; }
+  .snack-emoji.cambiando{ opacity:0; transform:scale(.8) rotate(-8deg); }
+
   /* ---------- Categorías ---------- */
   .categorias{ padding-top:0; padding-bottom:12px; }
   .section-head{
@@ -1056,7 +1059,7 @@
     </div>
     <div class="hero-scene" aria-hidden="true">
       <div class="plate"></div>
-      <div class="snack-emoji">🥐</div>
+      <div class="snack-emoji" id="snack-emoji">🍰</div>
       <div class="confetti-piece" style="top:6%; left:12%; --rot:-18deg; animation-delay:.05s; font-size:1.6rem;">🎉</div>
       <div class="confetti-piece" style="top:14%; right:8%; --rot:22deg; animation-delay:.15s; font-size:1.3rem; color:var(--rojo);">●</div>
       <div class="confetti-piece" style="bottom:16%; left:6%; --rot:12deg; animation-delay:.25s; font-size:1.4rem; color:var(--violeta);">★</div>
@@ -2258,5 +2261,25 @@
   cargarCombos();
 </script>
 
+
+<script>
+// Ilustración del inicio: va rotando entre distintos productos de repostería y snacks
+(function () {
+  const el = document.getElementById('snack-emoji');
+  if (!el) return;
+  const iconos = ['🍰', '🧁', '🍪', '🥪', '🎂', '🍩', '🥧'];
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  let i = 0;
+  setInterval(() => {
+    if (document.hidden) return;
+    el.classList.add('cambiando');
+    setTimeout(() => {
+      i = (i + 1) % iconos.length;
+      el.textContent = iconos[i];
+      el.classList.remove('cambiando');
+    }, 350);
+  }, 3000);
+})();
+</script>
 </body>
 </html>
