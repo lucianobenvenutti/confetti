@@ -224,14 +224,14 @@ function pantallaSinPermiso(array $usuario): void {
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
 <link rel="icon" href="../favicon.ico" sizes="48x48">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
-<meta name="theme-color" content="#A9E0EA">
+<meta name="theme-color" content="#F4E4CC">
 '
        . '<meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Sin permiso</title></head>'
-       . '<body style="font-family:system-ui,sans-serif;background:#FFFBF3;color:#1F2A44;padding:48px 24px;">'
+       . '<body style="font-family:system-ui,sans-serif;background:#FBF2E4;color:#3F2B1F;padding:48px 24px;">'
        . '<div style="max-width:460px;background:#fff;border-radius:14px;padding:26px;">'
        . '<h1 style="font-size:1.3rem;margin:0 0 8px;">No tenés permiso para esta sección</h1>'
-       . '<p style="color:#5B6478;margin:0 0 18px;">Tu usuario (' . $nombre . ') no puede entrar acá. Si lo necesitás, pedile al dueño que lo habilite.</p>'
-       . '<a href="index.php" style="color:#1B4A9C;">← Volver al panel</a></div></body></html>';
+       . '<p style="color:#7A614E;margin:0 0 18px;">Tu usuario (' . $nombre . ') no puede entrar acá. Si lo necesitás, pedile al dueño que lo habilite.</p>'
+       . '<a href="index.php" style="color:#6B4026;">← Volver al panel</a></div></body></html>';
     exit;
 }
 
@@ -294,9 +294,9 @@ function barraSesionHtml(): string {
     $nombre = htmlspecialchars($u['nombre'], ENT_QUOTES, 'UTF-8');
     $rol = htmlspecialchars($u['rol'], ENT_QUOTES, 'UTF-8');
     return '<span style="float:right; font-size:0.82rem;">👤 ' . $nombre . ' (' . $rol . ') · '
-         . '<a href="mi_clave.php" style="color:#5B6478; text-decoration:underline;">Mi clave</a> · '
+         . '<a href="mi_clave.php" style="color:#7A614E; text-decoration:underline;">Mi clave</a> · '
          . '<form method="post" action="logout.php" style="display:inline; margin:0;">'
-         . '<button type="submit" style="background:none; border:none; padding:0; font:inherit; color:#5B6478; cursor:pointer; text-decoration:underline;">Salir</button>'
+         . '<button type="submit" style="background:none; border:none; padding:0; font:inherit; color:#7A614E; cursor:pointer; text-decoration:underline;">Salir</button>'
          . '</form></span>';
 }
 

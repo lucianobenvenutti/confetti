@@ -39,13 +39,13 @@ $productosBajos = array_filter($productos, fn($p) => (float) $p['stock_actual'] 
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
 <link rel="icon" href="../favicon.ico" sizes="48x48">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
-<meta name="theme-color" content="#A9E0EA">
+<meta name="theme-color" content="#F4E4CC">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Confetti — <?= htmlspecialchars($proveedor['nombre']) ?></title>
 <style>
-  body{ font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:#FFFBF3; color:#1F2A44; margin:0; padding:32px 24px 60px; }
-  .nav-admin{ font-size:0.85rem; color:#5B6478; margin-bottom:18px; }
-  .nav-admin a{ color:#5B6478; text-decoration:none; }
+  body{ font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:#FBF2E4; color:#3F2B1F; margin:0; padding:32px 24px 60px; }
+  .nav-admin{ font-size:0.85rem; color:#7A614E; margin-bottom:18px; }
+  .nav-admin a{ color:#7A614E; text-decoration:none; }
   .cabecera{ display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; margin-bottom:24px; }
   h1{ font-size:1.5rem; margin:0 0 4px; }
   .datos-proveedor{
@@ -53,26 +53,26 @@ $productosBajos = array_filter($productos, fn($p) => (float) $p['stock_actual'] 
     display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:16px;
   }
   .dato{ font-size:0.9rem; }
-  .dato .etiqueta{ display:block; font-size:0.75rem; color:#5B6478; text-transform:uppercase; letter-spacing:0.02em; margin-bottom:3px; }
-  .btn{ font-family:inherit; font-weight:600; font-size:0.85rem; border:none; border-radius:9px; padding:9px 15px; cursor:pointer; text-decoration:none; display:inline-block; background:none; border:1px solid rgba(31,42,68,0.2); color:#1F2A44; }
+  .dato .etiqueta{ display:block; font-size:0.75rem; color:#7A614E; text-transform:uppercase; letter-spacing:0.02em; margin-bottom:3px; }
+  .btn{ font-family:inherit; font-weight:600; font-size:0.85rem; border:none; border-radius:9px; padding:9px 15px; cursor:pointer; text-decoration:none; display:inline-block; background:none; border:1px solid rgba(63,43,31,0.2); color:#3F2B1F; }
 
   .resumen-bajos{
-    background:#FDEAEA; border:1px solid #f0b7b2; border-radius:14px;
-    padding:16px 20px; max-width:900px; margin-bottom:24px; color:#E8483C; font-weight:600; font-size:0.92rem;
+    background:#FBEAE3; border:1px solid #F0CBBF; border-radius:14px;
+    padding:16px 20px; max-width:900px; margin-bottom:24px; color:#C8402F; font-weight:600; font-size:0.92rem;
   }
-  .resumen-bajos.ok{ background:#E4F5EE; border-color:#bfe6d7; color:#1E9C7C; }
+  .resumen-bajos.ok{ background:#EDF3E4; border-color:#D3E3C2; color:#5F8A4B; }
 
   table{ width:100%; max-width:900px; border-collapse:collapse; background:#fff; border-radius:14px; overflow:hidden; margin-bottom:10px; }
-  th, td{ text-align:left; padding:12px 16px; border-bottom:1px solid rgba(31,42,68,0.08); font-size:0.88rem; vertical-align:middle; }
-  th{ font-size:0.78rem; color:#5B6478; font-weight:600; }
+  th, td{ text-align:left; padding:12px 16px; border-bottom:1px solid rgba(63,43,31,0.08); font-size:0.88rem; vertical-align:middle; }
+  th{ font-size:0.78rem; color:#7A614E; font-weight:600; }
   tr.fila-bajo{ background:#FFF8F7; }
-  .categoria-chip{ font-size:0.78rem; color:#5B6478; }
+  .categoria-chip{ font-size:0.78rem; color:#7A614E; }
   .badge-bajo{
-    background:#E8483C; color:#fff; font-size:0.72rem; font-weight:700;
+    background:#A8601F; color:#fff; font-size:0.72rem; font-weight:700;
     padding:3px 8px; border-radius:999px; margin-left:8px;
   }
-  .sin-productos{ color:#5B6478; }
-  a.link-editar{ color:#1B4A9C; font-size:0.82rem; text-decoration:none; }
+  .sin-productos{ color:#7A614E; }
+  a.link-editar{ color:#6B4026; font-size:0.82rem; text-decoration:none; }
 </style>
 </head>
 <body>

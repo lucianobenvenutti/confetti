@@ -106,6 +106,8 @@ try {
     $pedidoId = (int) $pdo->lastInsertId();
 
     $subtotalGeneral = 0;
+    $subPorClave = [];      // subtotal de cada producto/combo, para poder aplicar un descuento solo a algunos
+    $nombrePorClave = [];
 
     foreach ($items as $item) {
         $tipo = $item['tipo'] ?? '';
@@ -127,6 +129,8 @@ try {
             )->execute([$pedidoId, $id, $cantidad, $producto['precio'], $subtotal]);
 
             $subtotalGeneral += $subtotal;
+            $subPorClave["producto:$id"] = ($subPorClave["producto:$id"] ?? 0) + $subtotal;
+            $nombrePorClave["producto:$id"] = $producto['nombre'];
 
         } elseif ($tipo === 'combo') {
             $stmt = $pdo->prepare('SELECT id, nombre, precio FROM combos WHERE id = ? AND activo = 1');
@@ -149,6 +153,8 @@ try {
             )->execute([$pedidoId, $id, $cantidad, $combo['precio'], $subtotal]);
 
             $subtotalGeneral += $subtotal;
+            $subPorClave["combo:$id"] = ($subPorClave["combo:$id"] ?? 0) + $subtotal;
+            $nombrePorClave["combo:$id"] = $combo['nombre'];
 
         } else {
             throw new Exception('Tipo de ítem desconocido.');
@@ -161,13 +167,31 @@ try {
 
     if ($descuento && isset($descuento['tipo'], $descuento['valor'])) {
         $valor = (float) $descuento['valor'];
+
+        // ¿Sobre qué se aplica? Sobre toda la venta, o solo sobre los productos que se eligieron.
+        $base = $subtotalGeneral;
+        $sobre = '';
+        if (($descuento['alcance'] ?? 'todos') === 'seleccion') {
+            $claves = array_values(array_unique(array_filter(
+                (array) ($descuento['claves'] ?? []),
+                fn($c) => is_string($c) && isset($subPorClave[$c])     // solo cosas que de verdad están en la venta
+            )));
+            if (!$claves) {
+                throw new Exception('Elegí al menos un producto para aplicarle el descuento.');
+            }
+            $base = 0;
+            $nombres = [];
+            foreach ($claves as $c) { $base += $subPorClave[$c]; $nombres[] = $nombrePorClave[$c]; }
+            $sobre = ' sobre ' . implode(', ', array_slice($nombres, 0, 3)) . (count($nombres) > 3 ? ' y ' . (count($nombres) - 3) . ' más' : '');
+        }
+
         if ($descuento['tipo'] === 'porcentaje' && $valor > 0) {
             $valor = min($valor, 100);
-            $montoDescuento = round($subtotalGeneral * $valor / 100, 2);
-            $descripcionDescuento = "Descuento: {$valor}% (-" . number_format($montoDescuento, 0, ',', '.') . ")";
+            $montoDescuento = round($base * $valor / 100, 2);
+            $descripcionDescuento = "Descuento: {$valor}%{$sobre} (-" . number_format($montoDescuento, 0, ',', '.') . ")";
         } elseif ($descuento['tipo'] === 'monto' && $valor > 0) {
-            $montoDescuento = min($valor, $subtotalGeneral);
-            $descripcionDescuento = "Descuento: -$" . number_format($montoDescuento, 0, ',', '.');
+            $montoDescuento = min($valor, $base);
+            $descripcionDescuento = "Descuento{$sobre}: -$" . number_format($montoDescuento, 0, ',', '.');
         }
     }
 

@@ -65,25 +65,25 @@ if ($tablaOk && $_SERVER['REQUEST_METHOD'] === 'POST') {
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
 <link rel="icon" href="../favicon.ico" sizes="48x48">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
-<meta name="theme-color" content="#A9E0EA">
+<meta name="theme-color" content="#F4E4CC">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Confetti — Datos de pago</title>
 <style>
-  body{ font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:#FFFBF3; color:#1F2A44; margin:0; padding:32px 24px 60px; }
-  .nav-admin{ font-size:0.85rem; color:#5B6478; margin-bottom:18px; }
-  .nav-admin a{ color:#5B6478; text-decoration:none; }
-  .nav-admin a:hover{ color:#1F2A44; text-decoration:underline; }
+  body{ font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:#FBF2E4; color:#3F2B1F; margin:0; padding:32px 24px 60px; }
+  .nav-admin{ font-size:0.85rem; color:#7A614E; margin-bottom:18px; }
+  .nav-admin a{ color:#7A614E; text-decoration:none; }
+  .nav-admin a:hover{ color:#3F2B1F; text-decoration:underline; }
   h1{ font-size:1.4rem; margin:0 0 4px; }
-  p.sub{ color:#5B6478; margin:0 0 22px; max-width:560px; }
+  p.sub{ color:#7A614E; margin:0 0 22px; max-width:560px; }
   .aviso{ padding:12px 16px; border-radius:10px; margin-bottom:20px; font-size:0.95rem; max-width:560px; }
-  .aviso.ok{ background:#E4F5EE; color:#1E9C7C; border:1px solid #bfe6d7; }
-  .aviso.error{ background:#FBEAE8; color:#E8483C; border:1px solid #f3c9c4; }
-  form{ max-width:560px; background:#fff; border-radius:14px; padding:24px; border:1px solid rgba(31,42,68,0.1); }
+  .aviso.ok{ background:#EDF3E4; color:#5F8A4B; border:1px solid #D3E3C2; }
+  .aviso.error{ background:#FBEAE3; color:#C8402F; border:1px solid #F0CBBF; }
+  form{ max-width:560px; background:#fff; border-radius:14px; padding:24px; border:1px solid rgba(63,43,31,0.1); }
   .campo{ margin-bottom:16px; }
   label{ display:block; font-size:0.85rem; font-weight:600; margin-bottom:6px; }
-  input[type=text], textarea{ width:100%; box-sizing:border-box; padding:11px 12px; border-radius:10px; border:1px solid rgba(31,42,68,0.2); font-family:inherit; font-size:0.95rem; }
-  .ayuda{ font-size:0.78rem; color:#5B6478; margin-top:4px; }
-  button{ font-family:inherit; font-weight:600; font-size:0.95rem; border:none; border-radius:10px; padding:12px 22px; cursor:pointer; background:#1B4A9C; color:#fff; }
+  input[type=text], textarea{ width:100%; box-sizing:border-box; padding:11px 12px; border-radius:10px; border:1px solid rgba(63,43,31,0.2); font-family:inherit; font-size:0.95rem; }
+  .ayuda{ font-size:0.78rem; color:#7A614E; margin-top:4px; }
+  button{ font-family:inherit; font-weight:600; font-size:0.95rem; border:none; border-radius:10px; padding:12px 22px; cursor:pointer; background:#6B4026; color:#fff; }
 </style>
 </head>
 <body>

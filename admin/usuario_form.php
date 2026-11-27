@@ -28,26 +28,26 @@ $mensaje = $_GET['msg'] ?? null;
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
 <link rel="icon" href="../favicon.ico" sizes="48x48">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
-<meta name="theme-color" content="#A9E0EA">
+<meta name="theme-color" content="#F4E4CC">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Confetti — <?= $id ? 'Editar' : 'Nuevo' ?> usuario</title>
 <style>
-  body{ font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:#FFFBF3; color:#1F2A44; margin:0; padding:32px 24px 60px; }
-  .nav-admin{ font-size:0.85rem; color:#5B6478; margin-bottom:18px; }
-  .nav-admin a{ color:#5B6478; text-decoration:none; }
+  body{ font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:#FBF2E4; color:#3F2B1F; margin:0; padding:32px 24px 60px; }
+  .nav-admin{ font-size:0.85rem; color:#7A614E; margin-bottom:18px; }
+  .nav-admin a{ color:#7A614E; text-decoration:none; }
   h1{ font-size:1.4rem; margin:0 0 22px; }
   form{ max-width:440px; background:#fff; border-radius:14px; padding:24px; }
-  .aviso{ padding:12px 16px; border-radius:10px; margin-bottom:20px; font-size:0.9rem; max-width:440px; background:#FBEAE8; color:#E8483C; border:1px solid #f3c9c4; }
+  .aviso{ padding:12px 16px; border-radius:10px; margin-bottom:20px; font-size:0.9rem; max-width:440px; background:#FBEAE3; color:#C8402F; border:1px solid #F0CBBF; }
   .campo{ margin-bottom:16px; }
   label{ display:block; font-size:0.85rem; font-weight:600; margin-bottom:6px; }
-  input[type="text"], input[type="password"], select{ width:100%; padding:10px 12px; border-radius:9px; border:1px solid rgba(31,42,68,0.15); font-family:inherit; font-size:0.95rem; box-sizing:border-box; }
-  .ayuda{ font-size:0.78rem; color:#5B6478; margin-top:5px; }
+  input[type="text"], input[type="password"], select{ width:100%; padding:10px 12px; border-radius:9px; border:1px solid rgba(63,43,31,0.15); font-family:inherit; font-size:0.95rem; box-sizing:border-box; }
+  .ayuda{ font-size:0.78rem; color:#7A614E; margin-top:5px; }
   .fila-check{ display:flex; align-items:center; gap:8px; }
   .fila-check label{ margin:0; font-weight:500; }
   .botones{ display:flex; gap:10px; margin-top:22px; }
   button, .btn-cancelar{ font-family:inherit; font-weight:600; font-size:0.9rem; border-radius:9px; padding:11px 18px; cursor:pointer; text-decoration:none; }
-  button{ border:none; background:#1B4A9C; color:#fff; }
-  .btn-cancelar{ background:none; border:1px solid rgba(31,42,68,0.2); color:#1F2A44; }
+  button{ border:none; background:#6B4026; color:#fff; }
+  .btn-cancelar{ background:none; border:1px solid rgba(63,43,31,0.2); color:#3F2B1F; }
 </style>
 </head>
 <body>

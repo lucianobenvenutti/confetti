@@ -6,7 +6,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
 <link rel="icon" href="favicon.ico" sizes="48x48">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-<meta name="theme-color" content="#A9E0EA">
+<meta name="theme-color" content="#F4E4CC">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="only light">
 <title>Confetti — Snack, Panadería y Repostería</title>
@@ -16,17 +16,19 @@
 <style>
   :root{
     color-scheme: only light;
-    --paper:#FFFBF3;
-    --paper-dim:#FFF4DE;
-    --ink:#1F2A44;
-    --ink-soft:#5B6478;
-    --rojo:#E8483C;
-    --violeta:#6E4E9E;
-    --verde:#1E9C7C;
-    --naranja:#F5941F;
-    --azul:#1B4A9C;
-    --magenta:#C24F9E;
-    --linea: rgba(31,42,68,0.12);
+    /* Paleta dulce de leche y chocolate */
+    --paper:#FBF2E4;          /* crema */
+    --paper-dim:#F4E4CC;      /* dulce de leche clarito */
+    --ink:#3F2B1F;            /* chocolate oscuro (texto) */
+    --ink-soft:#7A614E;       /* chocolate con leche (texto suave) */
+    --rojo:#A8601F;           /* dulce de leche tostado: color principal (botones, destacados) */
+    --violeta:#8A6240;        /* café con leche */
+    --verde:#5F8A4B;          /* verde oliva suave (ahorro, "sin TACC") */
+    --naranja:#96700F;        /* miel */
+    --azul:#6B4026;           /* chocolate */
+    --magenta:#A04855;        /* frambuesa */
+    --oferta:#C8402F;         /* rojo solo para ofertas y avisos de error */
+    --linea: rgba(63,43,31,0.14);
   }
 
   *{ box-sizing:border-box; }
@@ -112,8 +114,11 @@
     height:52px;
     width:auto;
     border-radius:10px;
-    transition:height .2s ease;
+    transition:height .2s ease, transform .2s ease;
   }
+  .logo-link{ display:inline-flex; cursor:pointer; }
+  .logo-link:hover img, .logo-link:focus-visible img{ transform:scale(1.1); }
+  .logo-link:active img{ transform:scale(1.03); }
   header.compacto .logo-mark img{ height:36px; }
   header.compacto .header-row .btn-carrito{ padding:6px 12px; }
   nav ul{
@@ -136,14 +141,14 @@
 
   /* ---------- Hero ---------- */
   .hero{
-    padding:64px 0 56px;
+    padding:26px 0 34px;
     position:relative;
     overflow:hidden;
   }
   .hero-grid{
     display:grid;
     grid-template-columns:1.15fr 0.85fr;
-    gap:48px;
+    gap:32px;
     align-items:center;
   }
   .eyebrow-chip{
@@ -156,7 +161,7 @@
     padding:7px 16px;
     font-size:0.88rem;
     color:var(--ink-soft);
-    margin-bottom:22px;
+    margin-bottom:14px;
   }
   .eyebrow-chip .dot{
     width:8px; height:8px; border-radius:50%;
@@ -166,18 +171,18 @@
   .hero h1{
     font-size:clamp(2.2rem, 4.2vw, 3.3rem);
     font-weight:700;
-    max-width:11ch;
+    max-width:20ch;
     color:var(--ink);
   }
   .hero h1 span{ color:var(--rojo); }
   .hero p.lede{
-    margin-top:20px;
+    margin-top:14px;
     font-size:1.13rem;
     color:var(--ink-soft);
     max-width:46ch;
   }
   .hero-ctas{
-    margin-top:30px;
+    margin-top:22px;
     display:flex;
     gap:14px;
     flex-wrap:wrap;
@@ -198,9 +203,9 @@
   .btn-primary{
     background:var(--rojo);
     color:#fff;
-    box-shadow:0 6px 0 0 #b8362c;
+    box-shadow:0 6px 0 0 #7A4415;
   }
-  .btn-primary:hover{ box-shadow:0 8px 0 0 #b8362c; }
+  .btn-primary:hover{ box-shadow:0 8px 0 0 #7A4415; }
   .btn-ghost{
     background:transparent;
     color:var(--ink);
@@ -211,7 +216,7 @@
   .hero-scene{
     position:relative;
     aspect-ratio:1/1;
-    max-width:380px;
+    max-width:270px;
     margin:0 auto;
   }
   .hero-scene .plate{
@@ -243,7 +248,7 @@
   }
 
   /* ---------- Categorías ---------- */
-  .categorias{ padding-top:8px; padding-bottom:12px; }
+  .categorias{ padding-top:0; padding-bottom:12px; }
   .section-head{
     display:flex;
     align-items:baseline;
@@ -420,16 +425,16 @@
   .card-producto.en-oferta{ position:relative; }
   .cinta-oferta{
     position:absolute; top:10px; right:10px; z-index:2;
-    background:var(--rojo); color:#fff; font-weight:800; font-size:0.82rem;
+    background:var(--oferta); color:#fff; font-weight:800; font-size:0.82rem;
     padding:5px 11px; border-radius:999px; box-shadow:0 4px 10px rgba(232,72,60,0.35);
     letter-spacing:.02em;
   }
   .bloque-precio{ display:flex; flex-direction:column; gap:1px; line-height:1.2; }
   .precio-viejo{ text-decoration:line-through; color:var(--ink-soft); font-size:0.88rem; font-weight:500; }
-  .precio.precio-oferta{ color:var(--rojo); font-size:1.2rem; }
+  .precio.precio-oferta{ color:var(--oferta); font-size:1.2rem; }
   .ahorro-txt{ color:var(--verde); font-weight:700; font-size:0.82rem; }
-  .chip.chip-oferta{ color:#B35F00; font-weight:700; }
-  .chip.chip-oferta .sw{ background:var(--rojo); }
+  .chip.chip-oferta{ color:#B3401F; font-weight:700; }
+  .chip.chip-oferta .sw{ background:var(--oferta); }
   .add-btn{
     width:36px; height:36px;
     border-radius:10px;
@@ -484,7 +489,7 @@
     max-width:14ch;
   }
   .combo-panel p{
-    color:#C9D0E0;
+    color:#EBD9C0;
     margin-top:14px;
     max-width:42ch;
   }
@@ -561,10 +566,19 @@
     color:var(--ink-soft);
     font-size:0.88rem;
   }
+  .footer-credito{
+    display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap;
+    margin-top:22px; padding-top:18px; border-top:1px dashed var(--linea);
+    color:var(--ink-soft); font-size:0.8rem;
+  }
+  .footer-credito a{ display:inline-flex; transition:transform .2s ease; }
+  .footer-credito a:hover, .footer-credito a:focus-visible{ transform:scale(1.08) rotate(-2deg); }
+  .footer-credito img{ display:block; height:auto; }
 
   @media (max-width:900px){
-    .hero-grid{ grid-template-columns:1fr; }
-    .hero-scene{ margin-top:20px; }
+    .hero{ padding:18px 0 8px; }
+    .hero-grid{ grid-template-columns:1fr; gap:12px; }
+    .hero-scene{ margin-top:0; max-width:170px; }
     .grid-productos{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
     .combo-panel{ grid-template-columns:1fr; padding:32px; }
     .pasos{ grid-template-columns:1fr; }
@@ -732,8 +746,8 @@
     font-size:0.95rem;
   }
   .modal-error{
-    background:#FBEAE8; color:var(--rojo);
-    border:1px solid #f3c9c4;
+    background:#FBEAE3; color:var(--oferta);
+    border:1px solid #F0CBBF;
     border-radius:10px;
     padding:10px 12px;
     font-size:0.85rem;
@@ -780,8 +794,8 @@
   .paso-step .etiqueta{ font-size:0.7rem; text-align:center; color:var(--ink-soft); max-width:72px; }
   .paso-step.activo .etiqueta, .paso-step.actual .etiqueta{ color:var(--ink); font-weight:600; }
   .aviso-cancelado{
-    margin-top:16px; background:#FBEAE8; border:1px solid #f3c9c4;
-    border-radius:12px; padding:14px 16px; color:var(--rojo); font-size:0.9rem;
+    margin-top:16px; background:#FBEAE3; border:1px solid #F0CBBF;
+    border-radius:12px; padding:14px 16px; color:var(--oferta); font-size:0.9rem;
   }
   .aviso-vencimiento{
     margin-top:14px; background:var(--paper-dim); border-radius:10px;
@@ -824,14 +838,14 @@
     .btn-menu, .btn-carrito{
       width:44px; height:44px; padding:0;
       display:flex; align-items:center; justify-content:center;
-      background:#A8E0E8;
-      border:1px solid #8CCFD9;
+      background:#EBCB9B;
+      border:1px solid #D9B27A;
       border-radius:12px;
       color:var(--ink);
       cursor:pointer;
     }
     .btn-menu, .btn-carrito{ transition:width .2s ease, height .2s ease, background .15s ease; }
-    .btn-menu:active, .btn-carrito:active{ background:#93D3DD; }
+    .btn-menu:active, .btn-carrito:active{ background:#E0BC88; }
     header.compacto .logo-mark img{ height:34px; }
     header.compacto .btn-menu,
     header.compacto .header-row .btn-carrito{ width:38px; height:38px; padding:0; }
@@ -967,7 +981,7 @@
   }
   .pago-opcion input{ position:absolute; opacity:0; pointer-events:none; }
   .pago-opcion .ico{ display:block; font-size:1.5rem; margin-bottom:4px; }
-  .pago-opcion.sel{ border-color:var(--azul); background:#E8F0FB; }
+  .pago-opcion.sel{ border-color:var(--azul); background:#F8E9D2; }
   .pago-opcion:focus-within{ outline:2px solid var(--azul); outline-offset:2px; }
   .transf-box{
     background:var(--paper-dim); border-radius:12px; padding:14px; margin-bottom:14px; font-size:0.9rem;
@@ -1004,7 +1018,9 @@
       <span class="barra"></span><span class="barra"></span><span class="barra"></span>
     </button>
     <div class="logo-mark">
-      <img src="assets/logo-confetti.png" alt="Confetti - Snack, Panadería, Repostería">
+      <a href="index.html" class="logo-link" aria-label="Confetti: volver al inicio" title="Ir al inicio">
+        <img src="assets/logo-confetti.png" alt="Confetti - Snack, Panadería, Repostería">
+      </a>
     </div>
     <nav id="nav-principal" aria-label="Menú principal">
       <ul>
@@ -1108,7 +1124,14 @@
 <footer>
   <div class="wrap footer-row">
     <span class="brand-word">Confetti</span>
-    <span class="footer-meta">Snack · Panadería · Repostería — Reconquista, Santa Fe</span>
+    <span class="footer-meta">Snack · Panadería · Repostería — Avellaneda, Santa Fe</span>
+  </div>
+  <div class="wrap footer-credito">
+    <span>Página diseñada y desarrollada por</span>
+    <a href="https://www.instagram.com/luciano.benvenutti/" target="_blank" rel="noopener noreferrer"
+       aria-label="NextCode, Luciano Benvenutti: abrir su Instagram" title="Mirá mi Instagram">
+      <img src="assets/nextcode-logo.png" alt="NextCode · Software y web a medida" width="84" height="80" loading="lazy">
+    </a>
   </div>
 </footer>
 
@@ -1253,11 +1276,11 @@
   let MODO_DEMO = false;
 
   const DEMO_CATEGORIAS = [
-    { id: 1, nombre: 'Copetín',     color_acento: '#E8483C' },
-    { id: 2, nombre: 'Panificados', color_acento: '#F5941F' },
-    { id: 3, nombre: 'Repostería',  color_acento: '#1E9C7C' },
-    { id: 4, nombre: 'Fiambrería',  color_acento: '#6E4E9E' },
-    { id: 5, nombre: 'Bebidas',     color_acento: '#1B4A9C' },
+    { id: 1, nombre: 'Copetín',     color_acento: '#A8601F' },
+    { id: 2, nombre: 'Panificados', color_acento: '#96700F' },
+    { id: 3, nombre: 'Repostería',  color_acento: '#6B4026' },
+    { id: 4, nombre: 'Fiambrería',  color_acento: '#A04855' },
+    { id: 5, nombre: 'Bebidas',     color_acento: '#8A6240' },
   ];
   const DEMO_PRODUCTOS = [
     { id: 1, categoria_id: 1, nombre: 'Empanaditas de jamón y queso', descripcion: 'Docena, recién horneadas', tipo_venta: 'unidad', precio: 4200 },
@@ -1929,7 +1952,7 @@
     const ctx = cv.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
     const W = cv.width = innerWidth * dpr, H = cv.height = innerHeight * dpr;
-    const colores = ['#E8483C', '#F5941F', '#1E9C7C', '#1B4A9C', '#C24F9E', '#6E4E9E', '#A8E0E8'];
+    const colores = ['#A8601F', '#D9A441', '#6B4026', '#A04855', '#F2C078', '#C98B5E', '#EBD9C0'];
     const piezas = [];
     // dos cañones, uno en cada esquina de abajo, disparando hacia el centro
     for (let i = 0; i < 140; i++) {

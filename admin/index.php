@@ -46,14 +46,14 @@ try {
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
 <link rel="icon" href="../favicon.ico" sizes="48x48">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
-<meta name="theme-color" content="#A9E0EA">
+<meta name="theme-color" content="#F4E4CC">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Confetti — Panel</title>
 <style>
   :root{
-    --paper:#FFFBF3; --paper-dim:#FFF4DE; --ink:#1F2A44; --ink-soft:#5B6478;
-    --rojo:#E8483C; --naranja:#F5941F; --verde:#1E9C7C; --violeta:#6E4E9E;
-    --linea:rgba(31,42,68,0.12);
+    --paper:#FBF2E4; --paper-dim:#F4E4CC; --ink:#3F2B1F; --ink-soft:#7A614E;
+    --rojo:#A8601F; --naranja:#96700F; --verde:#5F8A4B; --violeta:#8A6240;
+    --linea:rgba(63,43,31,0.12);
   }
   *{ box-sizing:border-box; }
   body{
@@ -61,30 +61,30 @@ try {
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
     background:var(--paper);
     color:var(--ink);
-    padding:32px 24px 60px;
+    padding:18px 24px 40px;
   }
   h1{ font-size:1.5rem; margin:0 0 4px; }
-  p.sub{ color:var(--ink-soft); margin:0 0 28px; }
+  p.sub{ color:var(--ink-soft); margin:0 0 18px; }
 
   .tiles{
     display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
-    gap:16px;
-    max-width:900px;
+    /* Ocupa todo el ancho: 6 por fila en pantallas grandes, 4 en notebooks, 3 en tablets, 1 en celulares */
+    grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
+    gap:14px;
   }
   .tile{
     background:#fff;
     border:1px solid var(--linea);
     border-left:5px solid var(--acento, var(--rojo));
     border-radius:16px;
-    padding:22px;
+    padding:16px 18px;
     text-decoration:none;
     color:var(--ink);
     display:block;
     transition:transform .12s ease;
   }
   a.tile:hover{ transform:translateY(-2px); }
-  .tile .icono{ font-size:1.8rem; margin-bottom:10px; }
+  .tile .icono{ font-size:1.6rem; margin-bottom:6px; }
   .tile h2{ font-size:1.05rem; margin:0 0 4px; }
   .tile p{ color:var(--ink-soft); font-size:0.85rem; margin:0; }
   .tile .badge{
@@ -108,10 +108,10 @@ try {
 </head>
 <body>
 
-<div style="overflow:hidden; margin-bottom:14px; font-size:0.85rem; color:#5B6478;"><?= barraSesionHtml() ?></div>
+<div style="overflow:hidden; margin-bottom:14px; font-size:0.85rem; color:#7A614E;"><?= barraSesionHtml() ?></div>
 
 <?php if (isset($_GET['clave_cambiada'])): ?>
-  <div style="background:#E4F5EE; color:#1E9C7C; border:1px solid #bfe6d7; border-radius:10px; padding:11px 16px; margin-bottom:18px; max-width:560px; font-size:0.92rem;">Contraseña cambiada.</div>
+  <div style="background:#EDF3E4; color:#5F8A4B; border:1px solid #D3E3C2; border-radius:10px; padding:11px 16px; margin-bottom:18px; max-width:560px; font-size:0.92rem;">Contraseña cambiada.</div>
 <?php endif; ?>
 
 <h1>Panel de Confetti</h1>

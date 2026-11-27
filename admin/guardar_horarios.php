@@ -13,14 +13,14 @@ function error($mensaje) {
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
 <link rel="icon" href="../favicon.ico" sizes="48x48">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
-<meta name="theme-color" content="#A9E0EA">
+<meta name="theme-color" content="#F4E4CC">
 '
        . '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
        . '<title>Revisá el horario</title></head>'
-       . '<body style="font-family:system-ui,sans-serif;background:#FFFBF3;color:#1F2A44;padding:40px 24px;">'
-       . '<div style="max-width:520px;background:#FBEAE8;color:#E8483C;border:1px solid #f3c9c4;border-radius:12px;padding:16px 20px;">'
+       . '<body style="font-family:system-ui,sans-serif;background:#FBF2E4;color:#3F2B1F;padding:40px 24px;">'
+       . '<div style="max-width:520px;background:#FBEAE3;color:#C8402F;border:1px solid #F0CBBF;border-radius:12px;padding:16px 20px;">'
        . htmlspecialchars($mensaje) . '</div>'
-       . '<p><a href="javascript:history.back()" style="color:#1B4A9C;">← Volver y corregir</a></p>'
+       . '<p><a href="javascript:history.back()" style="color:#6B4026;">← Volver y corregir</a></p>'
        . '</body></html>';
     exit;
 }

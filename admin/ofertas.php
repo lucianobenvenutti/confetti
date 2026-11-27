@@ -101,46 +101,46 @@ $pesos = fn($n) => '$' . number_format((float) $n, 0, ',', '.');
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
 <link rel="icon" href="../favicon.ico" sizes="48x48">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
-<meta name="theme-color" content="#A9E0EA">
+<meta name="theme-color" content="#F4E4CC">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Confetti — Ofertas</title>
 <style>
-  body{ font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:#FFFBF3; color:#1F2A44; margin:0; padding:28px 24px 80px; }
-  .nav-admin{ font-size:0.85rem; color:#5B6478; margin-bottom:18px; }
-  .nav-admin a{ color:#5B6478; text-decoration:none; }
-  .nav-admin a:hover{ color:#1F2A44; text-decoration:underline; }
+  body{ font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:#FBF2E4; color:#3F2B1F; margin:0; padding:28px 24px 80px; }
+  .nav-admin{ font-size:0.85rem; color:#7A614E; margin-bottom:18px; }
+  .nav-admin a{ color:#7A614E; text-decoration:none; }
+  .nav-admin a:hover{ color:#3F2B1F; text-decoration:underline; }
   h1{ font-size:1.4rem; margin:0 0 4px; }
-  p.sub{ color:#5B6478; margin:0 0 18px; max-width:700px; }
+  p.sub{ color:#7A614E; margin:0 0 18px; max-width:700px; }
   .aviso{ padding:12px 16px; border-radius:10px; margin-bottom:16px; font-size:0.95rem; max-width:900px; }
-  .aviso.ok{ background:#E4F5EE; color:#1E9C7C; border:1px solid #bfe6d7; }
-  .aviso.error{ background:#FBEAE8; color:#E8483C; border:1px solid #f3c9c4; }
+  .aviso.ok{ background:#EDF3E4; color:#5F8A4B; border:1px solid #D3E3C2; }
+  .aviso.error{ background:#FBEAE3; color:#C8402F; border:1px solid #F0CBBF; }
 
-  .barra{ position:sticky; top:0; z-index:5; background:#fff; border:1px solid rgba(31,42,68,0.12); border-radius:14px;
-          padding:14px 16px; margin-bottom:14px; box-shadow:0 6px 18px rgba(31,42,68,0.08); }
+  .barra{ position:sticky; top:0; z-index:5; background:#fff; border:1px solid rgba(63,43,31,0.12); border-radius:14px;
+          padding:14px 16px; margin-bottom:14px; box-shadow:0 6px 18px rgba(63,43,31,0.08); }
   .barra .fila{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
   .barra .titulo{ font-weight:700; }
-  .barra select, .barra input[type=text]{ font:inherit; padding:9px 10px; border-radius:9px; border:1px solid rgba(31,42,68,0.25); background:#fff; }
+  .barra select, .barra input[type=text]{ font:inherit; padding:9px 10px; border-radius:9px; border:1px solid rgba(63,43,31,0.25); background:#fff; }
   .barra input.valor{ width:110px; }
-  .contador{ font-size:0.85rem; color:#5B6478; }
+  .contador{ font-size:0.85rem; color:#7A614E; }
   button{ font-family:inherit; font-weight:700; font-size:0.92rem; border:none; border-radius:10px; padding:10px 18px; cursor:pointer; }
-  .btn-aplicar{ background:#E8483C; color:#fff; }
+  .btn-aplicar{ background:#A8601F; color:#fff; }
   .btn-aplicar:disabled, .btn-quitar:disabled{ opacity:.4; cursor:not-allowed; }
-  .btn-quitar{ background:#fff; color:#E8483C; border:1px solid #E8483C; }
+  .btn-quitar{ background:#fff; color:#C8402F; border:1px solid #C8402F; }
   .filtros{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:12px; }
-  .filtros input[type=text], .filtros select{ font:inherit; padding:9px 10px; border-radius:9px; border:1px solid rgba(31,42,68,0.25); background:#fff; }
+  .filtros input[type=text], .filtros select{ font:inherit; padding:9px 10px; border-radius:9px; border:1px solid rgba(63,43,31,0.25); background:#fff; }
   .filtros label{ font-size:0.88rem; display:flex; gap:6px; align-items:center; }
 
-  table{ width:100%; max-width:1000px; border-collapse:collapse; background:#fff; border-radius:14px; overflow:hidden; border:1px solid rgba(31,42,68,0.1); }
-  th, td{ padding:10px 12px; text-align:left; font-size:0.92rem; border-bottom:1px solid rgba(31,42,68,0.07); }
-  th{ background:#F6F3EC; font-size:0.78rem; text-transform:uppercase; letter-spacing:.04em; color:#5B6478; }
+  table{ width:100%; max-width:1000px; border-collapse:collapse; background:#fff; border-radius:14px; overflow:hidden; border:1px solid rgba(63,43,31,0.1); }
+  th, td{ padding:10px 12px; text-align:left; font-size:0.92rem; border-bottom:1px solid rgba(63,43,31,0.07); }
+  th{ background:#F3E8D6; font-size:0.78rem; text-transform:uppercase; letter-spacing:.04em; color:#7A614E; }
   tr.seleccionada{ background:#FFF6E8; }
   td.num, th.num{ text-align:right; white-space:nowrap; }
-  .tachado{ text-decoration:line-through; color:#8891a3; }
+  .tachado{ text-decoration:line-through; color:#A08A78; }
   .tag{ display:inline-block; background:#FFF1DC; color:#B35F00; font-weight:800; font-size:0.78rem; padding:3px 9px; border-radius:999px; }
-  .tag.mal{ background:#FBEAE8; color:#E8483C; }
-  .quedaria{ color:#1E9C7C; font-weight:700; }
-  .ahorro{ color:#1E9C7C; font-weight:600; }
-  .vacio{ padding:24px; color:#5B6478; }
+  .tag.mal{ background:#FBEAE3; color:#C8402F; }
+  .quedaria{ color:#5F8A4B; font-weight:700; }
+  .ahorro{ color:#5F8A4B; font-weight:600; }
+  .vacio{ padding:24px; color:#7A614E; }
   input[type=checkbox]{ width:18px; height:18px; cursor:pointer; }
 </style>
 </head>
@@ -218,7 +218,7 @@ $pesos = fn($n) => '$' . number_format((float) $n, 0, ',', '.');
         <td>
           <?php if ($activa): ?><span class="tag"><?= htmlspecialchars($etq) ?></span>
           <?php elseif ($invalida): ?><span class="tag mal" title="El descuento ya no entra en el precio actual: no se aplica">Descuento inválido</span>
-          <?php else: ?><span style="color:#8891a3;">—</span><?php endif; ?>
+          <?php else: ?><span style="color:#A08A78;">—</span><?php endif; ?>
         </td>
         <td class="num"><?php if ($activa): ?><strong><?= $pesos($final) . $sufijo ?></strong>
             <div class="ahorro">ahorra <?= $pesos($p['precio'] - $final) ?></div><?php else: ?>—<?php endif; ?></td>

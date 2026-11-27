@@ -11,13 +11,13 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
 <link rel="icon" href="../favicon.ico" sizes="48x48">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
-<meta name="theme-color" content="#A9E0EA">
+<meta name="theme-color" content="#F4E4CC">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Confetti — Mostrador</title>
 <style>
   :root{
-    --paper:#FFFBF3; --paper-dim:#FFF4DE; --ink:#1F2A44; --ink-soft:#5B6478;
-    --rojo:#E8483C; --verde:#1E9C7C; --linea:rgba(31,42,68,0.12);
+    --paper:#FBF2E4; --paper-dim:#F4E4CC; --ink:#3F2B1F; --ink-soft:#7A614E;
+    --rojo:#A8601F; --alerta:#C8402F; --verde:#5F8A4B; --linea:rgba(63,43,31,0.12);
   }
   *{ box-sizing:border-box; }
   body{
@@ -95,10 +95,10 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
   }
   .card .precio{ color:var(--ink-soft); font-size:0.8rem; margin-top:1px; }
   .tag-oferta{ background:#FFF1DC; color:#B35F00; font-weight:800; font-size:0.62rem; padding:1px 6px; border-radius:6px; letter-spacing:.03em; }
-  .card.stock-bajo{ background:#FDEAEA; border-color:#f0b7b2; }
+  .card.stock-bajo{ background:#FBEAE3; border-color:#F0CBBF; }
   .card .badge-bajo{
     align-self:flex-start;
-    background:var(--rojo);
+    background:var(--alerta);
     color:#fff;
     font-size:0.65rem;
     font-weight:700;
@@ -106,62 +106,81 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
     border-radius:6px;
   }
 
-  .lista-venta{ flex:1; overflow-y:auto; margin:14px 0; }
+  .lista-venta{ flex:1; overflow-y:auto; margin:8px 0; }
   .item-venta{
     display:flex; justify-content:space-between; align-items:center;
-    padding:10px 0; border-bottom:1px solid var(--linea); font-size:0.9rem; gap:8px;
+    padding:5px 0; border-bottom:1px solid var(--linea); font-size:0.9rem; gap:8px;
   }
-  .item-venta .info{ display:flex; align-items:center; gap:12px; min-width:0; flex:1; }
+  .item-venta .info{ display:flex; align-items:center; gap:8px; min-width:0; flex:1; }
   .item-venta .mini-venta{
-    flex:none; width:56px; height:56px; border-radius:10px; object-fit:cover;
+    flex:none; width:34px; height:34px; border-radius:8px; object-fit:cover;
     background:var(--paper-dim); border:1px solid var(--linea);
   }
   .item-venta .mini-venta.sin-foto{
-    display:flex; align-items:center; justify-content:center; font-size:1.5rem;
+    display:flex; align-items:center; justify-content:center; font-size:1.05rem;
   }
   .item-venta .textos{ min-width:0; }
-  .item-venta .nombre{ font-weight:600; font-size:0.98rem; overflow-wrap:anywhere; }
-  .item-venta .desc-venta{ color:var(--ink-soft); font-size:0.78rem; line-height:1.25; overflow-wrap:anywhere; }
-  .item-venta .detalle{ color:var(--ink-soft); font-size:0.85rem; margin-top:2px; }
+  .item-venta .nombre{ font-weight:600; font-size:0.9rem; line-height:1.2; overflow-wrap:anywhere; }
+  .item-venta .desc-venta{ color:var(--ink-soft); font-size:0.72rem; line-height:1.15; overflow-wrap:anywhere; }
+  .item-venta .detalle{ color:var(--ink-soft); font-size:0.8rem; margin-top:0; }
   .item-venta .btn-quitar{
-    border:none; background:none; color:var(--rojo); font-size:0.85rem; cursor:pointer; flex:none;
+    border:none; background:none; color:var(--alerta); font-size:1.3rem; line-height:1; cursor:pointer; flex:none; padding:2px 6px;
   }
 
   /* Cantidad editable de cada producto de la venta: − [número] + */
-  .cantidad-ctl{ display:flex; align-items:center; gap:6px; margin-top:8px; }
+  .cantidad-ctl{ display:flex; align-items:center; gap:4px; flex:none; }
   .btn-cant{
-    width:36px; height:36px; flex:none; border-radius:9px; cursor:pointer;
+    width:28px; height:28px; flex:none; border-radius:7px; cursor:pointer;
     border:1px solid var(--linea); background:#fff; color:var(--ink);
-    font-size:1.25rem; line-height:1; font-family:inherit; padding:0;
+    font-size:1.05rem; line-height:1; font-family:inherit; padding:0;
   }
   .btn-cant:hover{ background:var(--paper-dim); }
   .btn-cant:active{ transform:scale(0.94); }
   .btn-cant:disabled{ opacity:0.35; cursor:default; }
   .input-cant{
-    width:74px; height:36px; box-sizing:border-box; text-align:center;
-    border:1px solid var(--linea); border-radius:9px; font-size:1rem; font-weight:600;
+    width:52px; height:28px; box-sizing:border-box; text-align:center;
+    border:1px solid var(--linea); border-radius:7px; font-size:0.9rem; font-weight:600;
     font-family:inherit; color:var(--ink); background:#fff; -moz-appearance:textfield;
   }
   .input-cant::-webkit-outer-spin-button, .input-cant::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
-  .input-cant:focus{ outline:2px solid var(--azul, #1B4A9C); outline-offset:1px; }
+  .input-cant:focus{ outline:2px solid var(--azul, #6B4026); outline-offset:1px; }
   .unidad-cant{ color:var(--ink-soft); font-size:0.85rem; margin-right:2px; }
-  .aviso-cant{ color:var(--rojo); font-size:0.8rem; margin-top:4px; }
+  .aviso-cant{ color:var(--alerta); font-size:0.75rem; margin-top:2px; }
 
   /* En pantallas chicas (celular / tablet vertical) el panel de venta pasa abajo */
   @media (max-width: 900px){
     .layout{ grid-template-columns:1fr; }
-    .panel-venta{ position:static; height:auto; border-left:none; border-top:1px solid var(--linea); }
-    .lista-venta{ max-height:50vh; }
+    /* Celular: el panel de venta queda fijo abajo. Cerrado = solo título, total y "Registrar venta";
+       al tocar la barra se abre y muestra la lista, descuento, pago, etc. */
+    .panel-productos{ padding-bottom:150px; }
+    .panel-venta{
+      position:fixed; left:0; right:0; bottom:0; top:auto; height:auto; max-height:88vh;
+      border-left:none; border-top:1px solid var(--linea); padding:10px 14px 12px;
+      box-shadow:0 -4px 16px rgba(60,35,15,.18); z-index:40; overflow:hidden;
+    }
+    .venta-cab{ cursor:pointer; display:flex; align-items:center; gap:8px; padding:2px 0 6px; }
+    .cab-resumen{ margin-left:auto; font-weight:700; font-size:0.95rem; }
+    .cab-flecha{ font-size:0.8rem; color:var(--ink-soft); transition:transform .2s; }
+    .panel-venta.abierto .cab-flecha{ transform:rotate(180deg); }
+    .panel-venta:not(.abierto) .lista-venta,
+    .panel-venta:not(.abierto) .acciones-secundarias,
+    .panel-venta:not(.abierto) .cuenta-info,
+    .panel-venta:not(.abierto) .resumen,
+    .panel-venta:not(.abierto) .total-row{ display:none; }
+    .panel-venta.abierto .lista-venta{ min-height:80px; max-height:none; }
+    .panel-venta.abierto .cab-resumen{ display:none; }
+    body.panel-abierto{ overflow:hidden; }
   }
+  @media (min-width: 901px){ .cab-resumen, .cab-flecha{ display:none; } .venta-cab{ display:block; } }
   .vacio{ color:var(--ink-soft); font-size:0.9rem; }
 
   .acciones-secundarias{
-    display:flex; gap:8px; margin-bottom:14px;
+    display:flex; gap:6px; margin-bottom:8px;
   }
   .btn-secundario{
     flex:1;
-    padding:10px;
-    border-radius:9px;
+    padding:6px 8px;
+    border-radius:8px;
     border:1px solid var(--linea);
     background:#fff;
     font-size:0.82rem;
@@ -174,14 +193,14 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
   .btn-cuenta{ flex:1 1 100%; }
 
   .cuenta-info{
-    font-size:0.85rem; background:#EFEAF7; color:#4b3577; border-radius:10px;
+    font-size:0.85rem; background:#EFE3D6; color:#6B4B30; border-radius:10px;
     padding:9px 12px; margin-bottom:10px; display:none;
   }
-  .cuenta-info button{ border:none; background:none; color:#4b3577; text-decoration:underline; cursor:pointer; font-size:0.78rem; margin-left:6px; }
+  .cuenta-info button{ border:none; background:none; color:#6B4B30; text-decoration:underline; cursor:pointer; font-size:0.78rem; margin-left:6px; }
 
   /* Ventana para elegir / crear la cuenta */
   .modal-cuentas{
-    position:fixed; inset:0; background:rgba(31,42,68,0.45); z-index:60;
+    position:fixed; inset:0; background:rgba(63,43,31,0.45); z-index:60;
     display:none; align-items:center; justify-content:center; padding:20px;
   }
   .modal-cuentas.visible{ display:flex; }
@@ -200,45 +219,80 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
     border:1px solid var(--linea); background:#fff; border-radius:10px; padding:10px 12px; cursor:pointer;
     font-family:inherit; font-size:0.9rem;
   }
-  .fila-cuenta:hover{ border-color:#6E4E9E; }
+  .fila-cuenta:hover{ border-color:#8A6240; }
   .fila-cuenta small{ display:block; color:var(--ink-soft); font-size:0.75rem; }
   .fila-cuenta .saldo{ font-size:0.8rem; font-weight:700; white-space:nowrap; }
-  .saldo.debe{ color:var(--rojo); }
+  .saldo.debe{ color:var(--alerta); }
   .saldo.favor{ color:var(--verde); }
   .saldo.cero{ color:var(--ink-soft); font-weight:500; }
   .nueva-cuenta{ border-top:1px solid var(--linea); padding-top:12px; display:flex; flex-direction:column; gap:8px; }
   .nueva-cuenta h3{ font-size:0.85rem; margin:0; color:var(--ink-soft); }
   .nueva-cuenta .fila-inputs{ display:flex; gap:8px; }
   .modal-cuentas .btn-crear{
-    border:none; background:#6E4E9E; color:#fff; font-weight:600; border-radius:9px;
+    border:none; background:#8A6240; color:#fff; font-weight:600; border-radius:9px;
     padding:10px 14px; cursor:pointer; font-family:inherit; font-size:0.88rem;
   }
   .modal-cuentas .btn-cerrar{
     border:1px solid var(--linea); background:#fff; border-radius:9px; padding:9px;
     cursor:pointer; font-family:inherit; font-size:0.88rem;
   }
-  .picker-error{ color:var(--rojo); font-size:0.82rem; display:none; }
+  .picker-error{ color:var(--alerta); font-size:0.82rem; display:none; }
 
-  .resumen{ font-size:0.88rem; margin-bottom:8px; }
-  .resumen .fila{ display:flex; justify-content:space-between; padding:3px 0; }
-  .resumen .fila.descuento{ color:var(--rojo); }
+  /* Ventana de descuento */
+  .desc-fila{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .desc-fila label.op{
+    display:flex; align-items:center; gap:6px; border:1px solid var(--linea); border-radius:10px;
+    padding:9px 12px; cursor:pointer; font-size:0.9rem; background:#fff; flex:1; min-width:120px;
+  }
+  .desc-fila label.op:has(input:checked){ border-color:var(--rojo); background:#FBF2E4; font-weight:600; }
+  .desc-fila input[type="number"]{
+    width:130px; padding:10px 12px; border-radius:9px; border:1px solid var(--linea); font-family:inherit; font-size:1rem;
+  }
+  .desc-subtitulo{ font-size:0.8rem; color:var(--ink-soft); margin:2px 0 -4px; font-weight:600; }
+  .desc-lista{ overflow-y:auto; max-height:220px; display:flex; flex-direction:column; gap:6px; }
+  .desc-item{
+    display:flex; align-items:center; gap:10px; border:1px solid var(--linea); border-radius:10px;
+    padding:8px 12px; cursor:pointer; font-size:0.88rem; background:#fff;
+  }
+  .desc-item:has(input:checked){ border-color:var(--rojo); background:#FBF2E4; }
+  .desc-item input{ width:18px; height:18px; flex:none; }
+  .desc-item .txt{ flex:1; min-width:0; }
+  .desc-item small{ display:block; color:var(--ink-soft); font-size:0.74rem; }
+  .desc-item .monto{ font-weight:700; white-space:nowrap; }
+  .desc-atajos{ display:flex; gap:12px; font-size:0.8rem; }
+  .desc-atajos button{ border:none; background:none; color:#6B4B30; text-decoration:underline; cursor:pointer; padding:0; font-family:inherit; }
+  .desc-vista{ background:#F4E4CC; border-radius:10px; padding:10px 12px; font-size:0.9rem; min-height:20px; }
+  .desc-botones{ display:flex; gap:8px; }
+  .desc-botones .btn-aplicar{
+    flex:1; border:none; background:var(--rojo); color:#fff; font-weight:700; border-radius:10px;
+    padding:12px; cursor:pointer; font-family:inherit; font-size:0.95rem;
+  }
+  .desc-botones .btn-aplicar:disabled{ opacity:.4; cursor:not-allowed; }
+  .desc-botones .btn-quitar-desc{
+    border:1px solid var(--alerta); color:var(--alerta); background:#fff; border-radius:10px;
+    padding:12px 14px; cursor:pointer; font-family:inherit; font-size:0.9rem;
+  }
+
+  .resumen{ font-size:0.85rem; margin-bottom:4px; }
+  .resumen .fila{ display:flex; justify-content:space-between; padding:1px 0; }
+  .resumen .fila.descuento{ color:var(--alerta); }
   .resumen .fila button{ border:none; background:none; color:var(--ink-soft); font-size:0.75rem; cursor:pointer; text-decoration:underline; margin-left:6px; }
 
   .total-row{
     display:flex; justify-content:space-between; font-weight:700; font-size:1.2rem;
-    padding-top:10px; border-top:1px solid var(--linea); margin-bottom:8px;
+    padding-top:6px; border-top:1px solid var(--linea); margin-bottom:6px;
   }
   .vuelto-info{
     font-size:0.9rem; padding:10px 12px; border-radius:10px; margin-bottom:12px;
   }
-  .vuelto-info.ok{ background:#E4F5EE; color:var(--verde); }
-  .vuelto-info.falta{ background:#FBEAE8; color:var(--rojo); }
+  .vuelto-info.ok{ background:#EDF3E4; color:var(--verde); }
+  .vuelto-info.falta{ background:#FBEAE3; color:var(--alerta); }
 
   button.grande{
-    width:100%; padding:14px; border:none; border-radius:10px;
+    width:100%; padding:11px; border:none; border-radius:10px;
     background:var(--rojo); color:#fff; font-weight:700; font-size:1rem; cursor:pointer;
   }
-  button.grande:hover{ background:#c73a2f; }
+  button.grande:hover{ background:#8A4F1C; }
   button.grande:disabled{ background:#ccc; cursor:not-allowed; }
 
   .confirmacion{ text-align:center; padding:30px 10px; }
@@ -248,7 +302,7 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
   .confirmacion .detalle-pago{ color:var(--ink-soft); font-size:0.85rem; margin-bottom:18px; }
 
   .aviso-error{
-    background:#FBEAE8; color:var(--rojo); border:1px solid #f3c9c4;
+    background:#FBEAE3; color:var(--alerta); border:1px solid #F0CBBF;
     border-radius:10px; padding:10px 12px; font-size:0.85rem; margin-bottom:12px; display:none;
   }
 
@@ -260,21 +314,21 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
   }
   .aviso-web.visible{ display:flex; }
   .aviso-web.pulso{ animation:pulsoWeb 1.2s ease-in-out 4; }
-  @keyframes pulsoWeb{ 50%{ box-shadow:0 0 0 6px rgba(245,148,31,0.35); } }
+  @keyframes pulsoWeb{ 50%{ box-shadow:0 0 0 6px rgba(150,112,15,0.35); } }
   .aviso-web a{
-    background:#F5941F; color:#fff; text-decoration:none; font-weight:700; font-size:0.85rem;
+    background:#96700F; color:#fff; text-decoration:none; font-weight:700; font-size:0.85rem;
     padding:8px 14px; border-radius:9px; white-space:nowrap;
   }
   .aviso-web small{ display:block; font-weight:500; opacity:0.85; margin-top:2px; }
   .chip-sonido{
-    float:right; border:1px solid #d8dde7; background:#fff; color:#5B6478; border-radius:999px;
+    float:right; border:1px solid #E0D2BF; background:#fff; color:#7A614E; border-radius:999px;
     padding:3px 10px; font-size:0.78rem; cursor:pointer; font-family:inherit;
   }
-  .chip-sonido.activo{ background:#E4F5EE; border-color:#bfe6d7; color:#1E9C7C; }
+  .chip-sonido.activo{ background:#EDF3E4; border-color:#D3E3C2; color:#5F8A4B; }
   .toast-web{
     position:fixed; top:16px; right:16px; z-index:60; max-width:340px; display:none;
-    background:#fff; border-left:6px solid #F5941F; border-radius:12px; padding:14px 16px;
-    box-shadow:0 10px 30px rgba(31,42,68,0.25); font-size:0.92rem;
+    background:#fff; border-left:6px solid #96700F; border-radius:12px; padding:14px 16px;
+    box-shadow:0 10px 30px rgba(63,43,31,0.25); font-size:0.92rem;
   }
   .toast-web.visible{ display:block; animation:entraToast .35s ease-out; }
   @keyframes entraToast{ from{ transform:translateY(-14px); opacity:0; } }
@@ -284,16 +338,16 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
     font:inherit; font-weight:700; font-size:0.85rem; border-radius:9px; padding:8px 12px;
     border:0; cursor:pointer; text-decoration:none;
   }
-  .toast-web a{ background:#F5941F; color:#fff; }
-  .toast-web button{ background:#F2F4F8; color:#1F2A44; }
+  .toast-web a{ background:#96700F; color:#fff; }
+  .toast-web button{ background:#F1E6D6; color:#3F2B1F; }
 </style>
 </head>
 <body>
 
 <div class="layout">
   <div class="panel-productos">
-    <div style="overflow:hidden; font-size:0.85rem; color:#5B6478; margin-bottom:12px;">
-      <a href="index.php" style="color:#5B6478; text-decoration:none;">← Panel</a> <?= barraSesionHtml() ?>
+    <div style="overflow:hidden; font-size:0.85rem; color:#7A614E; margin-bottom:12px;">
+      <a href="index.php" style="color:#7A614E; text-decoration:none;">← Panel</a> <?= barraSesionHtml() ?>
       <button type="button" class="chip-sonido" id="chip-sonido" title="Sonido cuando llega un pedido web">🔕 Sonido apagado</button>
     </div>
     <div class="aviso-web" id="aviso-web" role="status" aria-live="polite">
@@ -310,7 +364,11 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
   </div>
 
   <div class="panel-venta" id="panel-venta">
-    <h1 style="font-size:1.15rem;">Venta actual</h1>
+    <div class="venta-cab" id="venta-cab" role="button" tabindex="0" aria-expanded="false">
+      <h1 style="font-size:1.15rem;margin:0;">Venta actual</h1>
+      <span class="cab-resumen" id="cab-resumen"></span>
+      <span class="cab-flecha" aria-hidden="true">▲</span>
+    </div>
     <div class="aviso-error" id="aviso-error"></div>
     <div class="lista-venta" id="lista-venta">
       <p class="vacio">Todavía no agregaste nada.</p>
@@ -341,6 +399,40 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
   </div>
 </div>
 
+<div class="modal-cuentas" id="modal-descuento">
+  <div class="tarjeta">
+    <h2>Descuento</h2>
+
+    <div class="desc-fila">
+      <label class="op"><input type="radio" name="desc-tipo" value="porcentaje" checked> % Porcentaje</label>
+      <label class="op"><input type="radio" name="desc-tipo" value="monto"> $ Monto fijo</label>
+    </div>
+    <div class="desc-fila">
+      <input type="number" id="desc-valor" min="0" step="any" inputmode="decimal" placeholder="Ej: 10">
+      <span id="desc-unidad" style="color:var(--ink-soft);">% de descuento</span>
+    </div>
+
+    <div class="desc-subtitulo">¿Sobre qué lo aplico?</div>
+    <div class="desc-fila">
+      <label class="op"><input type="radio" name="desc-alcance" value="todos" checked> A toda la venta</label>
+      <label class="op"><input type="radio" name="desc-alcance" value="seleccion"> Solo a algunos productos</label>
+    </div>
+
+    <div id="desc-seleccion" style="display:none; flex-direction:column; gap:8px;">
+      <div class="desc-atajos"><button type="button" id="desc-todos">Marcar todos</button><button type="button" id="desc-ninguno">Desmarcar todos</button></div>
+      <div class="desc-lista" id="desc-lista"></div>
+    </div>
+
+    <div class="desc-vista" id="desc-vista"></div>
+
+    <div class="desc-botones">
+      <button type="button" class="btn-quitar-desc" id="desc-quitar" style="display:none;">Quitar descuento</button>
+      <button type="button" class="btn-aplicar" id="desc-aplicar" disabled>Aplicar descuento</button>
+    </div>
+    <button type="button" class="btn-cerrar" id="desc-cancelar">Cancelar</button>
+  </div>
+</div>
+
 <div class="modal-cuentas" id="modal-cuentas">
   <div class="tarjeta">
     <h2>Cargar a cuenta corriente</h2>
@@ -366,7 +458,7 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
   let productosCache = [];
   let categoriaActiva = null;
   let venta = []; // { tipo, id, nombre, precio, tipo_venta, cantidad }
-  let descuento = null;   // { tipo: 'porcentaje'|'monto', valor: number }
+  let descuento = null;   // { tipo: 'porcentaje'|'monto', valor: number, alcance: 'todos'|'seleccion', claves: ['producto:5', ...] }
   let montoPagado = null; // number o null
   let cuentaSeleccionada = null; // { id, nombre, saldo } si la venta va a cuenta corriente
   let cuentasCache = [];
@@ -464,7 +556,7 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
       btn.disabled = !p.disponible;
       const sufijo = p.tipo_venta === 'peso' ? '/kg' : '';
       const precio = p.en_oferta
-        ? `<s style="opacity:.6">${formatoPrecio.format(p.precio_normal)}</s> <strong style="color:var(--rojo)">${formatoPrecio.format(p.precio)}${sufijo}</strong> <span class="tag-oferta">OFERTA</span>`
+        ? `<s style="opacity:.6">${formatoPrecio.format(p.precio_normal)}</s> <strong style="color:var(--alerta)">${formatoPrecio.format(p.precio)}${sufijo}</strong> <span class="tag-oferta">OFERTA</span>`
         : `${formatoPrecio.format(p.precio)}${sufijo}`;
       const desc = (p.descripcion || '').trim();
       btn.title = p.nombre + (desc ? ' — ' + desc : '');   // al dejar el mouse encima se ve completa
@@ -581,12 +673,35 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
     return venta.reduce((acc, i) => acc + i.precio * i.cantidad, 0);
   }
 
+  // Un renglón por producto (aunque se haya cargado en varias tandas de peso)
+  function gruposVenta() {
+    const m = new Map();
+    venta.forEach(i => {
+      const clave = `${i.tipo}:${i.id}`;
+      const g = m.get(clave) || { clave, nombre: i.nombre, descripcion: i.descripcion || '', subtotal: 0 };
+      g.subtotal += i.precio * i.cantidad;
+      m.set(clave, g);
+    });
+    return [...m.values()];
+  }
+
+  // Sobre cuánta plata se aplica el descuento: toda la venta o solo lo elegido
+  function baseDescuento(subtotal, d = descuento) {
+    if (!d) return 0;
+    if (d.alcance !== 'seleccion') return subtotal;
+    const elegidas = new Set(d.claves || []);
+    return gruposVenta().filter(g => elegidas.has(g.clave)).reduce((a, g) => a + g.subtotal, 0);
+  }
+
+  function montoDescuentoDe(d, subtotal) {
+    if (!d) return 0;
+    const base = baseDescuento(subtotal, d);
+    if (d.tipo === 'porcentaje') return base * Math.min(Math.max(d.valor, 0), 100) / 100;
+    return Math.min(Math.max(d.valor, 0), base);
+  }
+
   function calcularMontoDescuento(subtotal) {
-    if (!descuento) return 0;
-    if (descuento.tipo === 'porcentaje') {
-      return subtotal * Math.min(Math.max(descuento.valor, 0), 100) / 100;
-    }
-    return Math.min(Math.max(descuento.valor, 0), subtotal);
+    return montoDescuentoDe(descuento, subtotal);
   }
 
   function calcularTotal() {
@@ -619,18 +734,18 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
               <div class="nombre">${esc(item.nombre)}</div>
               ${item.descripcion ? `<div class="desc-venta">${esc(item.descripcion)}</div>` : ''}
               <div class="detalle">${precioUnit} · <strong>${formatoPrecio.format(item.precio * item.cantidad)}</strong></div>
-              <div class="cantidad-ctl">
-                <button type="button" class="btn-cant menos" aria-label="Menos">−</button>
-                <input type="number" class="input-cant" inputmode="${esPeso ? 'numeric' : 'numeric'}"
-                       min="${esPeso ? 10 : 1}" step="${esPeso ? 50 : 1}" value="${valorMostrado}"
-                       aria-label="Cantidad${esPeso ? ' en gramos' : ''}">
-                ${esPeso ? '<span class="unidad-cant">g</span>' : ''}
-                <button type="button" class="btn-cant mas" aria-label="Más">+</button>
-              </div>
               ${item.aviso ? `<div class="aviso-cant">${esc(item.aviso)}</div>` : ''}
             </div>
           </div>
-          <button type="button" class="btn-quitar" aria-label="Quitar">Quitar</button>
+          <div class="cantidad-ctl">
+            <button type="button" class="btn-cant menos" aria-label="Menos">−</button>
+            <input type="number" class="input-cant" inputmode="numeric"
+                   min="${esPeso ? 10 : 1}" step="${esPeso ? 50 : 1}" value="${valorMostrado}"
+                   aria-label="Cantidad${esPeso ? ' en gramos' : ''}">
+            ${esPeso ? '<span class="unidad-cant">g</span>' : ''}
+            <button type="button" class="btn-cant mas" aria-label="Más">+</button>
+          </div>
+          <button type="button" class="btn-quitar" aria-label="Quitar" title="Quitar">×</button>
         `;
         const paso = esPeso ? 50 : 1;
         const input = div.querySelector('.input-cant');
@@ -663,7 +778,7 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
       resumenCont.innerHTML = `
         <div class="fila"><span>Subtotal</span><span>${formatoPrecio.format(subtotal)}</span></div>
         <div class="fila descuento">
-          <span>Descuento ${descuento.tipo === 'porcentaje' ? `(${descuento.valor}%)` : ''}
+          <span>Descuento ${descuento.tipo === 'porcentaje' ? `(${descuento.valor}%)` : ''}${textoAlcance()}
             <button id="btn-quitar-descuento">quitar</button>
           </span>
           <span>-${formatoPrecio.format(montoDescuento)}</span>
@@ -676,6 +791,12 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
     }
 
     document.getElementById('total-venta').textContent = formatoPrecio.format(total);
+    {
+      const unidades = venta.length;
+      document.getElementById('cab-resumen').textContent = unidades
+        ? `${unidades} ${unidades === 1 ? 'producto' : 'productos'} · ${formatoPrecio.format(total)}`
+        : 'Vacía';
+    }
 
     // Vuelto (si se cargó con cuánto paga)
     const vueltoCont = document.getElementById('vuelto-info');
@@ -717,25 +838,92 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
     btnRegistrar.disabled = venta.length === 0;
   }
 
-  document.getElementById('btn-descuento').addEventListener('click', () => {
-    const texto = prompt('Descuento (ej: "10%" para porcentaje, o "500" para un monto fijo en pesos). Dejalo en 0 para sacarlo.', descuento ? (descuento.tipo === 'porcentaje' ? descuento.valor + '%' : descuento.valor) : '');
-    if (texto === null) return;
+  // ---------------- Ventana de descuento ----------------
+  function textoAlcance() {
+    if (!descuento || descuento.alcance !== 'seleccion') return '';
+    const elegidas = new Set(descuento.claves || []);
+    const nombres = gruposVenta().filter(g => elegidas.has(g.clave)).map(g => g.nombre);
+    if (!nombres.length) return '';
+    return ` · solo ${nombres.length === 1 ? esc(nombres[0]) : nombres.length + ' productos'}`;
+  }
 
-    const limpio = texto.trim();
-    if (limpio === '' || parseFloat(limpio) === 0) {
-      descuento = null;
-      renderVenta();
-      return;
-    }
+  const modalDesc = document.getElementById('modal-descuento');
+  const radio = (nombre) => document.querySelector(`input[name="${nombre}"]:checked`).value;
 
-    if (limpio.includes('%')) {
-      const valor = parseFloat(limpio.replace('%', ''));
-      if (!isNaN(valor) && valor > 0) descuento = { tipo: 'porcentaje', valor };
+  function descuentoDelFormulario() {
+    const valor = parseFloat(document.getElementById('desc-valor').value);
+    const tipo = radio('desc-tipo');
+    const alcance = radio('desc-alcance');
+    const claves = alcance === 'seleccion'
+      ? [...document.querySelectorAll('#desc-lista input:checked')].map(c => c.value) : [];
+    const valido = isFinite(valor) && valor > 0 && (tipo !== 'porcentaje' || valor <= 100)
+                   && (alcance !== 'seleccion' || claves.length > 0);
+    return { d: { tipo, valor, alcance, claves }, valido };
+  }
+
+  function actualizarVistaDescuento() {
+    const { d, valido } = descuentoDelFormulario();
+    document.getElementById('desc-unidad').textContent = d.tipo === 'porcentaje' ? '% de descuento' : 'pesos de descuento';
+    document.getElementById('desc-seleccion').style.display = d.alcance === 'seleccion' ? 'flex' : 'none';
+    const vista = document.getElementById('desc-vista');
+    const subtotal = calcularSubtotal();
+    if (valido) {
+      const monto = montoDescuentoDe(d, subtotal);
+      vista.innerHTML = `Descuento: <strong>-${formatoPrecio.format(monto)}</strong> · Total quedaría <strong>${formatoPrecio.format(Math.max(0, subtotal - monto))}</strong>`;
+    } else if (d.alcance === 'seleccion' && !d.claves.length) {
+      vista.textContent = 'Marcá los productos que llevan el descuento.';
+    } else if (d.tipo === 'porcentaje' && d.valor > 100) {
+      vista.textContent = 'El porcentaje no puede pasar de 100.';
     } else {
-      const valor = parseFloat(limpio);
-      if (!isNaN(valor) && valor > 0) descuento = { tipo: 'monto', valor };
+      vista.textContent = 'Escribí cuánto descuento querés dar.';
     }
+    document.getElementById('desc-aplicar').disabled = !valido || subtotal <= 0;
+  }
+
+  function abrirDescuento() {
+    const grupos = gruposVenta();
+    const previo = descuento;
+    const marcadas = new Set(previo && previo.alcance === 'seleccion' ? previo.claves : []);
+    document.querySelector(`input[name="desc-tipo"][value="${previo ? previo.tipo : 'porcentaje'}"]`).checked = true;
+    document.querySelector(`input[name="desc-alcance"][value="${previo ? previo.alcance : 'todos'}"]`).checked = true;
+    document.getElementById('desc-valor').value = previo ? previo.valor : '';
+    document.getElementById('desc-quitar').style.display = previo ? '' : 'none';
+
+    const lista = document.getElementById('desc-lista');
+    lista.innerHTML = grupos.length ? grupos.map(g => `
+      <label class="desc-item">
+        <input type="checkbox" value="${esc(g.clave)}" ${marcadas.has(g.clave) ? 'checked' : ''}>
+        <span class="txt">${esc(g.nombre)}${g.descripcion ? `<small>${esc(g.descripcion)}</small>` : ''}</span>
+        <span class="monto">${formatoPrecio.format(g.subtotal)}</span>
+      </label>`).join('') : '<div class="vacio">Todavía no agregaste productos a la venta.</div>';
+
+    modalDesc.classList.add('visible');
+    actualizarVistaDescuento();
+    document.getElementById('desc-valor').focus();
+  }
+
+  function cerrarDescuento() { modalDesc.classList.remove('visible'); }
+
+  function aplicarDescuento() {
+    const { d, valido } = descuentoDelFormulario();
+    if (!valido) return;
+    descuento = d.alcance === 'seleccion' ? d : { tipo: d.tipo, valor: d.valor, alcance: 'todos', claves: [] };
+    cerrarDescuento();
     renderVenta();
+  }
+
+  document.getElementById('btn-descuento').addEventListener('click', abrirDescuento);
+  document.getElementById('desc-cancelar').addEventListener('click', cerrarDescuento);
+  document.getElementById('desc-aplicar').addEventListener('click', aplicarDescuento);
+  document.getElementById('desc-quitar').addEventListener('click', () => { descuento = null; cerrarDescuento(); renderVenta(); });
+  document.getElementById('desc-todos').addEventListener('click', () => { document.querySelectorAll('#desc-lista input').forEach(c => c.checked = true); actualizarVistaDescuento(); });
+  document.getElementById('desc-ninguno').addEventListener('click', () => { document.querySelectorAll('#desc-lista input').forEach(c => c.checked = false); actualizarVistaDescuento(); });
+  modalDesc.addEventListener('input', actualizarVistaDescuento);
+  modalDesc.addEventListener('change', actualizarVistaDescuento);
+  modalDesc.addEventListener('click', (e) => { if (e.target === modalDesc) cerrarDescuento(); });
+  // Enter en cualquier campo de la ventana (número, opciones, productos) aplica el descuento si está completo
+  modalDesc.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.target.tagName !== 'BUTTON') { e.preventDefault(); if (!document.getElementById('desc-aplicar').disabled) aplicarDescuento(); }
   });
 
   document.getElementById('btn-pago').addEventListener('click', () => {
@@ -790,6 +978,20 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
       btn.textContent = textoBotonRegistrar();
     }
   }
+
+  // Celular: abrir / cerrar el panel de venta fijo abajo
+  (function () {
+    const panel = document.getElementById('panel-venta');
+    const cab = document.getElementById('venta-cab');
+    if (!panel || !cab) return;
+    const alternar = () => {
+      const abierto = panel.classList.toggle('abierto');
+      cab.setAttribute('aria-expanded', abierto ? 'true' : 'false');
+      document.body.classList.toggle('panel-abierto', abierto && window.matchMedia('(max-width: 900px)').matches);
+    };
+    cab.addEventListener('click', alternar);
+    cab.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); alternar(); } });
+  })();
 
   function mostrarConfirmacion(data) {
     const panel = document.getElementById('panel-venta');
@@ -894,7 +1096,7 @@ $usuarioActual = exigirSesion(ROLES_TODOS);
     if (e.target.id === 'modal-cuentas') cerrarCuentas();
   });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') cerrarCuentas();
+    if (e.key === 'Escape') { cerrarCuentas(); cerrarDescuento(); }
   });
 
   document.getElementById('btn-crear-cuenta').addEventListener('click', async () => {

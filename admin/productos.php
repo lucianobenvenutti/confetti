@@ -38,57 +38,57 @@ function hace($segundos) {
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
 <link rel="icon" href="../favicon.ico" sizes="48x48">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
-<meta name="theme-color" content="#A9E0EA">
+<meta name="theme-color" content="#F4E4CC">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Confetti — Productos</title>
 <style>
-  body{ font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:#FFFBF3; color:#1F2A44; margin:0; padding:32px 24px 60px; }
-  .nav-admin{ font-size:0.85rem; color:#5B6478; margin-bottom:18px; }
-  .nav-admin a{ color:#5B6478; text-decoration:none; }
-  .nav-admin a:hover{ color:#1F2A44; text-decoration:underline; }
+  body{ font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:#FBF2E4; color:#3F2B1F; margin:0; padding:32px 24px 60px; }
+  .nav-admin{ font-size:0.85rem; color:#7A614E; margin-bottom:18px; }
+  .nav-admin a{ color:#7A614E; text-decoration:none; }
+  .nav-admin a:hover{ color:#3F2B1F; text-decoration:underline; }
   .cabecera{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:22px; }
   h1{ font-size:1.4rem; margin:0; }
-  p.sub{ color:#5B6478; margin:4px 0 0; }
+  p.sub{ color:#7A614E; margin:4px 0 0; }
   .aviso{ padding:12px 16px; border-radius:10px; margin-bottom:20px; font-size:0.95rem; max-width:640px; }
-  .aviso.ok{ background:#E4F5EE; color:#1E9C7C; border:1px solid #bfe6d7; }
-  .aviso.error{ background:#FBEAE8; color:#E8483C; border:1px solid #f3c9c4; }
+  .aviso.ok{ background:#EDF3E4; color:#5F8A4B; border:1px solid #D3E3C2; }
+  .aviso.error{ background:#FBEAE3; color:#C8402F; border:1px solid #F0CBBF; }
   .btn{ font-family:inherit; font-weight:600; font-size:0.88rem; border:none; border-radius:9px; padding:10px 16px; cursor:pointer; text-decoration:none; display:inline-block; }
-  .btn-primario{ background:#E8483C; color:#fff; }
-  .btn-primario:hover{ background:#c73a2f; }
+  .btn-primario{ background:#A8601F; color:#fff; }
+  .btn-primario:hover{ background:#8A4F1C; }
   table{ width:100%; max-width:1160px; border-collapse:collapse; background:#fff; border-radius:14px; overflow:hidden; }
-  th, td{ text-align:left; padding:12px 16px; border-bottom:1px solid rgba(31,42,68,0.08); vertical-align:middle; font-size:0.88rem; }
-  th{ font-size:0.78rem; color:#5B6478; font-weight:600; }
+  th, td{ text-align:left; padding:12px 16px; border-bottom:1px solid rgba(63,43,31,0.08); vertical-align:middle; font-size:0.88rem; }
+  th{ font-size:0.78rem; color:#7A614E; font-weight:600; }
   tr.inactivo{ opacity:.5; }
-  .miniatura{ width:44px; height:44px; border-radius:9px; object-fit:cover; background:#FFF4DE; display:block; }
-  .miniatura-vacia{ width:44px; height:44px; border-radius:9px; background:#FFF4DE; display:flex; align-items:center; justify-content:center; font-size:1.1rem; }
-  .categoria-chip{ font-size:0.78rem; color:#5B6478; }
-  .stock-bajo{ color:#E8483C; font-weight:600; }
-  .acciones a, .acciones button{ font-size:0.82rem; margin-right:10px; border:none; background:none; cursor:pointer; padding:0; color:#1B4A9C; text-decoration:none; }
-  .acciones button.eliminar{ color:#E8483C; }
+  .miniatura{ width:44px; height:44px; border-radius:9px; object-fit:cover; background:#F4E4CC; display:block; }
+  .miniatura-vacia{ width:44px; height:44px; border-radius:9px; background:#F4E4CC; display:flex; align-items:center; justify-content:center; font-size:1.1rem; }
+  .categoria-chip{ font-size:0.78rem; color:#7A614E; }
+  .stock-bajo{ color:#C8402F; font-weight:600; }
+  .acciones a, .acciones button{ font-size:0.82rem; margin-right:10px; border:none; background:none; cursor:pointer; padding:0; color:#6B4026; text-decoration:none; }
+  .acciones button.eliminar{ color:#C8402F; }
 
   /* Ingreso de mercadería */
   .ingreso{ display:flex; gap:6px; align-items:center; margin:0; }
   .ingreso input{
-    width:84px; padding:6px 8px; border-radius:8px; border:1px solid rgba(31,42,68,0.15);
+    width:84px; padding:6px 8px; border-radius:8px; border:1px solid rgba(63,43,31,0.15);
     font-family:inherit; font-size:0.85rem;
   }
   .ingreso button{
-    background:#1E9C7C; color:#fff; border:none; border-radius:8px; padding:7px 11px;
+    background:#5F8A4B; color:#fff; border:none; border-radius:8px; padding:7px 11px;
     font-weight:600; font-size:0.8rem; cursor:pointer; font-family:inherit;
   }
-  .ingreso button:hover{ background:#178067; }
-  .ultimo-ingreso{ font-size:0.72rem; color:#5B6478; margin-top:4px; }
-  tr:target{ background:#F2FBF7; }
+  .ingreso button:hover{ background:#4A6E3A; }
+  .ultimo-ingreso{ font-size:0.72rem; color:#7A614E; margin-top:4px; }
+  tr:target{ background:#F4F8EE; }
 
   /* Buscador */
   .buscador-productos{ display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
   .buscador-productos input{
     width:100%; max-width:440px; padding:11px 14px; border-radius:10px;
-    border:1px solid rgba(31,42,68,0.15); font-family:inherit; font-size:0.92rem; box-sizing:border-box;
+    border:1px solid rgba(63,43,31,0.15); font-family:inherit; font-size:0.92rem; box-sizing:border-box;
   }
-  .buscador-productos input:focus{ outline:2px solid #1E9C7C; outline-offset:1px; }
-  .contador-busqueda{ font-size:0.82rem; color:#5B6478; }
-  #sin-resultados td{ color:#5B6478; text-align:center; padding:26px; }
+  .buscador-productos input:focus{ outline:2px solid #5F8A4B; outline-offset:1px; }
+  .contador-busqueda{ font-size:0.82rem; color:#7A614E; }
+  #sin-resultados td{ color:#7A614E; text-align:center; padding:26px; }
 </style>
 </head>
 <body>
@@ -101,7 +101,7 @@ function hace($segundos) {
     <p class="sub">Catálogo completo — crear, editar, sacar de circulación o borrar.</p>
   </div>
   <div style="display:flex; gap:10px;">
-    <a class="btn" style="background:#6E4E9E; color:#fff;" href="combos.php">🎉 Armar combo</a>
+    <a class="btn" style="background:#8A6240; color:#fff;" href="combos.php">🎉 Armar combo</a>
     <a class="btn btn-primario" href="producto_form.php">+ Nuevo producto</a>
   </div>
 </div>

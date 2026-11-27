@@ -47,21 +47,21 @@ $mensaje = $_GET['msg'] ?? null;
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
 <link rel="icon" href="../favicon.ico" sizes="48x48">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
-<meta name="theme-color" content="#A9E0EA">
+<meta name="theme-color" content="#F4E4CC">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Confetti — <?= $id ? 'Editar' : 'Armar' ?> combo</title>
 <style>
-  body{ font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:#FFFBF3; color:#1F2A44; margin:0; padding:32px 24px 60px; }
-  .nav-admin{ font-size:0.85rem; color:#5B6478; margin-bottom:18px; }
-  .nav-admin a{ color:#5B6478; text-decoration:none; }
+  body{ font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:#FBF2E4; color:#3F2B1F; margin:0; padding:32px 24px 60px; }
+  .nav-admin{ font-size:0.85rem; color:#7A614E; margin-bottom:18px; }
+  .nav-admin a{ color:#7A614E; text-decoration:none; }
   h1{ font-size:1.4rem; margin:0 0 22px; }
   .layout{ display:grid; grid-template-columns:1fr 1fr; gap:20px; max-width:920px; align-items:start; }
   form{ background:#fff; border-radius:14px; padding:24px; }
-  .aviso{ padding:12px 16px; border-radius:10px; margin-bottom:20px; font-size:0.9rem; max-width:920px; background:#FBEAE8; color:#E8483C; border:1px solid #f3c9c4; }
+  .aviso{ padding:12px 16px; border-radius:10px; margin-bottom:20px; font-size:0.9rem; max-width:920px; background:#FBEAE3; color:#C8402F; border:1px solid #F0CBBF; }
   .campo{ margin-bottom:16px; }
   label{ display:block; font-size:0.85rem; font-weight:600; margin-bottom:6px; }
   input[type="text"], input[type="number"], textarea{
-    width:100%; padding:10px 12px; border-radius:9px; border:1px solid rgba(31,42,68,0.15); font-family:inherit; font-size:0.95rem;
+    width:100%; padding:10px 12px; border-radius:9px; border:1px solid rgba(63,43,31,0.15); font-family:inherit; font-size:0.95rem;
   }
   textarea{ resize:vertical; min-height:60px; }
   .fila-check{ display:flex; align-items:center; gap:8px; margin-bottom:10px; }
@@ -72,21 +72,21 @@ $mensaje = $_GET['msg'] ?? null;
   button, .btn-cancelar{
     font-family:inherit; font-weight:600; font-size:0.9rem; border-radius:9px; padding:11px 18px; cursor:pointer; text-decoration:none;
   }
-  button{ border:none; background:#6E4E9E; color:#fff; }
-  button:hover{ background:#5a3f82; }
-  .btn-cancelar{ background:none; border:1px solid rgba(31,42,68,0.2); color:#1F2A44; }
+  button{ border:none; background:#8A6240; color:#fff; }
+  button:hover{ background:#6B4B30; }
+  .btn-cancelar{ background:none; border:1px solid rgba(63,43,31,0.2); color:#3F2B1F; }
 
   .panel-productos{ background:#fff; border-radius:14px; padding:20px 24px; max-height:640px; overflow-y:auto; }
   .panel-productos h2{ font-size:1rem; margin:0 0 4px; }
-  .panel-productos p.ayuda{ color:#5B6478; font-size:0.82rem; margin:0 0 16px; }
+  .panel-productos p.ayuda{ color:#7A614E; font-size:0.82rem; margin:0 0 16px; }
   .grupo-categoria{ margin-bottom:16px; }
-  .grupo-categoria h3{ font-size:0.82rem; color:#5B6478; margin:0 0 8px; text-transform:uppercase; letter-spacing:0.02em; }
+  .grupo-categoria h3{ font-size:0.82rem; color:#7A614E; margin:0 0 8px; text-transform:uppercase; letter-spacing:0.02em; }
   .fila-producto{
     display:flex; align-items:center; gap:10px; padding:6px 0;
   }
   .fila-producto label{ flex:1; margin:0; font-weight:500; font-size:0.9rem; }
   .fila-producto input[type="number"]{ width:90px; padding:6px 8px; font-size:0.85rem; }
-  .fila-producto .unidad{ font-size:0.78rem; color:#5B6478; width:26px; }
+  .fila-producto .unidad{ font-size:0.78rem; color:#7A614E; width:26px; }
 </style>
 </head>
 <body>
@@ -129,7 +129,7 @@ $mensaje = $_GET['msg'] ?? null;
       <?php if (!empty($combo['imagen'])): ?>
         <div class="foto-actual">
           <img src="../assets/combos/<?= htmlspecialchars($combo['imagen']) ?>" alt="">
-          <span style="font-size:0.85rem; color:#5B6478;">Foto actual</span>
+          <span style="font-size:0.85rem; color:#7A614E;">Foto actual</span>
         </div>
       <?php endif; ?>
       <input type="file" id="imagen" name="imagen" accept="image/*">

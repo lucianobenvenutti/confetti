@@ -186,7 +186,7 @@ $fmtValor = function ($f) use ($metrica, $pesos) {
 };
 $nombreFila = fn($f) => ($f['tipo'] === 'combo' ? '🎁 ' : '') . $f['nombre'];
 
-function barrasH(array $items, string $color = '#1B4A9C'): string {
+function barrasH(array $items, string $color = '#6B4026'): string {
     $max = 0; foreach ($items as $i) $max = max($max, $i['v']);
     $out = '';
     foreach ($items as $i) {
@@ -198,7 +198,7 @@ function barrasH(array $items, string $color = '#1B4A9C'): string {
     }
     return $out;
 }
-function columnasV(array $items, string $color = '#1B4A9C'): string {
+function columnasV(array $items, string $color = '#6B4026'): string {
     $max = 0; foreach ($items as $i) $max = max($max, $i['v']);
     $out = '<div class="columnas">';
     foreach ($items as $i) {
@@ -249,35 +249,35 @@ if ($res['n'] > 0) {
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
 <link rel="icon" href="../favicon.ico" sizes="48x48">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
-<meta name="theme-color" content="#A9E0EA">
+<meta name="theme-color" content="#F4E4CC">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Confetti — Análisis de ventas</title>
 <style>
-  body{ font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:#FFFBF3; color:#1F2A44; margin:0; padding:28px 24px 70px; }
-  .nav-admin{ font-size:0.85rem; color:#5B6478; margin-bottom:18px; }
-  .nav-admin a{ color:#5B6478; text-decoration:none; }
-  .nav-admin a:hover{ color:#1F2A44; text-decoration:underline; }
+  body{ font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:#FBF2E4; color:#3F2B1F; margin:0; padding:28px 24px 70px; }
+  .nav-admin{ font-size:0.85rem; color:#7A614E; margin-bottom:18px; }
+  .nav-admin a{ color:#7A614E; text-decoration:none; }
+  .nav-admin a:hover{ color:#3F2B1F; text-decoration:underline; }
   h1{ font-size:1.4rem; margin:0 0 4px; }
   h2{ font-size:1.05rem; margin:0 0 4px; }
-  p.sub{ color:#5B6478; margin:0 0 18px; max-width:720px; }
-  .nota{ color:#5B6478; font-size:0.82rem; margin:0 0 12px; }
+  p.sub{ color:#7A614E; margin:0 0 18px; max-width:720px; }
+  .nota{ color:#7A614E; font-size:0.82rem; margin:0 0 12px; }
   .contenido{ max-width:1000px; }
 
   .filtros{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; align-items:center; }
-  .tab{ padding:8px 14px; border-radius:9px; font-size:0.85rem; font-weight:600; text-decoration:none; color:#1F2A44; border:1px solid rgba(31,42,68,0.15); background:#fff; }
-  .tab.activo{ background:#1B4A9C; color:#fff; border-color:#1B4A9C; }
-  .tab.m.activo{ background:#E8483C; border-color:#E8483C; }
-  .etiqueta-filtro{ font-size:0.8rem; color:#5B6478; margin-right:4px; }
+  .tab{ padding:8px 14px; border-radius:9px; font-size:0.85rem; font-weight:600; text-decoration:none; color:#3F2B1F; border:1px solid rgba(63,43,31,0.15); background:#fff; }
+  .tab.activo{ background:#6B4026; color:#fff; border-color:#6B4026; }
+  .tab.m.activo{ background:#A8601F; border-color:#A8601F; }
+  .etiqueta-filtro{ font-size:0.8rem; color:#7A614E; margin-right:4px; }
 
   .tarjetas{ display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:12px; margin:18px 0; }
   .tarjeta{ background:#fff; border-radius:14px; padding:16px 18px; }
-  .tarjeta .e{ font-size:0.78rem; color:#5B6478; margin-bottom:4px; }
+  .tarjeta .e{ font-size:0.78rem; color:#7A614E; margin-bottom:4px; }
   .tarjeta .v{ font-size:1.5rem; font-weight:700; }
   .tarjeta .cmp{ font-size:0.78rem; margin-top:3px; }
-  .sube{ color:#1E9C7C; } .baja{ color:#E8483C; } .igual{ color:#5B6478; }
+  .sube{ color:#5F8A4B; } .baja{ color:#C8402F; } .igual{ color:#7A614E; }
 
-  .ideas{ background:#fff; border:1px solid rgba(31,42,68,0.1); border-radius:14px; padding:6px 18px; margin-bottom:20px; }
-  .idea{ display:flex; gap:12px; padding:11px 0; border-bottom:1px solid rgba(31,42,68,0.07); font-size:0.93rem; line-height:1.4; }
+  .ideas{ background:#fff; border:1px solid rgba(63,43,31,0.1); border-radius:14px; padding:6px 18px; margin-bottom:20px; }
+  .idea{ display:flex; gap:12px; padding:11px 0; border-bottom:1px solid rgba(63,43,31,0.07); font-size:0.93rem; line-height:1.4; }
   .idea:last-child{ border-bottom:none; }
   .idea .ic{ font-size:1.2rem; flex:none; }
 
@@ -285,27 +285,27 @@ if ($res['n'] > 0) {
   @media (max-width:860px){ .grilla{ grid-template-columns:1fr; } }
   .panel{ background:#fff; border-radius:14px; padding:18px 20px 16px; margin-bottom:16px; }
   .grilla .panel{ margin-bottom:0; }
-  .vacio{ color:#8891a3; padding:14px 0; font-size:0.9rem; }
+  .vacio{ color:#A08A78; padding:14px 0; font-size:0.9rem; }
 
   .fila-barra{ display:grid; grid-template-columns:minmax(110px, 38%) 1fr auto; gap:10px; align-items:center; padding:5px 0; font-size:0.86rem; }
   .etq-barra{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .etq-barra small{ display:block; color:#8891a3; font-size:0.72rem; overflow:hidden; text-overflow:ellipsis; }
-  .pista{ background:#F2F4F8; border-radius:6px; height:14px; overflow:hidden; }
+  .etq-barra small{ display:block; color:#A08A78; font-size:0.72rem; overflow:hidden; text-overflow:ellipsis; }
+  .pista{ background:#F1E6D6; border-radius:6px; height:14px; overflow:hidden; }
   .relleno{ height:100%; border-radius:6px; min-width:2px; }
   .val-barra{ font-weight:700; font-size:0.82rem; min-width:64px; text-align:right; white-space:nowrap; }
 
   .columnas{ display:flex; gap:6px; align-items:flex-end; height:190px; padding-top:6px; overflow-x:auto; }
   .col{ flex:1; min-width:26px; display:flex; flex-direction:column; align-items:center; height:100%; }
-  .col-val{ font-size:0.68rem; color:#5B6478; height:16px; white-space:nowrap; }
+  .col-val{ font-size:0.68rem; color:#7A614E; height:16px; white-space:nowrap; }
   .col-pista{ flex:1; width:100%; display:flex; align-items:flex-end; }
   .col-relleno{ width:100%; border-radius:6px 6px 0 0; min-height:2px; opacity:.85; }
   .col-relleno.resalta{ opacity:1; box-shadow:0 0 0 2px rgba(232,72,60,.35); }
-  .col-etq{ font-size:0.72rem; color:#5B6478; margin-top:5px; white-space:nowrap; }
+  .col-etq{ font-size:0.72rem; color:#7A614E; margin-top:5px; white-space:nowrap; }
 
   table{ width:100%; border-collapse:collapse; font-size:0.88rem; }
-  th, td{ text-align:left; padding:9px 10px; border-bottom:1px solid rgba(31,42,68,0.07); vertical-align:top; }
-  th{ font-size:0.76rem; color:#5B6478; text-transform:uppercase; letter-spacing:.03em; }
-  .puesto{ color:#8891a3; font-size:0.78rem; }
+  th, td{ text-align:left; padding:9px 10px; border-bottom:1px solid rgba(63,43,31,0.07); vertical-align:top; }
+  th{ font-size:0.76rem; color:#7A614E; text-transform:uppercase; letter-spacing:.03em; }
+  .puesto{ color:#A08A78; font-size:0.78rem; }
   .oro{ font-weight:700; }
   .scroll-x{ overflow-x:auto; }
 </style>
@@ -366,7 +366,7 @@ $cmp = function ($act, $ant, $esPlata = true) use ($pesos) {
     <h2>🏆 Lo más vendido</h2>
     <p class="nota"><?= $h($metricas[$metrica]) ?> · top 10</p>
     <?php if (!$masVendidos): ?><div class="vacio">No hay ventas de productos en este período.</div>
-    <?php else: echo barrasH(array_map(fn($f) => ['etq' => $nombreFila($f), 'sub' => $f['descripcion'] ?? '', 'v' => $valor($f), 'txt' => $fmtValor($f)], $masVendidos), '#1E9C7C'); endif; ?>
+    <?php else: echo barrasH(array_map(fn($f) => ['etq' => $nombreFila($f), 'sub' => $f['descripcion'] ?? '', 'v' => $valor($f), 'txt' => $fmtValor($f)], $masVendidos), '#5F8A4B'); endif; ?>
   </div>
   <div class="panel">
     <h2>🧊 Lo que menos se vende</h2>
@@ -375,7 +375,7 @@ $cmp = function ($act, $ant, $esPlata = true) use ($pesos) {
     <?php else: echo barrasH(array_map(fn($f) => [
         'etq' => $nombreFila($f),
         'sub' => ($f['descripcion'] ?? '') . ($f['stock_actual'] !== null && $f['stock_actual'] > 0 ? ' · stock: ' . rtrim(rtrim(number_format((float) $f['stock_actual'], 3, ',', ''), '0'), ',') : ''),
-        'v' => $valor($f), 'txt' => $valor($f) > 0 ? $fmtValor($f) : 'sin ventas', 'color' => '#E8483C',
+        'v' => $valor($f), 'txt' => $valor($f) > 0 ? $fmtValor($f) : 'sin ventas', 'color' => '#C8402F',
     ], $menosVendidos)); endif; ?>
   </div>
 </div>
@@ -391,7 +391,7 @@ $cmp = function ($act, $ant, $esPlata = true) use ($pesos) {
           $t = (float) ($porDia[$k]['t'] ?? 0); $n = (int) ($porDia[$k]['n'] ?? 0);
           $cols[] = ['etq' => mb_substr($nombre, 0, 3), 'v' => $t, 'corto' => corto($t), 'txt' => "$nombre: " . $pesos($t) . " ($n ventas)", 'resalta' => $maxDia > 0 && $t == $maxDia];
       }
-      echo columnasV($cols, '#1B4A9C');
+      echo columnasV($cols, '#6B4026');
     ?>
   </div>
   <div class="panel">
@@ -406,7 +406,7 @@ $cmp = function ($act, $ant, $esPlata = true) use ($pesos) {
           $n = (int) ($porHora[$x]['n'] ?? 0);
           $cols[] = ['etq' => $x . 'h', 'v' => $n, 'corto' => (string) $n, 'txt' => "$x hs: $n ventas", 'resalta' => $maxHora > 0 && $n == $maxHora];
       }
-      echo columnasV($cols, '#6E4E9E');
+      echo columnasV($cols, '#8A6240');
     ?>
   </div>
 </div>
@@ -419,7 +419,7 @@ $cmp = function ($act, $ant, $esPlata = true) use ($pesos) {
     $tot = array_sum(array_column($porCategoria, 'plata'));
     echo barrasH(array_map(fn($c) => ['etq' => $c['nombre'], 'v' => (float) $c['plata'],
         'txt' => $pesos($c['plata']) . ($tot > 0 ? ' · ' . round($c['plata'] / $tot * 100) . '%' : ''),
-        'color' => $c['color_acento'] ?: '#1B4A9C'], $porCategoria));
+        'color' => $c['color_acento'] ?: '#6B4026'], $porCategoria));
   ?>
 </div>
 <?php endif; ?>
@@ -432,7 +432,7 @@ $cmp = function ($act, $ant, $esPlata = true) use ($pesos) {
   <?php
     $maxMes = 0; foreach ($mesesLista as $m) $maxMes = max($maxMes, $m['t']);
     echo columnasV(array_map(fn($m) => ['etq' => $m['etq'], 'v' => $m['t'], 'corto' => corto($m['t']),
-        'txt' => $m['etq'] . ': ' . $pesos($m['t']) . ' (' . $m['n'] . ' ventas)', 'resalta' => $maxMes > 0 && $m['t'] == $maxMes], $mesesLista), '#E8483C');
+        'txt' => $m['etq'] . ': ' . $pesos($m['t']) . ' (' . $m['n'] . ' ventas)', 'resalta' => $maxMes > 0 && $m['t'] == $maxMes], $mesesLista), '#A8601F');
   ?>
 </div>
 

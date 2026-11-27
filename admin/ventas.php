@@ -80,44 +80,44 @@ $etiquetasOrigen = ['web' => 'Pedidos web', 'mostrador' => 'Mostrador'];
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
 <link rel="icon" href="../favicon.ico" sizes="48x48">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
-<meta name="theme-color" content="#A9E0EA">
+<meta name="theme-color" content="#F4E4CC">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Confetti — Ventas</title>
 <style>
-  body{ font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:#FFFBF3; color:#1F2A44; margin:0; padding:32px 24px 60px; }
-  .nav-admin{ font-size:0.85rem; color:#5B6478; margin-bottom:18px; }
-  .nav-admin a{ color:#5B6478; text-decoration:none; }
-  .nav-admin a:hover{ color:#1F2A44; text-decoration:underline; }
+  body{ font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:#FBF2E4; color:#3F2B1F; margin:0; padding:32px 24px 60px; }
+  .nav-admin{ font-size:0.85rem; color:#7A614E; margin-bottom:18px; }
+  .nav-admin a{ color:#7A614E; text-decoration:none; }
+  .nav-admin a:hover{ color:#3F2B1F; text-decoration:underline; }
   h1{ font-size:1.4rem; margin:0 0 4px; }
-  p.sub{ color:#5B6478; margin:0 0 22px; }
+  p.sub{ color:#7A614E; margin:0 0 22px; }
 
   .filtros{ display:flex; align-items:center; gap:10px; margin-bottom:26px; flex-wrap:wrap; }
   .tab{
     padding:9px 16px; border-radius:9px; font-size:0.86rem; font-weight:600;
-    text-decoration:none; color:#1F2A44; border:1px solid rgba(31,42,68,0.15); background:#fff;
+    text-decoration:none; color:#3F2B1F; border:1px solid rgba(63,43,31,0.15); background:#fff;
   }
-  .tab.activo{ background:#1B4A9C; color:#fff; border-color:#1B4A9C; }
+  .tab.activo{ background:#6B4026; color:#fff; border-color:#6B4026; }
   .form-rango{ display:flex; align-items:center; gap:8px; }
   .form-rango input[type="date"]{
-    padding:8px 10px; border-radius:9px; border:1px solid rgba(31,42,68,0.15); font-family:inherit; font-size:0.85rem;
+    padding:8px 10px; border-radius:9px; border:1px solid rgba(63,43,31,0.15); font-family:inherit; font-size:0.85rem;
   }
   .form-rango button{
     font-family:inherit; font-weight:600; font-size:0.85rem; border:none; border-radius:9px;
-    padding:9px 16px; cursor:pointer; background:#1F2A44; color:#fff;
+    padding:9px 16px; cursor:pointer; background:#3F2B1F; color:#fff;
   }
 
   .tarjetas{ display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:14px; max-width:760px; margin-bottom:26px; }
   .tarjeta{ background:#fff; border-radius:14px; padding:18px 20px; }
-  .tarjeta .etiqueta{ font-size:0.78rem; color:#5B6478; margin-bottom:4px; }
+  .tarjeta .etiqueta{ font-size:0.78rem; color:#7A614E; margin-bottom:4px; }
   .tarjeta .valor{ font-size:1.5rem; font-weight:700; }
-  .nota-cancelados{ font-size:0.8rem; color:#5B6478; margin:-14px 0 26px; }
+  .nota-cancelados{ font-size:0.8rem; color:#7A614E; margin:-14px 0 26px; }
 
   table{ width:100%; max-width:860px; border-collapse:collapse; background:#fff; border-radius:14px; overflow:hidden; margin-bottom:28px; }
-  th, td{ text-align:left; padding:11px 16px; border-bottom:1px solid rgba(31,42,68,0.08); font-size:0.88rem; }
-  th{ font-size:0.78rem; color:#5B6478; font-weight:600; }
-  .badge-origen{ font-size:0.75rem; padding:3px 9px; border-radius:999px; background:#EFEAF7; color:#6E4E9E; }
-  .badge-estado{ font-size:0.75rem; padding:3px 9px; border-radius:999px; background:#FFF4DE; }
-  .sin-datos{ color:#5B6478; }
+  th, td{ text-align:left; padding:11px 16px; border-bottom:1px solid rgba(63,43,31,0.08); font-size:0.88rem; }
+  th{ font-size:0.78rem; color:#7A614E; font-weight:600; }
+  .badge-origen{ font-size:0.75rem; padding:3px 9px; border-radius:999px; background:#EFE3D6; color:#8A6240; }
+  .badge-estado{ font-size:0.75rem; padding:3px 9px; border-radius:999px; background:#F4E4CC; }
+  .sin-datos{ color:#7A614E; }
 
   h2{ font-size:1.05rem; margin:0 0 12px; }
 </style>
@@ -135,7 +135,7 @@ $etiquetasOrigen = ['web' => 'Pedidos web', 'mostrador' => 'Mostrador'];
   <form class="form-rango" method="get" action="">
     <input type="hidden" name="periodo" value="rango">
     <input type="date" name="desde" value="<?= $periodo === 'rango' ? htmlspecialchars($desde) : '' ?>" required>
-    <span style="color:#5B6478; font-size:0.85rem;">a</span>
+    <span style="color:#7A614E; font-size:0.85rem;">a</span>
     <input type="date" name="hasta" value="<?= $periodo === 'rango' ? htmlspecialchars($hasta) : '' ?>" required>
     <button type="submit">Ver</button>
   </form>

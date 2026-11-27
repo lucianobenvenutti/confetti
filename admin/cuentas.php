@@ -49,51 +49,51 @@ function hace($segundos) {
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
 <link rel="icon" href="../favicon.ico" sizes="48x48">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
-<meta name="theme-color" content="#A9E0EA">
+<meta name="theme-color" content="#F4E4CC">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Confetti — Cuentas corrientes</title>
 <style>
-  body{ font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:#FFFBF3; color:#1F2A44; margin:0; padding:32px 24px 60px; }
-  .nav-admin{ font-size:0.85rem; color:#5B6478; margin-bottom:18px; }
-  .nav-admin a{ color:#5B6478; text-decoration:none; }
-  .nav-admin a:hover{ color:#1F2A44; text-decoration:underline; }
+  body{ font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:#FBF2E4; color:#3F2B1F; margin:0; padding:32px 24px 60px; }
+  .nav-admin{ font-size:0.85rem; color:#7A614E; margin-bottom:18px; }
+  .nav-admin a{ color:#7A614E; text-decoration:none; }
+  .nav-admin a:hover{ color:#3F2B1F; text-decoration:underline; }
   .cabecera{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:22px; }
   h1{ font-size:1.4rem; margin:0; }
-  p.sub{ color:#5B6478; margin:4px 0 0; }
+  p.sub{ color:#7A614E; margin:4px 0 0; }
   .aviso{ padding:12px 16px; border-radius:10px; margin-bottom:20px; font-size:0.95rem; max-width:720px; }
-  .aviso.ok{ background:#E4F5EE; color:#1E9C7C; border:1px solid #bfe6d7; }
-  .aviso.error{ background:#FBEAE8; color:#E8483C; border:1px solid #f3c9c4; }
+  .aviso.ok{ background:#EDF3E4; color:#5F8A4B; border:1px solid #D3E3C2; }
+  .aviso.error{ background:#FBEAE3; color:#C8402F; border:1px solid #F0CBBF; }
   .btn{ font-family:inherit; font-weight:600; font-size:0.88rem; border:none; border-radius:9px; padding:10px 16px; cursor:pointer; text-decoration:none; display:inline-block; }
-  .btn-primario{ background:#6E4E9E; color:#fff; }
-  .btn-primario:hover{ background:#5a3f82; }
+  .btn-primario{ background:#8A6240; color:#fff; }
+  .btn-primario:hover{ background:#6B4B30; }
 
   .resumen{ display:flex; gap:14px; flex-wrap:wrap; margin-bottom:22px; }
   .tarjeta{ background:#fff; border-radius:14px; padding:16px 20px; min-width:190px; }
-  .tarjeta .etiqueta{ font-size:0.78rem; color:#5B6478; margin-bottom:4px; }
+  .tarjeta .etiqueta{ font-size:0.78rem; color:#7A614E; margin-bottom:4px; }
   .tarjeta .valor{ font-size:1.5rem; font-weight:700; }
-  .tarjeta .valor.rojo{ color:#E8483C; }
+  .tarjeta .valor.rojo{ color:#C8402F; }
 
   .buscador{ margin-bottom:14px; }
   .buscador input{
     width:100%; max-width:340px; padding:10px 14px; border-radius:10px;
-    border:1px solid rgba(31,42,68,0.15); font-family:inherit; font-size:0.92rem;
+    border:1px solid rgba(63,43,31,0.15); font-family:inherit; font-size:0.92rem;
   }
 
   table{ width:100%; max-width:900px; border-collapse:collapse; background:#fff; border-radius:14px; overflow:hidden; }
-  th, td{ text-align:left; padding:13px 16px; border-bottom:1px solid rgba(31,42,68,0.08); vertical-align:middle; font-size:0.9rem; }
-  th{ font-size:0.78rem; color:#5B6478; font-weight:600; }
-  a.nombre{ color:#1F2A44; text-decoration:none; font-weight:600; }
+  th, td{ text-align:left; padding:13px 16px; border-bottom:1px solid rgba(63,43,31,0.08); vertical-align:middle; font-size:0.9rem; }
+  th{ font-size:0.78rem; color:#7A614E; font-weight:600; }
+  a.nombre{ color:#3F2B1F; text-decoration:none; font-weight:600; }
   a.nombre:hover{ text-decoration:underline; }
-  .tel{ display:block; font-size:0.78rem; color:#5B6478; font-weight:400; }
+  .tel{ display:block; font-size:0.78rem; color:#7A614E; font-weight:400; }
   .saldo{ font-weight:700; white-space:nowrap; }
-  .saldo.debe{ color:#E8483C; }
-  .saldo.favor{ color:#1E9C7C; }
-  .saldo.cero{ color:#5B6478; font-weight:500; }
+  .saldo.debe{ color:#C8402F; }
+  .saldo.favor{ color:#5F8A4B; }
+  .saldo.cero{ color:#7A614E; font-weight:500; }
   .acciones a, .acciones button{ font-size:0.82rem; margin-right:10px; border:none; background:none; cursor:pointer; padding:0; text-decoration:none; font-family:inherit; }
-  .acciones a.cobrar{ color:#1E9C7C; font-weight:600; }
-  .acciones a.sumar{ color:#1B4A9C; }
-  .acciones button.eliminar{ color:#E8483C; }
-  .sin-datos{ color:#5B6478; }
+  .acciones a.cobrar{ color:#5F8A4B; font-weight:600; }
+  .acciones a.sumar{ color:#6B4026; }
+  .acciones button.eliminar{ color:#C8402F; }
+  .sin-datos{ color:#7A614E; }
 </style>
 </head>
 <body>
@@ -119,7 +119,7 @@ function hace($segundos) {
   </div>
   <div class="tarjeta">
     <div class="etiqueta">Cuentas con deuda</div>
-    <div class="valor"><?= $conDeuda ?> <span style="font-size:0.9rem; color:#5B6478; font-weight:400;">de <?= count($cuentas) ?></span></div>
+    <div class="valor"><?= $conDeuda ?> <span style="font-size:0.9rem; color:#7A614E; font-weight:400;">de <?= count($cuentas) ?></span></div>
   </div>
 </div>
 

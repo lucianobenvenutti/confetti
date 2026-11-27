@@ -83,19 +83,19 @@ function etiquetaCantidad($item) {
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
 <link rel="icon" href="../favicon.ico" sizes="48x48">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
-<meta name="theme-color" content="#A9E0EA">
+<meta name="theme-color" content="#F4E4CC">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Confetti — Pedidos</title>
 <style>
   body{
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-    background:#FFFBF3;
-    color:#1F2A44;
+    background:#FBF2E4;
+    color:#3F2B1F;
     margin:0;
     padding:32px 24px 60px;
   }
   h1{ font-size:1.5rem; margin-bottom:4px; }
-  p.sub{ color:#5B6478; margin-top:0; margin-bottom:24px; }
+  p.sub{ color:#7A614E; margin-top:0; margin-bottom:24px; }
   .aviso{
     padding:12px 16px;
     border-radius:10px;
@@ -103,8 +103,8 @@ function etiquetaCantidad($item) {
     font-size:0.95rem;
     max-width:640px;
   }
-  .aviso.ok{ background:#E4F5EE; color:#1E9C7C; border:1px solid #bfe6d7; }
-  .aviso.error{ background:#FBEAE8; color:#E8483C; border:1px solid #f3c9c4; }
+  .aviso.ok{ background:#EDF3E4; color:#5F8A4B; border:1px solid #D3E3C2; }
+  .aviso.error{ background:#FBEAE3; color:#C8402F; border:1px solid #F0CBBF; }
 
   .lista{
     display:flex;
@@ -115,8 +115,8 @@ function etiquetaCantidad($item) {
   .pedido{
     background:#fff;
     border-radius:14px;
-    border:1px solid rgba(31,42,68,0.1);
-    border-left:5px solid var(--acento, #5B6478);
+    border:1px solid rgba(63,43,31,0.1);
+    border-left:5px solid var(--acento, #7A614E);
     padding:18px 20px;
   }
   .pedido-head{
@@ -131,7 +131,7 @@ function etiquetaCantidad($item) {
     font-size:1.02rem;
   }
   .pedido-head .cliente{
-    color:#5B6478;
+    color:#7A614E;
     font-size:0.88rem;
     margin-top:2px;
   }
@@ -145,29 +145,29 @@ function etiquetaCantidad($item) {
     font-weight:600;
     padding:4px 10px;
     border-radius:999px;
-    background:#FFF4DE;
-    color:#1F2A44;
+    background:#F4E4CC;
+    color:#3F2B1F;
     white-space:nowrap;
   }
-  .badge.origen{ background:#EFEAF7; color:#6E4E9E; }
+  .badge.origen{ background:#EFE3D6; color:#8A6240; }
 
   /* Cómo eligió pagar el cliente */
   .pago-fila{
     display:flex; align-items:center; gap:10px; flex-wrap:wrap;
     margin-top:12px; font-size:0.88rem;
   }
-  .badge.pago-local{ background:#E4F5EE; color:#1E9C7C; }
-  .badge.pago-transf{ background:#E3ECFA; color:#1B4A9C; }
+  .badge.pago-local{ background:#EDF3E4; color:#5F8A4B; }
+  .badge.pago-transf{ background:#F1E3D3; color:#6B4026; }
   .sin-comprobante{ color:#8a6d00; font-size:0.82rem; }
   .btn-comprobante{
-    background:#1B4A9C; color:#fff; padding:6px 14px; font-size:0.82rem;
+    background:#6B4026; color:#fff; padding:6px 14px; font-size:0.82rem;
   }
   .btn-comprobante:hover{ background:#153a7c; }
 
   /* Visor del comprobante (se abre arriba de la página, sin salir de Pedidos) */
   .visor{
     position:fixed; inset:0; z-index:100; display:none;
-    background:rgba(31,42,68,0.7); align-items:center; justify-content:center; padding:20px;
+    background:rgba(63,43,31,0.7); align-items:center; justify-content:center; padding:20px;
   }
   .visor.visible{ display:flex; }
   .visor-card{
@@ -176,16 +176,16 @@ function etiquetaCantidad($item) {
   }
   .visor-barra{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
   .visor-barra strong{ font-size:0.95rem; }
-  .visor-barra a{ font-size:0.82rem; color:#1B4A9C; }
+  .visor-barra a{ font-size:0.82rem; color:#6B4026; }
   .visor-cuerpo{ overflow:auto; text-align:center; min-height:200px; }
   .visor-cuerpo img{ max-width:100%; max-height:74vh; border-radius:8px; }
   .visor-cuerpo iframe{ width:100%; height:74vh; border:0; border-radius:8px; }
-  .btn-cerrar-visor{ background:#F2F4F8; color:#1F2A44; }
+  .btn-cerrar-visor{ background:#F1E6D6; color:#3F2B1F; }
 
   .items{
     margin:14px 0 10px;
     padding-top:12px;
-    border-top:1px dashed rgba(31,42,68,0.14);
+    border-top:1px dashed rgba(63,43,31,0.14);
     font-size:0.9rem;
   }
   .items div{
@@ -199,7 +199,7 @@ function etiquetaCantidad($item) {
     justify-content:space-between;
     font-weight:700;
     padding-top:8px;
-    border-top:1px solid rgba(31,42,68,0.1);
+    border-top:1px solid rgba(63,43,31,0.1);
     margin-top:4px;
   }
 
@@ -218,37 +218,37 @@ function etiquetaCantidad($item) {
     padding:9px 16px;
     cursor:pointer;
   }
-  .btn-avanzar{ background:#1E9C7C; color:#fff; }
-  .btn-avanzar:hover{ background:#178067; }
+  .btn-avanzar{ background:#5F8A4B; color:#fff; }
+  .btn-avanzar:hover{ background:#4A6E3A; }
   .btn-avisar{ display:inline-block; background:#25D366; color:#fff; font-weight:700; font-size:0.9rem; padding:10px 16px; border-radius:10px; text-decoration:none; }
   .btn-avisar:hover{ background:#1ebe5a; }
-  .btn-cancelar{ background:transparent; color:#E8483C; border:1px solid #E8483C; }
-  .btn-cancelar:hover{ background:#FBEAE8; }
-  .sin-pedidos{ color:#5B6478; }
+  .btn-cancelar{ background:transparent; color:#C8402F; border:1px solid #C8402F; }
+  .btn-cancelar:hover{ background:#FBEAE3; }
+  .sin-pedidos{ color:#7A614E; }
 
   .cuenta-atras{
     margin-top:12px;
     display:inline-block;
-    background:#F2F4F8;
-    color:#5B6478;
+    background:#F1E6D6;
+    color:#7A614E;
     font-size:0.82rem;
     padding:6px 12px;
     border-radius:9px;
   }
   .cuenta-atras .cuenta-valor{
     font-weight:700;
-    color:#1F2A44;
+    color:#3F2B1F;
     font-variant-numeric:tabular-nums;
   }
   .cuenta-atras.urgente{ background:#FFF1DC; }
   .cuenta-atras.urgente .cuenta-valor{ color:#C26A00; }
-  .cuenta-atras.vencido{ background:#FBEAE8; color:#E8483C; font-weight:600; }
+  .cuenta-atras.vencido{ background:#FBEAE3; color:#C8402F; font-weight:600; }
 
   /* Lo que el cliente pidió aclarar: tiene que verse a simple vista */
   .comentario-cliente{
     margin-top:12px;
     background:#FFF8E1;
-    border-left:4px solid #F5941F;
+    border-left:4px solid #96700F;
     border-radius:8px;
     padding:10px 14px;
     font-size:0.92rem;
@@ -266,39 +266,39 @@ function etiquetaCantidad($item) {
   /* Actualización automática y aviso de pedidos nuevos */
   .barra-vivo{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:18px; }
   .btn-sonido{
-    font-family:inherit; font-weight:600; font-size:0.82rem; background:#fff; color:#1F2A44;
-    border:1px solid rgba(31,42,68,0.2); border-radius:9px; padding:8px 14px; cursor:pointer;
+    font-family:inherit; font-weight:600; font-size:0.82rem; background:#fff; color:#3F2B1F;
+    border:1px solid rgba(63,43,31,0.2); border-radius:9px; padding:8px 14px; cursor:pointer;
   }
-  .btn-sonido.activo{ background:#E4F5EE; border-color:#bfe6d7; color:#1E9C7C; }
-  .estado-vivo{ font-size:0.8rem; color:#5B6478; }
-  .estado-vivo.sin-conexion{ color:#E8483C; font-weight:600; }
+  .btn-sonido.activo{ background:#EDF3E4; border-color:#D3E3C2; color:#5F8A4B; }
+  .estado-vivo{ font-size:0.8rem; color:#7A614E; }
+  .estado-vivo.sin-conexion{ color:#C8402F; font-weight:600; }
 
   .alerta-nuevo{
     display:none; position:sticky; top:10px; z-index:20; max-width:760px; box-sizing:border-box;
     background:#FFF1DC; border:1px solid #f5c98a; color:#8a4b00; border-radius:12px;
     padding:12px 16px; margin-bottom:16px; font-weight:700;
     align-items:center; justify-content:space-between; gap:12px;
-    box-shadow:0 6px 18px rgba(31,42,68,0.12);
+    box-shadow:0 6px 18px rgba(63,43,31,0.12);
   }
   .alerta-nuevo.visible{ display:flex; }
   .alerta-nuevo button{
     font-family:inherit; font-weight:600; font-size:0.82rem; background:#8a4b00; color:#fff;
     border:none; border-radius:8px; padding:7px 14px; cursor:pointer;
   }
-  .pedido.nuevo{ box-shadow:0 0 0 3px rgba(245,148,31,0.45); animation:pulso 1.6s ease-in-out 3; }
-  @keyframes pulso{ 50%{ box-shadow:0 0 0 8px rgba(245,148,31,0.2); } }
+  .pedido.nuevo{ box-shadow:0 0 0 3px rgba(150,112,15,0.45); animation:pulso 1.6s ease-in-out 3; }
+  @keyframes pulso{ 50%{ box-shadow:0 0 0 8px rgba(150,112,15,0.2); } }
 </style>
 </head>
 <body>
 
-<div class="nav-admin" style="font-size:0.85rem; color:#5B6478; margin-bottom:18px;">
-  <a href="index.php" style="color:#5B6478; text-decoration:none;">← Panel</a> ·
+<div class="nav-admin" style="font-size:0.85rem; color:#7A614E; margin-bottom:18px;">
+  <a href="index.php" style="color:#7A614E; text-decoration:none;">← Panel</a> ·
   Pedidos web ·
-  <a href="mostrador.php" style="color:#5B6478; text-decoration:none;">Mostrador</a>
+  <a href="mostrador.php" style="color:#7A614E; text-decoration:none;">Mostrador</a>
   <?php if (esDueno($usuarioActual)): ?>
-    · <a href="ventas.php" style="color:#5B6478; text-decoration:none;">Ventas</a> ·
-    <a href="horarios.php" style="color:#5B6478; text-decoration:none;">Horario</a> ·
-    <a href="cuentas.php" style="color:#5B6478; text-decoration:none;">Cuentas</a>
+    · <a href="ventas.php" style="color:#7A614E; text-decoration:none;">Ventas</a> ·
+    <a href="horarios.php" style="color:#7A614E; text-decoration:none;">Horario</a> ·
+    <a href="cuentas.php" style="color:#7A614E; text-decoration:none;">Cuentas</a>
   <?php endif; ?>
   <?= barraSesionHtml() ?>
 </div>
@@ -332,7 +332,7 @@ function etiquetaCantidad($item) {
   <div class="aviso ok" style="display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;">
     <span>Avisale al cliente que ya puede pasar a retirarlo.</span>
     <a href="<?= htmlspecialchars($linkWhatsapp) ?>" target="_blank"
-       style="background:#1E9C7C; color:#fff; font-weight:700; padding:9px 16px; border-radius:9px; text-decoration:none; white-space:nowrap;">
+       style="background:#5F8A4B; color:#fff; font-weight:700; padding:9px 16px; border-radius:9px; text-decoration:none; white-space:nowrap;">
       📲 Avisar por WhatsApp
     </a>
   </div>
@@ -345,8 +345,8 @@ function etiquetaCantidad($item) {
   <?php endif; ?>
   <?php foreach ($pedidos as $p):
     $acentos = [
-      'pendiente' => '#F5941F', 'en_preparacion' => '#1B4A9C',
-      'listo' => '#1E9C7C', 'entregado' => '#8891a3', 'cancelado' => '#E8483C',
+      'pendiente' => '#96700F', 'en_preparacion' => '#6B4026',
+      'listo' => '#5F8A4B', 'entregado' => '#A08A78', 'cancelado' => '#C8402F',
     ];
   ?>
     <div class="pedido" data-id="<?= $p['id'] ?>" data-origen="<?= $p['origen'] ?>" data-estado="<?= $p['estado'] ?>"

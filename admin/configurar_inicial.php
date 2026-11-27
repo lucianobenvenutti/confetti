@@ -80,29 +80,29 @@ if ($estado === 'formulario' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
 <link rel="icon" href="../favicon.ico" sizes="48x48">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
-<meta name="theme-color" content="#A9E0EA">
+<meta name="theme-color" content="#F4E4CC">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
 <title>Confetti — Primera configuración</title>
 <style>
-  body{ font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:#FFFBF3; color:#1F2A44; margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; box-sizing:border-box; }
-  .tarjeta{ width:100%; max-width:400px; background:#fff; border-radius:18px; padding:30px 28px; box-shadow:0 10px 30px rgba(31,42,68,0.08); box-sizing:border-box; }
+  body{ font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:#FBF2E4; color:#3F2B1F; margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; box-sizing:border-box; }
+  .tarjeta{ width:100%; max-width:400px; background:#fff; border-radius:18px; padding:30px 28px; box-shadow:0 10px 30px rgba(63,43,31,0.08); box-sizing:border-box; }
   .logo{ display:block; max-width:150px; max-height:64px; margin:0 auto 14px; border-radius:10px; }
   h1{ font-size:1.35rem; margin:0 0 4px; text-align:center; }
-  p.sub{ color:#5B6478; margin:0 0 22px; text-align:center; font-size:0.92rem; }
+  p.sub{ color:#7A614E; margin:0 0 22px; text-align:center; font-size:0.92rem; }
   .aviso{ padding:11px 14px; border-radius:10px; margin-bottom:18px; font-size:0.9rem; }
-  .aviso.error{ background:#FBEAE8; color:#C0392B; border:1px solid #f3c9c4; }
-  .aviso.ok{ background:#E4F5EE; color:#1E9C7C; border:1px solid #bfe6d7; }
-  .aviso.info{ background:#FFF4DE; color:#8a4b00; border:1px solid #f5d9a8; }
+  .aviso.error{ background:#FBEAE3; color:#C0392B; border:1px solid #F0CBBF; }
+  .aviso.ok{ background:#EDF3E4; color:#5F8A4B; border:1px solid #D3E3C2; }
+  .aviso.info{ background:#F4E4CC; color:#8a4b00; border:1px solid #f5d9a8; }
   label{ display:block; font-size:0.85rem; font-weight:600; margin-bottom:6px; }
-  input{ width:100%; padding:12px 14px; border-radius:10px; border:1px solid rgba(31,42,68,0.18); font-family:inherit; font-size:1rem; box-sizing:border-box; margin-bottom:16px; }
-  input:focus{ outline:2px solid #A8E0E8; outline-offset:1px; border-color:#6bbcc8; }
+  input{ width:100%; padding:12px 14px; border-radius:10px; border:1px solid rgba(63,43,31,0.18); font-family:inherit; font-size:1rem; box-sizing:border-box; margin-bottom:16px; }
+  input:focus{ outline:2px solid #D9B27A; outline-offset:1px; border-color:#B8732E; }
   .campo-clave{ position:relative; }
   .campo-clave input{ padding-right:84px; }
-  .campo-clave button{ position:absolute; right:8px; top:8px; background:#EEF4F5; border:none; border-radius:8px; padding:7px 12px; font-size:0.78rem; font-weight:600; color:#1F2A44; cursor:pointer; font-family:inherit; }
-  .entrar{ width:100%; border:none; border-radius:10px; padding:13px; background:#E8483C; color:#fff; font-weight:700; font-size:1rem; cursor:pointer; font-family:inherit; }
-  .entrar:hover{ background:#c73a2f; }
-  a{ color:#1B4A9C; }
+  .campo-clave button{ position:absolute; right:8px; top:8px; background:#F3EADB; border:none; border-radius:8px; padding:7px 12px; font-size:0.78rem; font-weight:600; color:#3F2B1F; cursor:pointer; font-family:inherit; }
+  .entrar{ width:100%; border:none; border-radius:10px; padding:13px; background:#A8601F; color:#fff; font-weight:700; font-size:1rem; cursor:pointer; font-family:inherit; }
+  .entrar:hover{ background:#8A4F1C; }
+  a{ color:#6B4026; }
 </style>
 </head>
 <body>

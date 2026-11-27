@@ -12,7 +12,7 @@ function volverForm($msg, $id = null) {
 
 $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT) ?: null;
 $nombre = trim($_POST['nombre'] ?? '');
-$colorAcento = trim($_POST['color_acento'] ?? '#E8483C');
+$colorAcento = trim($_POST['color_acento'] ?? '#C8402F');
 $orden = filter_input(INPUT_POST, 'orden', FILTER_VALIDATE_INT) ?: 0;
 $activo = isset($_POST['activo']) ? 1 : 0;
 
@@ -20,7 +20,7 @@ if ($nombre === '') {
     volverForm('El nombre es obligatorio.', $id);
 }
 if (!preg_match('/^#[0-9A-Fa-f]{6}$/', $colorAcento)) {
-    $colorAcento = '#E8483C';
+    $colorAcento = '#C8402F';
 }
 
 if ($id) {

@@ -33,20 +33,20 @@ $mensaje = $_GET['msg'] ?? null;
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
 <link rel="icon" href="../favicon.ico" sizes="48x48">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
-<meta name="theme-color" content="#A9E0EA">
+<meta name="theme-color" content="#F4E4CC">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Confetti — <?= $id ? 'Editar' : 'Nuevo' ?> producto</title>
 <style>
-  body{ font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:#FFFBF3; color:#1F2A44; margin:0; padding:32px 24px 60px; }
-  .nav-admin{ font-size:0.85rem; color:#5B6478; margin-bottom:18px; }
-  .nav-admin a{ color:#5B6478; text-decoration:none; }
+  body{ font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:#FBF2E4; color:#3F2B1F; margin:0; padding:32px 24px 60px; }
+  .nav-admin{ font-size:0.85rem; color:#7A614E; margin-bottom:18px; }
+  .nav-admin a{ color:#7A614E; text-decoration:none; }
   h1{ font-size:1.4rem; margin:0 0 22px; }
   form{ max-width:480px; background:#fff; border-radius:14px; padding:26px; }
-  .aviso{ padding:12px 16px; border-radius:10px; margin-bottom:20px; font-size:0.9rem; max-width:480px; background:#FBEAE8; color:#E8483C; border:1px solid #f3c9c4; }
+  .aviso{ padding:12px 16px; border-radius:10px; margin-bottom:20px; font-size:0.9rem; max-width:480px; background:#FBEAE3; color:#C8402F; border:1px solid #F0CBBF; }
   .campo{ margin-bottom:16px; }
   label{ display:block; font-size:0.85rem; font-weight:600; margin-bottom:6px; }
   input[type="text"], input[type="number"], select, textarea{
-    width:100%; padding:10px 12px; border-radius:9px; border:1px solid rgba(31,42,68,0.15); font-family:inherit; font-size:0.95rem;
+    width:100%; padding:10px 12px; border-radius:9px; border:1px solid rgba(63,43,31,0.15); font-family:inherit; font-size:0.95rem;
   }
   textarea{ resize:vertical; min-height:60px; }
   .dos-columnas{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
@@ -60,9 +60,9 @@ $mensaje = $_GET['msg'] ?? null;
   button, .btn-cancelar{
     font-family:inherit; font-weight:600; font-size:0.9rem; border-radius:9px; padding:11px 18px; cursor:pointer; text-decoration:none;
   }
-  button{ border:none; background:#E8483C; color:#fff; }
-  button:hover{ background:#c73a2f; }
-  .btn-cancelar{ background:none; border:1px solid rgba(31,42,68,0.2); color:#1F2A44; }
+  button{ border:none; background:#A8601F; color:#fff; }
+  button:hover{ background:#8A4F1C; }
+  .btn-cancelar{ background:none; border:1px solid rgba(63,43,31,0.2); color:#3F2B1F; }
 </style>
 </head>
 <body>
@@ -109,7 +109,7 @@ $mensaje = $_GET['msg'] ?? null;
         </option>
       <?php endforeach; ?>
     </select>
-    <a href="proveedor_form.php" style="font-size:0.78rem; color:#5B6478;" target="_blank">¿No está? Agregalo acá (se abre aparte)</a>
+    <a href="proveedor_form.php" style="font-size:0.78rem; color:#7A614E;" target="_blank">¿No está? Agregalo acá (se abre aparte)</a>
   </div>
 
   <div class="campo">
@@ -131,7 +131,7 @@ $mensaje = $_GET['msg'] ?? null;
       <input type="number" id="precio" name="precio" step="0.01" min="0" value="<?= htmlspecialchars($producto['precio']) ?>" required>
     </div>
   </div>
-  <p id="ganancia" style="margin:-6px 0 16px; font-size:0.85rem; color:#5B6478;"></p>
+  <p id="ganancia" style="margin:-6px 0 16px; font-size:0.85rem; color:#7A614E;"></p>
 
   <div class="campo">
     <label for="stock_actual">Stock actual</label>
@@ -169,7 +169,7 @@ $mensaje = $_GET['msg'] ?? null;
     <?php if (!empty($producto['imagen'])): ?>
       <div class="foto-actual">
         <img src="../assets/productos/<?= htmlspecialchars($producto['imagen']) ?>" alt="">
-        <span style="font-size:0.85rem; color:#5B6478;">Foto actual</span>
+        <span style="font-size:0.85rem; color:#7A614E;">Foto actual</span>
       </div>
     <?php endif; ?>
     <input type="file" id="imagen" name="imagen" accept="image/*">
@@ -202,7 +202,7 @@ $mensaje = $_GET['msg'] ?? null;
     const pct = compra > 0 ? ' (' + Math.round(ganancia / compra * 100) + '% sobre lo que pagaste)' : '';
     pGanancia.textContent = (ganancia >= 0 ? 'Ganancia por unidad: $' : 'Ojo: perdés $')
       + Math.abs(ganancia).toLocaleString('es-AR', { maximumFractionDigits: 2 }) + pct;
-    pGanancia.style.color = ganancia >= 0 ? '#1E9C7C' : '#E8483C';
+    pGanancia.style.color = ganancia >= 0 ? '#5F8A4B' : '#C8402F';
   }
   inCompra.addEventListener('input', actualizarGanancia);
   inVenta.addEventListener('input', actualizarGanancia);
